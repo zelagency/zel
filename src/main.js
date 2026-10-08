@@ -1,11 +1,9 @@
-import * as THREE from 'three';
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import { projects, projectCover } from './projects.js';
-import { FIXED_STEP, damp, stepBody } from './motion.js';
+import { damp } from './motion.js';
+import { initHero } from './hero.js';
 import { PointerTrail } from './pointer-trail.js';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -246,95 +244,7 @@ function drawPaint(now){
   if(trail.active)paintRaf=requestAnimationFrame(drawPaint);
 }
 
-// A custom 3D sculpture, with hollow rounded cylinders and damped pointer physics.
-function initHero(){
-  const canvas=$('#hero-canvas'), host=$('#hero-visual');
-  let renderer;
-  try {renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'});}catch{return;}
-  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
-  renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.83;
-  const scene=new THREE.Scene();
-  const camera=new THREE.PerspectiveCamera(35,1,.1,100);camera.position.set(0,0,14);
-  const pmrem=new THREE.PMREMGenerator(renderer), room=new RoomEnvironment();
-  const env=pmrem.fromScene(room,.04);scene.environment=env.texture;room.dispose();pmrem.dispose();
-  scene.add(new THREE.AmbientLight(0xffffff,.3));
-  const key=new THREE.DirectionalLight(0xffffff,4);key.position.set(-4,7,9);scene.add(key);
-  const rim=new THREE.DirectionalLight(0x6274ff,2);rim.position.set(5,-2,-4);scene.add(rim);
-  const fill=new THREE.DirectionalLight(0xffffff,1.5);fill.position.set(7,3,1);scene.add(fill);
-  const materials=[
-    new THREE.MeshStandardMaterial({color:0x08090b,metalness:.45,roughness:.29,envMapIntensity:.45}),
-    new THREE.MeshStandardMaterial({color:0x1114c4,metalness:.35,roughness:.26,envMapIntensity:.5}),
-    new THREE.MeshStandardMaterial({color:0xd9d9df,metalness:.4,roughness:.32,envMapIntensity:.65})
-  ];
-  const profile=[new THREE.Vector2(.17,-.8),new THREE.Vector2(.43,-.8),new THREE.Vector2(.49,-.76),new THREE.Vector2(.5,-.69),new THREE.Vector2(.5,.69),new THREE.Vector2(.49,.76),new THREE.Vector2(.43,.8),new THREE.Vector2(.17,.8),new THREE.Vector2(.14,.74),new THREE.Vector2(.14,-.74),new THREE.Vector2(.17,-.8)];
-  const cylinder=new THREE.LatheGeometry(profile,40);
-  const core=new THREE.SphereGeometry(.51,20,16);
-  const horizontal=cylinder.clone().rotateZ(Math.PI/2),depth=cylinder.clone().rotateX(Math.PI/2);
-  const sculpture=mergeGeometries([cylinder,horizontal,depth,core]);
-  cylinder.dispose();horizontal.dispose();depth.dispose();core.dispose();
-  const cluster=new THREE.Group();scene.add(cluster);const pieces=[];
-  const batches=materials.map(material=>{
-    const mesh=new THREE.InstancedMesh(sculpture,material,48);mesh.count=0;mesh.frustumCulled=false;
-    mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);cluster.add(mesh);return mesh;
-  });
-  let seed=209;const random=()=>{seed=(seed*16807)%2147483647;return (seed-1)/2147483646;};
-  for(let z=0;z<3;z++)for(let y=0;y<4;y++)for(let x=0;x<4;x++){
-    if(random()<.13)continue;
-    const piece=new THREE.Object3D(), batch=batches[z===2?0:Math.floor(random()*3)];
-    const scale=.85+random()*.18;piece.scale.setScalar(scale);
-    piece.position.set((x-1.5)*1.65+(random()-.5)*.9,(y-1.5)*1.63+(random()-.5)*.7,(z-1)*1.45);
-    piece.rotation.set(random()*3,random()*3,random()*3);
-    piece.userData={origin:piece.position.clone(),rotation:piece.rotation.clone(),v:new THREE.Vector3(),spin:new THREE.Vector3((random()-.5)*.05,(random()-.5)*.05,(random()-.5)*.05),phase:random()*6,batch,index:batch.count++};
-    pieces.push(piece);
-  }
-  cluster.rotation.z=-.12;
-  const pointer=new THREE.Vector2(), eased=new THREE.Vector2(), raycaster=new THREE.Raycaster();
-  let visible=true,last=0,time=0,accumulator=0,dragging=false,dragDistance=0,burst=0,burstTarget=0,raf=null,contextLost=false;
-  const lastPointer=new THREE.Vector2(),dragOffset=new THREE.Vector2(),impulse=new THREE.Vector3();
-  function upload(){pieces.forEach(piece=>{piece.updateMatrix();piece.userData.batch.setMatrixAt(piece.userData.index,piece.matrix);});batches.forEach(batch=>{batch.instanceMatrix.needsUpdate=true;batch.boundingSphere=null;});}
-  function schedule(){if(visible&&!document.hidden&&!motionQuery.matches&&!contextLost&&raf===null){last=0;raf=requestAnimationFrame(frame);}}
-  function syncFrame(){if(raf!==null){cancelAnimationFrame(raf);raf=null;}accumulator=0;schedule();}
-  function resize(){const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();cluster.scale.setScalar(camera.aspect<1.2?.64:1.12);upload();renderer.render(scene,camera);}
-  new ResizeObserver(resize).observe(host);resize();
-  new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;syncFrame();}).observe(host);
-  document.addEventListener('visibilitychange',syncFrame);
-  host.addEventListener('pointermove',event=>{
-    const r=host.getBoundingClientRect();pointer.set((event.clientX-r.left)/r.width*2-1,-((event.clientY-r.top)/r.height*2-1));
-    if(dragging&&!reduced){const dx=event.clientX-lastPointer.x,dy=event.clientY-lastPointer.y;dragOffset.x+=dx*.004;dragOffset.y+=dy*.002;dragDistance+=Math.abs(dx)+Math.abs(dy);lastPointer.set(event.clientX,event.clientY);}
-  });
-  host.addEventListener('pointerdown',event=>{dragging=true;dragDistance=0;lastPointer.set(event.clientX,event.clientY);});
-  window.addEventListener('pointerup',()=>{dragging=false;});
-  host.addEventListener('pointerleave',()=>{pointer.set(0,0);dragging=false;});
-  host.addEventListener('click',()=>{
-    if(reduced||dragDistance>8)return;
-    raycaster.setFromCamera(pointer,camera);const hit=raycaster.intersectObjects(cluster.children,true)[0];
-    const center=hit?.point||new THREE.Vector3(0,0,1);const local=cluster.worldToLocal(center.clone());
-    pieces.forEach(piece=>{impulse.copy(piece.position).sub(local);impulse.z+=2;impulse.normalize().multiplyScalar(5.4+random()*3.6);piece.userData.v.add(impulse);});burstTarget=1;
-  });
-  function frame(now){
-    raf=null;const dt=last?Math.min((now-last)/1000,.05):FIXED_STEP;last=now;
-    if(!visible||document.hidden||motionQuery.matches||contextLost)return;
-    accumulator+=dt;
-    while(accumulator>=FIXED_STEP-1e-10){time+=FIXED_STEP;pieces.forEach(piece=>stepBody(piece,time));accumulator-=FIXED_STEP;}
-    eased.x=damp(eased.x,pointer.x,18,dt);eased.y=damp(eased.y,pointer.y,18,dt);
-    burst=damp(burst,burstTarget,15,dt);burstTarget=damp(burstTarget,0,3,dt);
-    if(!dragging){dragOffset.x=damp(dragOffset.x,0,1.8,dt);dragOffset.y=damp(dragOffset.y,0,1.8,dt);}
-    cluster.rotation.y=damp(cluster.rotation.y,eased.x*.24+dragOffset.x,dragging?18:12,dt);
-    cluster.rotation.x=damp(cluster.rotation.x,-eased.y*.12+dragOffset.y,dragging?18:12,dt);
-    pieces.forEach(piece=>{
-      const d=piece.userData;
-      piece.rotation.x=d.rotation.x+Math.sin(time*.2+d.phase)*.09+burst*d.spin.x*8;
-      piece.rotation.y=d.rotation.y+Math.cos(time*.22+d.phase)*.1;
-    });
-    upload();renderer.render(scene,camera);raf=requestAnimationFrame(frame);
-  }
-  renderer.render(scene,camera);canvas.classList.add('ready');$('.hero-fallback').style.visibility='hidden';
-  schedule();
-  canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();contextLost=true;syncFrame();canvas.classList.remove('ready');$('.hero-fallback').style.visibility='visible';});
-  canvas.addEventListener('webglcontextrestored',()=>{contextLost=false;upload();renderer.render(scene,camera);canvas.classList.add('ready');$('.hero-fallback').style.visibility='hidden';schedule();});
-  motionQuery.addEventListener('change',()=>{syncFrame();renderer.render(scene,camera);});
-}
-initHero();
+initHero(motionQuery);
 motionQuery.addEventListener('change',event=>{
   reduced=event.matches;
   syncLoops();

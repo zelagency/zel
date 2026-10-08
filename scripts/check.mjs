@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
 import { transform } from 'esbuild';
 import { projects } from '../src/projects.js';
-import { FIXED_STEP, damp, stepBody } from '../src/motion.js';
+import { damp } from '../src/motion.js';
 import { PointerTrail } from '../src/pointer-trail.js';
 
 function pointerReplay(fps){
@@ -23,20 +23,6 @@ const interruptedTrail=new PointerTrail();interruptedTrail.push(0,0,0);interrupt
 assert.ok(interruptedTrail.frame(550).every(point=>point.x>=500),'No streak connecting across a pause');
 assert.equal(interruptedTrail.frame(1200).length,0,'Trail disappears after inactivity');assert.ok(!interruptedTrail.active);
 
-// A scatter must settle along the same path on different display refresh rates.
-function simulate(fps){
-  const body={position:{x:0,y:0,z:0},userData:{origin:{x:0,y:0,z:0},v:{x:8,y:5,z:6},phase:0}};
-  let time=0,accumulator=0;
-  for(let frame=0;frame<fps*4;frame++){
-    accumulator+=1/fps;
-    while(accumulator>=FIXED_STEP-1e-10){time+=FIXED_STEP;stepBody(body,time);accumulator-=FIXED_STEP;}
-    assert.ok(Object.values(body.position).every(Number.isFinite),'Finite scatter positions');
-  }
-  return body.position;
-}
-const baseline=simulate(60);
-for(const fps of [120,144])for(const axis of ['x','y','z'])assert.ok(Math.abs(simulate(fps)[axis]-baseline[axis])<1e-9,`Consistent spring at ${fps}Hz`);
-assert.ok(Math.abs(baseline.x)<.001&&Math.abs(baseline.z)<.001,'Scatter returns to its origin');
 let tilt=0;for(let i=0;i<144;i++)tilt=damp(tilt,1,5,1/144);
 assert.ok(Math.abs(tilt-damp(0,1,5,1))<1e-12,'Tilt damping is independent of frame duration');
 
@@ -57,6 +43,9 @@ window.Element.prototype.scrollIntoView=function(){};
 window.SVGElement.prototype.getTotalLength=()=>2000;
 try{await import('../dist/app.js');}catch(error){console.error(error.stack.split('\n').map(line=>line.slice(0,400)).join('\n'));process.exit(1);}
 const $=s=>document.querySelector(s);
+assert.equal(document.querySelectorAll('#hero-visual [data-letter]').length,3,'Three vector letters in hero');
+$('#hero-visual').click();assert.equal($('#hero-visual').getAttribute('aria-pressed'),'true');assert.equal($('#hero-visual').dataset.inverted,'true');
+$('#hero-visual').click();assert.equal($('#hero-visual').getAttribute('aria-pressed'),'false');assert.equal($('#hero-visual').dataset.inverted,'false');
 assert.equal(document.querySelectorAll('.project').length,3,'Three real ZEL projects');
 assert.equal($('.project-featured').dataset.projectId,'fogstores','Fogstores is the lead project');
 for(const project of projects){
@@ -93,5 +82,5 @@ for(const element of [...document.querySelectorAll('[src],[href],[data-src]')]){
 }
 await transform(fs.readFileSync('dist/style.css','utf8'),{loader:'css',minify:true});
 await transform(fs.readFileSync('dist/projects.css','utf8'),{loader:'css',minify:true});
-console.log('PASS: project navigation/URLs; dialogs/root scroll lock and restoration; sound/reel/brief; versioned assets; CSS; consistent scatter and pointer trajectories at multiple refresh rates; pointer pause/re-entry/expiry.');
+console.log('PASS: hero colour toggle; project navigation/URLs; dialogs/root scroll lock and restoration; sound/reel/brief; versioned assets; CSS; consistent damping and pointer trajectories at multiple refresh rates; pointer pause/re-entry/expiry.');
 dom.window.close();process.exit(0);

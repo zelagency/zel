@@ -16,9 +16,11 @@ Preview: http://localhost:5173
 
 ## Experience
 
-Custom Three.js sculpture made from hollow rounded cross forms, drawn in three material batches. Pointer movement tilts the composition; clicks scatter it; dragging rotates it. Physics use a fixed 120 Hz simulation step and time-based damping, with rendering paused offscreen or in a hidden tab. GSAP and Lenis coordinate scrolling, ribbons, title movement, the reel and device presentation. The pointer trail captures coalesced input where available, resamples by timestamp, and draws four continuous curves per animation frame. Reel and button followers use frame-based damping and reusable setters; pointer event handlers only capture their targets. Ambient audio and UI sounds activate through the sound button. Reduced motion stops continuous motion and video loops. Native page and dialog scrollbars are hidden while the custom page indicator remains. Dialogs lock both root and body scrolling and support keyboard dismissal and focus restoration. Build output uses content-versioned CSS and script URLs.
+A cobalt hero carries an original vector ZEL wordmark. Pointer movement redistributes the letters' widths with time-based damping; clicking or keyboard activation switches the colour treatment. Rendering stops once settled, offscreen, or in a hidden tab. Reduced motion keeps the wordmark static while retaining the colour switch. GSAP and Lenis coordinate scrolling, ribbons, title movement, the reel and device presentation. The pointer trail captures coalesced input where available, resamples by timestamp, and draws four continuous curves per animation frame. Reel and button followers use frame-based damping and reusable setters; pointer event handlers only capture their targets. Ambient audio and UI sounds activate through the sound button. Reduced motion stops continuous motion and video loops. Native page and dialog scrollbars are hidden while the custom page indicator remains. Dialogs lock both root and body scrolling and support keyboard dismissal and focus restoration. Build output uses content-versioned CSS and script URLs.
 
 Pointer research: [MDN coalesced pointer events](https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/getCoalescedEvents), [MDN animation frames](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame), [GSAP quickSetter](https://gsap.com/docs/v3/GSAP/gsap.quickSetter/), and [GSAP ticker](https://gsap.com/docs/v3/GSAP/gsap.ticker/). Automated checks replay the same curved pointer trajectory at different display rates and verify pause/re-entry handling; these are not measured browser FPS results.
+
+Hero direction research: [Codrops kinetic typography](https://tympanus.net/codrops/2020/06/02/kinetic-typography-with-three-js/) and [Spline interactive typography](https://spline.design/solutions/3d-typography). These informed the typographic direction; the shipped SVG artwork and interaction code are original.
 
 ## Selected work
 
@@ -35,7 +37,7 @@ The contact form prepares a local downloadable brief. No messages are submitted 
 ## Reference media
 
 Design reference: https://lusion.co/ and the user’s a.png–f.png screenshots.
-The flower loop, creative reference reel, ambient audio and UI sounds remain Lusion reference media, credited in the page and reel viewer. Featured Work now uses the user's own projects and real assets. The page and 3D implementation are newly authored.
+The flower loop, creative reference reel, ambient audio and UI sounds remain Lusion reference media, credited in the page and reel viewer. Featured Work now uses the user's own projects and real assets. The page and interactive wordmark are newly authored.
 
 The reference’s Aeonik Regular web font is included for accurate typography in this private visual study, with Arial/Helvetica fallbacks. The reference media and font retain their original ownership; use appropriate licenses or replacements for a public agency launch.
 
