@@ -1,0 +1,6 @@
+import http from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
+const root=path.resolve('dist');
+const mime={'.html':'text/html','.js':'application/javascript','.css':'text/css','.webp':'image/webp','.jpg':'image/jpeg','.svg':'image/svg+xml','.mp4':'video/mp4','.ogg':'audio/ogg'};
+http.createServer((req,res)=>{const p=path.resolve(root,'.'+decodeURIComponent(req.url.split('?')[0] === '/' ? '/index.html':req.url.split('?')[0]));if(!p.startsWith(root+path.sep)){res.writeHead(403);return res.end();}fs.stat(p,(err,stat)=>{if(err||!stat.isFile()){res.writeHead(404);return res.end('Not found');}const range=req.headers.range;res.setHeader('Content-Type',mime[path.extname(p)]||'application/octet-stream');res.setHeader('Accept-Ranges','bytes');if(range){const [a,b]=range.replace('bytes=','').split('-');const start=Number(a)||0,end=b?Math.min(Number(b),stat.size-1):stat.size-1;if(start>=stat.size||end<start){res.writeHead(416);return res.end();}res.writeHead(206,{'Content-Range':`bytes ${start}-${end}/${stat.size}`,'Content-Length':end-start+1});fs.createReadStream(p,{start,end}).pipe(res);}else{res.writeHead(200,{'Content-Length':stat.size});fs.createReadStream(p).pipe(res);}});}).listen(5173,'127.0.0.1',()=>console.log('ZEL preview: http://localhost:5173'));

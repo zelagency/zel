@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f0f1fa">
+  <meta name="description" content="ZEL is a creative digital agency bringing bold ideas to life through design, motion, 3D and interactive experiences.">
+  <title>ZEL — Bold Ideas, Brought to Life</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="header">
+    <a class="logo" href="#home" aria-label="ZEL home">ZEL</a>
+    <nav class="header-actions" aria-label="Main navigation">
+      <button class="sound pill" aria-label="Enable sound" aria-pressed="false" title="Sound off"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M3 15c4 0 3-10 7-10s4 18 8 18 3-10 7-10"/></svg></button>
+      <button class="talk pill dark" data-contact>LET’S TALK <span class="small-dot">•</span></button>
+      <button class="menu-button pill" aria-expanded="false" aria-controls="menu-dialog">MENU <span class="menu-dots">••</span></button>
+    </nav>
+  </header>
+  <main id="main">
+    <section class="hero" id="home" aria-labelledby="hero-title">
+      <h1 id="hero-title">We create 3D visual storytelling<br class="desktop-break"> and interactive web experiences<br class="desktop-break"> that help brands stand out</h1>
+      <button class="hero-visual" id="hero-visual" aria-label="Interact with the 3D sculpture. Click to scatter the shapes.">
+        <div class="hero-fallback" aria-hidden="true"><span>✣</span><span>✣</span><span>✣</span><span>✣</span><span>✣</span><span>✣</span><span>✣</span><span>✣</span></div>
+        <canvas id="hero-canvas" aria-hidden="true"></canvas>
+        <span class="hero-hint">CLICK TO PLAY ↗</span>
+      </button>
+      <a class="scroll-cue" href="#about"><span>+</span><span>+</span><b>SCROLL TO EXPLORE</b><span>+</span><span>+</span></a>
+    </section>
+    <section class="about section" id="about" aria-labelledby="about-title">
+      <svg class="ribbon ribbon-blue" viewBox="0 0 1900 1500" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="blue-gradient"><stop stop-color="#302bfa"/><stop offset="1" stop-color="#597fff"/></linearGradient></defs><path d="M-120 150 C160 210 350 290 520 600 C700 900 560 1230 290 1190 C-50 1130 -20 800 290 740 C640 650 1070 760 1240 980 C1430 1270 1490 950 1690 1060 C1790 1120 1780 1260 1790 1320" stroke="url(#blue-gradient)"/></svg>
+      <h2 class="about-title" id="about-title"><span class="line first">Bold Ideas,</span><span class="line">Brought to Life</span></h2>
+      <div class="about-content"><div class="flower-frame media-frame"><video class="ambient-video" muted loop playsinline preload="none" poster="/assets/flowers.jpg" data-src="/assets/flowers.mp4" aria-label="Abstract flowers in motion"></video><div class="flower-tint"></div></div>
+        <div class="about-copy"><p>We combine design, motion, 3D, and development to create digital experiences that feel visually striking and technically seamless. From campaign launches to immersive brand worlds, we build work that captures attention and invites interaction.</p><a class="approach pill white" href="#ideas"><span class="dot"></span><span>OUR APPROACH</span><span class="arrow">↗</span></a></div>
+      </div>
+    </section>
+    <section class="reel section" id="reel" aria-label="Creative reel">
+      <div class="reel-pin">
+        <div class="marquee" aria-hidden="true"><div><span>▶▶▶ &nbsp; PLAY REEL</span><span>▶▶▶ &nbsp; PLAY REEL</span><span>▶▶▶ &nbsp; PLAY REEL</span><span>▶▶▶ &nbsp; PLAY REEL</span><span>▶▶▶ &nbsp; PLAY REEL</span><span>▶▶▶ &nbsp; PLAY REEL</span></div></div>
+        <button class="reel-frame media-frame" aria-label="Play the creative reference reel" data-reel>
+          <video class="ambient-video reel-video" muted loop playsinline preload="none" poster="/assets/reel-poster.jpg" data-src="/assets/reel.mp4" data-start="2.65"></video>
+          <div class="reel-red"></div>
+          <div class="reel-title"><span>PLAY</span><span class="play-pill"><svg viewBox="0 0 30 30" aria-hidden="true"><path d="m10 6 16 9-16 9z"/></svg></span><span>REEL</span></div>
+          <span class="reel-cursor" aria-hidden="true">▶</span>
+        </button>
+        <div class="marquee reverse" aria-hidden="true"><div><span>▶▶▶ &nbsp; PLAY REEL</span><span>▶▶▶ &nbsp; PLAY REEL</span><span>▶▶▶ &nbsp; PLAY REEL</span><span>▶▶▶ &nbsp; PLAY REEL</span><span>▶▶▶ &nbsp; PLAY REEL</span><span>▶▶▶ &nbsp; PLAY REEL</span></div></div>
+      </div>
+    </section>
+    <section class="work section" id="work" aria-labelledby="work-title">
+      <div class="work-heading"><h2 id="work-title">Featured Work</h2><p>A SELECTION OF IMMERSIVE DIGITAL EXPERIENCES.<br>VISUAL REFERENCES FOR AMBITIOUS BRANDS<br>AND FORWARD THINKING TEAMS.</p></div>
+      <div class="project-grid" id="project-grid"></div>
+      <button class="pill white all-projects" id="all-projects"><span class="dot"></span>SEE ALL PROJECTS <span class="arrow">↗</span></button>
+    </section>
+    <section class="ideas section" id="ideas" aria-labelledby="ideas-title">
+      <svg class="ribbon ribbon-aqua" viewBox="0 0 1900 1500" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="aqua-gradient"><stop stop-color="#47dfe9"/><stop offset="1" stop-color="#8bfff6"/></linearGradient></defs><path d="M430 -180 C210 360 500 700 960 690 C1430 680 1260 310 1310 60 C1390 -250 1700 -100 1620 270 C1510 690 1250 760 1260 890" stroke="url(#aqua-gradient)"/></svg>
+      <h2 id="ideas-title"><span class="line">Where Creative Ideas</span><span class="line">Become Immersive</span><span class="line">Experiences</span></h2>
+      <div class="ideas-content">
+        <div class="device-scene" aria-hidden="true"><div class="device"><div class="device-toolbar"><i></i><i></i><i></i><span>zel.studio / imagination</span></div><div class="device-screen"><img src="/assets/spatial_fusion.webp" alt="" loading="lazy"><span>Enter a<br>new dimension.</span><div class="device-orb"></div></div></div><div class="device-base"></div></div>
+        <div class="ideas-copy"><p>Original ideas deserve extraordinary experiences. At ZEL, we bring creative direction, digital craft, and interactive technology together to build worlds that feel unmistakably yours.</p><p>Every detail has a purpose. Every interaction invites discovery. We create work that connects with people and stays with them long after they leave.</p><button class="pill white" data-contact><span class="dot"></span>START A CONVERSATION <span class="arrow">↗</span></button></div>
+      </div>
+      <div class="end-note"><span>© 2026 ZEL</span><span>VISUAL STUDY · REFERENCE MEDIA BY <a href="https://lusion.co/" target="_blank" rel="noopener">LUSION ↗</a></span><a href="#home">BACK TO TOP ↑</a></div>
+    </section>
+  </main>
+  <div class="scroll-indicator" aria-hidden="true"><i></i></div>
+  <canvas id="fluid-canvas" aria-hidden="true"></canvas>
+  <dialog id="menu-dialog" class="menu-dialog"><div class="menu-inner"><span class="menu-label">EXPLORE ZEL</span><nav aria-label="Explore"><a href="#home">Home <span>01</span></a><a href="#about">About <span>02</span></a><a href="#work">Work <span>03</span></a><a href="#ideas">Approach <span>04</span></a></nav><button class="menu-contact" data-contact>Let’s make something extraordinary. ↗</button></div></dialog>
+  <dialog id="contact-dialog" class="contact-dialog"><button class="dialog-close pill" data-close aria-label="Close contact">CLOSE ×</button><span class="menu-label">LET’S TALK</span><h2>Your next<br>big idea.</h2><p>Tell us what you have in mind.</p><form id="contact-form"><label>Your name<input name="name" autocomplete="name" required placeholder="How should we call you?"></label><label>Email address<input name="email" type="email" autocomplete="email" required placeholder="you@company.com"></label><label>Your project<textarea name="project" required placeholder="The idea, the ambition, the possibilities…" rows="3"></textarea></label><button class="pill dark" type="submit">PREPARE PROJECT BRIEF ↗</button><p class="form-status" aria-live="polite"></p></form></dialog>
+  <dialog id="media-dialog" class="media-dialog"><button class="dialog-close pill" data-close aria-label="Close media">CLOSE ×</button><div class="media-dialog-content"></div></dialog>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
