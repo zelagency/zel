@@ -135,6 +135,9 @@ mm.add('(prefers-reduced-motion: no-preference)',()=>{
   gsap.fromTo('.device',{rotationY:15,rotationX:12,rotationZ:-5},{rotationY:-7,rotationX:0,rotationZ:2,ease:'none',scrollTrigger:{trigger:'.ideas-content',start:'top bottom',end:'bottom 30%',scrub:1}});
   return ()=>{};
 });
+mm.add('(min-width: 813px) and (prefers-reduced-motion: no-preference)',()=>{
+  ScrollTrigger.create({trigger:'.reel-pin',start:'top 5%',end:'+=100%',pin:true,anticipatePin:1});
+});
 
 const reel=$('.reel-frame'), cursor=$('.reel-cursor');
 reel.addEventListener('pointermove',event=>{
