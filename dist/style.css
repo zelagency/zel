@@ -9,3 +9,4 @@
 dialog,.menu-inner,dialog textarea{scrollbar-width:none}
 dialog::-webkit-scrollbar,.menu-inner::-webkit-scrollbar,dialog textarea::-webkit-scrollbar{display:none;width:0;height:0}
 dialog,.menu-inner{overscroll-behavior:contain}
+html[data-input-mode="pointer"] :is(button,a):focus{outline:none}

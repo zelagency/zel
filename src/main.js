@@ -12,6 +12,12 @@ const $ = (s, root = document) => root.querySelector(s);
 const $$ = (s, root = document) => [...root.querySelectorAll(s)];
 const motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
 let reduced = motionQuery.matches;
+// Dialog focus restoration should not add a keyboard ring after a pointer click.
+document.documentElement.dataset.inputMode='pointer';
+document.addEventListener('pointerdown',()=>{document.documentElement.dataset.inputMode='pointer';},{capture:true,passive:true});
+document.addEventListener('keydown',event=>{
+  if(!event.metaKey&&!event.ctrlKey&&!event.altKey)document.documentElement.dataset.inputMode='keyboard';
+},{capture:true});
 $('#project-grid').innerHTML = projects.map((project,i)=>`<article class="project ${i===0?'project-featured':''}" data-project-id="${project.id}"><button class="project-image" data-project="${i}" aria-label="Explore ${project.title}">${projectCover(project)}<span class="project-arrow" aria-hidden="true">↗</span></button><p class="project-meta">${project.tags}</p><div class="project-title"><h3>${project.title}</h3><a href="${project.url}" target="_blank" rel="noopener" aria-label="Visit ${project.title} live website">VISIT SITE ↗</a></div><p class="project-summary">${project.description}</p></article>`).join('');
 
 // Smooth scroll is deliberately slow enough to give the visual sequence room.
