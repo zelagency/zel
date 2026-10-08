@@ -25,6 +25,6 @@ The contact form prepares a local downloadable brief. No messages are submitted 
 Design reference: https://lusion.co/ and the user’s a.png–f.png screenshots.
 Project imagery, reel preview, ambient audio and UI sounds are Lusion reference media and are credited in the page and media viewers. These projects are clearly identified as visual references, not ZEL client work. Replace the media with ZEL’s licensed assets before using the site as an original public portfolio. The page and 3D implementation are newly authored.
 
-The system Arial/Helvetica stack approximates the reference’s Aeonik proportions without bundling the commercial font.
+The reference’s Aeonik Regular web font is included for accurate typography in this private visual study, with Arial/Helvetica fallbacks. The reference media and font retain their original ownership; use appropriate licenses or replacements for a public agency launch.
 
 Browser surfaces were unavailable in the execution session. Functional checks and build validation were performed; viewport screenshot comparison and perceptual audio verification remain unverified.
