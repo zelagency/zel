@@ -204,7 +204,7 @@ const progress=$('.scroll-indicator i');
 function updateProgress(){const total=document.documentElement.scrollHeight-innerHeight;progress.style.transform=`translateY(${Math.max(0,(innerHeight*.2-35)*scrollY/Math.max(1,total))}px)`;}
 window.addEventListener('scroll',updateProgress,{passive:true});
 
-// Capture every available input sample; render one continuous curve per frame.
+// Capture every available input sample; filter and reuse one curve per frame.
 const paint=$('#fluid-canvas'), ctx=paint.getContext('2d'), trail=new PointerTrail();let paintRaf=null;
 function resetPaint(){if(paintRaf!==null)cancelAnimationFrame(paintRaf);paintRaf=null;trail.clear();ctx?.clearRect(0,0,innerWidth,innerHeight);}
 function sizePaint(){resetPaint();const dpr=Math.min(devicePixelRatio,1.25);paint.width=innerWidth*dpr;paint.height=innerHeight*dpr;ctx?.setTransform(dpr,0,0,dpr,0,0);}
@@ -226,18 +226,19 @@ function drawPaint(now){
   if(reduced||document.hidden){resetPaint();return;}
   const points=trail.frame(now);
   if(points.length>2){
-    const first=points[0],last=points.at(-1),fade=Math.max(0,1-(now-last.t)/trail.lifetime);
+    const first=points[0],last=points.at(-1),fade=trail.opacity(now);
+    const path=new Path2D();path.moveTo(first.x,first.y);
+    for(let i=1;i<points.length-1;i++){
+      const p=points[i],next=points[i+1];path.quadraticCurveTo(p.x,p.y,(p.x+next.x)/2,(p.y+next.y)/2);
+    }
+    path.lineTo(last.x,last.y);
     ctx.lineCap='round';ctx.lineJoin='round';ctx.shadowBlur=0;
     for(let layer=0;layer<4;layer++){
       const gradient=ctx.createLinearGradient(first.x,first.y,last.x+.01,last.y+.01);
       gradient.addColorStop(0,'transparent');gradient.addColorStop(.55,['#adcfff','#e6c8dc','#b9fff4','#ffffff'][layer]);gradient.addColorStop(1,'#ffffff');
       ctx.lineWidth=34-layer*7;ctx.strokeStyle=gradient;ctx.globalAlpha=fade*.18;
       const offset=(layer-1.5)*2;
-      ctx.beginPath();ctx.moveTo(first.x,first.y+offset);
-      for(let i=1;i<points.length-1;i++){
-        const p=points[i],next=points[i+1];ctx.quadraticCurveTo(p.x,p.y+offset,(p.x+next.x)/2,(p.y+next.y)/2+offset);
-      }
-      ctx.lineTo(last.x,last.y+offset);ctx.stroke();
+      ctx.save();ctx.translate(0,offset);ctx.stroke(path);ctx.restore();
     }
     ctx.globalAlpha=1;
   }

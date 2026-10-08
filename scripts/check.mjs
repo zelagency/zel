@@ -23,6 +23,20 @@ const interruptedTrail=new PointerTrail();interruptedTrail.push(0,0,0);interrupt
 assert.ok(interruptedTrail.frame(550).every(point=>point.x>=500),'No streak connecting across a pause');
 assert.equal(interruptedTrail.frame(1200).length,0,'Trail disappears after inactivity');assert.ok(!interruptedTrail.active);
 
+// A low-polling mouse must settle between events without overshooting its stop.
+const settlingTrail=new PointerTrail();settlingTrail.push(0,0,0);settlingTrail.push(100,0,20);
+const headAt=t=>settlingTrail.frame(t).at(-1).x;
+const earlyHead=headAt(30),laterHead=headAt(40),restingHead=headAt(180);
+assert.ok(earlyHead<laterHead&&laterHead<restingHead,'Head advances between input events');
+assert.ok(restingHead<=100&&100-restingHead<.03,'Settles at actual pointer without overshoot');
+assert.ok(settlingTrail.opacity(300)<.6,'Fade uses last input time, not the settling head');
+const noisyTrail=new PointerTrail();
+for(let t=0;t<=200;t+=5)noisyTrail.push(t,t%10===0?2:-2,t);
+const jitter=noisyTrail.frame(206).filter(p=>p.t>80);
+assert.ok(Math.max(...jitter.map(p=>Math.abs(p.y)))<.5,'Suppresses small high-frequency hand jitter');
+function straightInput(hz){const trail=new PointerTrail();for(let i=0;i<=hz;i++)trail.push(i*500/hz,0,i*1000/hz);return trail.frame(1006).at(-1).x;}
+assert.ok(Math.abs(straightInput(60)-straightInput(240))<.001,'Equivalent straight-line response across mouse polling rates');
+
 let tilt=0;for(let i=0;i<144;i++)tilt=damp(tilt,1,5,1/144);
 assert.ok(Math.abs(tilt-damp(0,1,5,1))<1e-12,'Tilt damping is independent of frame duration');
 
