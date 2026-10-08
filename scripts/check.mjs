@@ -5,6 +5,23 @@ import { JSDOM } from 'jsdom';
 import { transform } from 'esbuild';
 import { projects } from '../src/projects.js';
 import { FIXED_STEP, damp, stepBody } from '../src/motion.js';
+import { PointerTrail } from '../src/pointer-trail.js';
+
+function pointerReplay(fps){
+  const trail=new PointerTrail();let inputTime=0;
+  for(let frame=0;frame<=fps;frame++){
+    const now=frame*1000/fps;
+    while(inputTime<=now+1e-8){trail.push(100+inputTime*.4,200+Math.sin(inputTime/150)*60,inputTime);inputTime+=1000/240;}
+    trail.frame(now);
+  }
+  return trail.frame(1000);
+}
+const pointer60=pointerReplay(60),pointer144=pointerReplay(144);
+assert.equal(pointer60.length,pointer144.length,'Same trail length across display rates');
+pointer60.forEach((point,i)=>assert.ok(Math.hypot(point.x-pointer144[i].x,point.y-pointer144[i].y)<.001,'Same curved trajectory at 60 and 144 Hz'));
+const interruptedTrail=new PointerTrail();interruptedTrail.push(0,0,0);interruptedTrail.push(20,20,20);interruptedTrail.push(500,500,500);interruptedTrail.push(520,520,520);
+assert.ok(interruptedTrail.frame(550).every(point=>point.x>=500),'No streak connecting across a pause');
+assert.equal(interruptedTrail.frame(1200).length,0,'Trail disappears after inactivity');assert.ok(!interruptedTrail.active);
 
 // A scatter must settle along the same path on different display refresh rates.
 function simulate(fps){
@@ -47,7 +64,11 @@ for(const project of projects){
   for(const image of project.images)assert.ok(fs.existsSync(path.join('dist',image.src)),`Missing real project image ${image.src}`);
 }
 $('.menu-button').click();assert.ok($('#menu-dialog').open);assert.equal($('.menu-button').getAttribute('aria-expanded'),'true');
+assert.equal(document.documentElement.style.overflow,'hidden','Root scrolling locks while menu is open');
 $('.menu-close').click();assert.ok(!$('#menu-dialog').open);assert.equal(document.body.style.overflow,'');
+assert.equal(document.documentElement.style.overflow,'','Root scrolling unlocks after close');
+$('.menu-button').click();$('.menu-contact').click();assert.ok($('#contact-dialog').open);assert.equal(document.documentElement.style.overflow,'hidden','Menu-to-contact transition retains root lock');
+$('#contact-dialog [data-close]').click();assert.equal(document.documentElement.style.overflow,'');
 $('.sound').click();await new Promise(r=>setTimeout(r,0));assert.equal($('.sound').getAttribute('aria-pressed'),'true');
 $('.sound').click();await new Promise(r=>setTimeout(r,0));assert.equal($('.sound').getAttribute('aria-pressed'),'false');
 $('[data-project="0"]').focus();$('[data-project="0"]').click();assert.ok($('#media-dialog').open);assert.equal($('.media-dialog-content h2').textContent,'Fogstores');
@@ -68,9 +89,9 @@ globalThis.URL.createObjectURL=()=> 'blob:test-brief';globalThis.URL.revokeObjec
 $('#contact-form').dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true}));assert.equal($('.brief-download').getAttribute('download'),'ZEL-project-brief.txt');
 $('#contact-dialog [data-close]').click();assert.equal(document.body.style.overflow,'');
 for(const element of [...document.querySelectorAll('[src],[href],[data-src]')]){
-  for(const attr of ['src','href','data-src']){const ref=element.getAttribute(attr);if(ref?.startsWith('/')&&!ref.startsWith('//'))assert.ok(fs.existsSync(path.join('dist',ref)),`Missing asset ${ref}`);if(ref?.startsWith('#'))assert.ok(document.querySelector(ref),`Invalid anchor ${ref}`);}
+  for(const attr of ['src','href','data-src']){const ref=element.getAttribute(attr);if(ref?.startsWith('/')&&!ref.startsWith('//'))assert.ok(fs.existsSync(path.join('dist',new URL(ref,'http://localhost').pathname)),`Missing asset ${ref}`);if(ref?.startsWith('#'))assert.ok(document.querySelector(ref),`Invalid anchor ${ref}`);}
 }
 await transform(fs.readFileSync('dist/style.css','utf8'),{loader:'css',minify:true});
 await transform(fs.readFileSync('dist/projects.css','utf8'),{loader:'css',minify:true});
-console.log('PASS: three real projects and live URLs; case study/gallery navigation; Escape and focus return; sound; menu/scroll lock; reel; brief download; assets/anchors; CSS; identical scatter response at 60/120/144Hz.');
+console.log('PASS: project navigation/URLs; dialogs/root scroll lock and restoration; sound/reel/brief; versioned assets; CSS; consistent scatter and pointer trajectories at multiple refresh rates; pointer pause/re-entry/expiry.');
 dom.window.close();process.exit(0);

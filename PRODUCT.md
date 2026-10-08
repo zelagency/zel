@@ -2,9 +2,9 @@
 ## Register
 brand
 ## Users
-Prospective clients exploring ZEL as a creative digital agency.
+Businesses and people with ambitious ideas who need distinctive websites, commerce platforms, or custom operational tools.
 ## Product Purpose
-A close visual recreation of the supplied Lusion reference, branded ZEL, through the end of the immersive experiences section.
+Present ZEL as an agency building unique digital solutions around a client's business and ideas. The portfolio demonstrates fashion commerce, cloud-kitchen ordering and operations, and a cafe ordering/POS platform. Its visual experience follows the supplied Lusion reference through the immersive experiences section.
 ## Brand Personality
 Oversized, expressive, interactive.
 ## Design Principles

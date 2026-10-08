@@ -6,6 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import { projects, projectCover } from './projects.js';
 import { FIXED_STEP, damp, stepBody } from './motion.js';
+import { PointerTrail } from './pointer-trail.js';
 
 gsap.registerPlugin(ScrollTrigger);
 const $ = (s, root = document) => root.querySelector(s);
@@ -61,8 +62,8 @@ const menu=$('#menu-dialog'), contact=$('#contact-dialog'), media=$('#media-dial
 $$('dialog').forEach(dialog=>dialog.setAttribute('data-lenis-prevent',''));
 menu.insertAdjacentHTML('afterbegin','<a class="menu-logo logo" href="#home">ZEL</a><button class="dialog-close pill menu-close" aria-label="Close menu">CLOSE ••</button>');
 let previousFocus;
-const lockScroll=()=>{lenis?.stop();document.body.style.overflow='hidden';};
-const unlockScroll=()=>{if($$('dialog[open]').length)return;lenis?.start();document.body.style.overflow='';previousFocus?.focus();};
+const lockScroll=()=>{lenis?.stop();document.documentElement.style.overflow='hidden';document.body.style.overflow='hidden';};
+const unlockScroll=()=>{if($$('dialog[open]').length)return;document.documentElement.style.overflow='';document.body.style.overflow='';lenis?.start();previousFocus?.focus({preventScroll:true});};
 function showDialog(dialog){
   previousFocus=document.activeElement;
   dialog.showModal();lockScroll();
@@ -148,27 +149,50 @@ mm.add('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-prefe
   function listen(element,type,handler){element.addEventListener(type,handler);cleanups.push(()=>element.removeEventListener(type,handler));}
   const reel=$('.reel-frame'), cursor=$('.reel-cursor');
   gsap.set(cursor,{xPercent:-50,yPercent:-50,x:0,y:0});
-  const cursorX=gsap.quickTo(cursor,'x',{duration:.32,ease:'power3.out'});
-  const cursorY=gsap.quickTo(cursor,'y',{duration:.32,ease:'power3.out'});
-  const cursorRotation=gsap.quickTo(cursor,'rotation',{duration:.5,ease:'power3.out'});
+  const cursorX=gsap.quickSetter(cursor,'x','px'),cursorY=gsap.quickSetter(cursor,'y','px');
+  const cursorRotation=gsap.quickSetter(cursor,'rotation','deg');
+  const follower={inside:false,ready:false,x:0,y:0,clientX:0,clientY:0,rotation:0};
+  listen(reel,'pointerenter',event=>{follower.inside=true;follower.ready=false;follower.clientX=event.clientX;follower.clientY=event.clientY;});
   listen(reel,'pointermove',event=>{
-    const rect=reel.getBoundingClientRect();
-    cursorX(event.clientX-rect.left);cursorY(event.clientY-rect.top);
-    cursorRotation(gsap.utils.clamp(-12,12,(event.movementX||0)*.4));
+    follower.clientX=event.clientX;follower.clientY=event.clientY;
   });
+  listen(reel,'pointerleave',()=>{follower.inside=false;follower.ready=false;delete reel.dataset.pointerInside;});
+  const buttons=new Set();
   $$('.pill').forEach(button=>{
-    let rect;
-    const x=gsap.quickTo(button,'x',{duration:.45,ease:'power3.out'});
-    const y=gsap.quickTo(button,'y',{duration:.45,ease:'power3.out'});
-    listen(button,'pointerenter',()=>{rect=button.getBoundingClientRect();});
+    const state={button,inside:false,x:0,y:0,clientX:0,clientY:0,setX:gsap.quickSetter(button,'x','px'),setY:gsap.quickSetter(button,'y','px')};
+    listen(button,'pointerenter',event=>{state.inside=true;state.clientX=event.clientX;state.clientY=event.clientY;buttons.add(state);});
     listen(button,'pointermove',event=>{
-      if(!rect||event.pointerType!=='mouse')return;
-      x((event.clientX-rect.left-rect.width/2)*.12);y((event.clientY-rect.top-rect.height/2)*.16);
+      state.clientX=event.clientX;state.clientY=event.clientY;
     });
-    listen(button,'pointerleave',()=>{x(0);y(0);rect=null;});
-    listen(button,'focus',()=>{x(0);y(0);});
+    listen(button,'pointerleave',()=>{state.inside=false;});
+    listen(button,'focus',()=>{state.inside=false;buttons.add(state);});
   });
-  return ()=>cleanups.forEach(cleanup=>cleanup());
+  function tick(time,deltaMs){
+    if(document.hidden)return;
+    const dt=Math.min(deltaMs/1000,.05);
+    // Read geometry before any transform writes; compensate for existing transforms.
+    const reelRect=follower.inside?reel.getBoundingClientRect():null;
+    const reelWidth=reelRect?reel.offsetWidth:1,reelHeight=reelRect?reel.offsetHeight:1;
+    const plans=[...buttons].map(state=>({state,rect:state.inside?state.button.getBoundingClientRect():null}));
+    if(reelRect){
+      const x=(follower.clientX-reelRect.left)*reelWidth/(reelRect.width||1);
+      const y=(follower.clientY-reelRect.top)*reelHeight/(reelRect.height||1);
+      const oldX=follower.x;
+      if(!follower.ready){follower.x=x;follower.y=y;follower.rotation=0;follower.ready=true;}
+      else{follower.x=damp(follower.x,x,22,dt);follower.y=damp(follower.y,y,22,dt);follower.rotation=damp(follower.rotation,gsap.utils.clamp(-10,10,(follower.x-oldX)/(dt||1)/100),12,dt);}
+      cursorX(follower.x);cursorY(follower.y);cursorRotation(follower.rotation);reel.dataset.pointerInside='true';
+    }
+    plans.forEach(({state,rect})=>{
+      const targetX=rect?gsap.utils.clamp(-5,5,(state.clientX-(rect.left+rect.width/2-state.x))*.09):0;
+      const targetY=rect?gsap.utils.clamp(-4,4,(state.clientY-(rect.top+rect.height/2-state.y))*.12):0;
+      state.x=damp(state.x,targetX,18,dt);state.y=damp(state.y,targetY,18,dt);
+      if(!state.inside&&Math.abs(state.x)+Math.abs(state.y)<.02){state.x=0;state.y=0;buttons.delete(state);}
+      state.setX(state.x);state.setY(state.y);
+    });
+  }
+  gsap.ticker.add(tick);
+  listen(window,'blur',()=>{follower.inside=false;delete reel.dataset.pointerInside;buttons.forEach(state=>{state.inside=false;});});
+  return ()=>{cleanups.forEach(cleanup=>cleanup());gsap.ticker.remove(tick);buttons.forEach(state=>{state.setX(0);state.setY(0);});buttons.clear();delete reel.dataset.pointerInside;};
 });
 
 // Decorative loops share the same visibility lifecycle as the video loops.
@@ -182,35 +206,44 @@ const progress=$('.scroll-indicator i');
 function updateProgress(){const total=document.documentElement.scrollHeight-innerHeight;progress.style.transform=`translateY(${Math.max(0,(innerHeight*.2-35)*scrollY/Math.max(1,total))}px)`;}
 window.addEventListener('scroll',updateProgress,{passive:true});
 
-// Iridescent pointer paint. Each point fades out; no persistent drawing surface.
-const paint=$('#fluid-canvas'), ctx=paint.getContext('2d');let trail=[], paintRaf;
-function sizePaint(){const dpr=Math.min(devicePixelRatio,1.25);paint.width=innerWidth*dpr;paint.height=innerHeight*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}
+// Capture every available input sample; render one continuous curve per frame.
+const paint=$('#fluid-canvas'), ctx=paint.getContext('2d'), trail=new PointerTrail();let paintRaf=null;
+function resetPaint(){if(paintRaf!==null)cancelAnimationFrame(paintRaf);paintRaf=null;trail.clear();ctx?.clearRect(0,0,innerWidth,innerHeight);}
+function sizePaint(){resetPaint();const dpr=Math.min(devicePixelRatio,1.25);paint.width=innerWidth*dpr;paint.height=innerHeight*dpr;ctx?.setTransform(dpr,0,0,dpr,0,0);}
 sizePaint();window.addEventListener('resize',sizePaint);
 window.addEventListener('pointermove',event=>{
-  if(reduced||event.pointerType!=='mouse'||innerWidth<813||event.target.closest('.hero-visual,.media-frame,dialog,.project-image'))return;
-  const now=performance.now(),previous=trail.at(-1);
-  if(previous&&now-previous.t<16)return;
-  trail.push({x:event.clientX,y:event.clientY,t:now});if(trail.length>40)trail.shift();if(!paintRaf)paintRaf=requestAnimationFrame(drawPaint);
-});
-function drawPaint(now){
-  ctx.clearRect(0,0,innerWidth,innerHeight);trail=trail.filter(p=>now-p.t<750);
-  if(reduced||document.hidden){trail=[];paintRaf=null;return;}
-  if(trail.length>2){
-    for(let layer=0;layer<4;layer++){
-      const first=trail[0],last=trail.at(-1),color=['#acdfff','#eaccc0','#b9fff4','#ffffff'][layer];
-      const gradient=ctx.createLinearGradient(first.x,first.y,last.x+.01,last.y+.01);
-      gradient.addColorStop(0,'transparent');gradient.addColorStop(1,color);
-      ctx.lineWidth=42-layer*8;ctx.lineCap='round';ctx.lineJoin='round';ctx.shadowBlur=layer===0?12:0;
-      ctx.strokeStyle=gradient;ctx.shadowColor=color;ctx.globalAlpha=(1-(now-last.t)/750)*.16;
-      ctx.beginPath();ctx.moveTo(first.x,first.y+layer*3);
-      for(let i=1;i<trail.length-1;i++){
-        const p=trail[i],next=trail[i+1];ctx.quadraticCurveTo(p.x,p.y+layer*3,(p.x+next.x)/2,(p.y+next.y)/2+layer*3);
-      }
-      ctx.lineTo(last.x,last.y+layer*3);ctx.stroke();
-    }
-    ctx.globalAlpha=1;ctx.shadowBlur=0;
+  if(!ctx||reduced||document.hidden||event.pointerType!=='mouse'||innerWidth<813||event.target.closest('.hero-visual,.media-frame,dialog,.project-image')){resetPaint();return;}
+  const now=performance.now(),samples=event.getCoalescedEvents?.();
+  for(const sample of samples?.length?samples:[event]){
+    const timestamp=Math.abs(now-sample.timeStamp)<10000?sample.timeStamp:now;
+    trail.push(sample.clientX,sample.clientY,timestamp);
   }
-  paintRaf=trail.length?requestAnimationFrame(drawPaint):null;
+  if(paintRaf===null)paintRaf=requestAnimationFrame(drawPaint);
+},{passive:true});
+window.addEventListener('blur',resetPaint);
+document.documentElement.addEventListener('pointerleave',resetPaint);
+document.addEventListener('visibilitychange',resetPaint);
+function drawPaint(now){
+  paintRaf=null;ctx.clearRect(0,0,innerWidth,innerHeight);
+  if(reduced||document.hidden){resetPaint();return;}
+  const points=trail.frame(now);
+  if(points.length>2){
+    const first=points[0],last=points.at(-1),fade=Math.max(0,1-(now-last.t)/trail.lifetime);
+    ctx.lineCap='round';ctx.lineJoin='round';ctx.shadowBlur=0;
+    for(let layer=0;layer<4;layer++){
+      const gradient=ctx.createLinearGradient(first.x,first.y,last.x+.01,last.y+.01);
+      gradient.addColorStop(0,'transparent');gradient.addColorStop(.55,['#adcfff','#e6c8dc','#b9fff4','#ffffff'][layer]);gradient.addColorStop(1,'#ffffff');
+      ctx.lineWidth=34-layer*7;ctx.strokeStyle=gradient;ctx.globalAlpha=fade*.18;
+      const offset=(layer-1.5)*2;
+      ctx.beginPath();ctx.moveTo(first.x,first.y+offset);
+      for(let i=1;i<points.length-1;i++){
+        const p=points[i],next=points[i+1];ctx.quadraticCurveTo(p.x,p.y+offset,(p.x+next.x)/2,(p.y+next.y)/2+offset);
+      }
+      ctx.lineTo(last.x,last.y+offset);ctx.stroke();
+    }
+    ctx.globalAlpha=1;
+  }
+  if(trail.active)paintRaf=requestAnimationFrame(drawPaint);
 }
 
 // A custom 3D sculpture, with hollow rounded cylinders and damped pointer physics.
@@ -283,11 +316,11 @@ function initHero(){
     if(!visible||document.hidden||motionQuery.matches||contextLost)return;
     accumulator+=dt;
     while(accumulator>=FIXED_STEP-1e-10){time+=FIXED_STEP;pieces.forEach(piece=>stepBody(piece,time));accumulator-=FIXED_STEP;}
-    eased.x=damp(eased.x,pointer.x,5,dt);eased.y=damp(eased.y,pointer.y,5,dt);
+    eased.x=damp(eased.x,pointer.x,18,dt);eased.y=damp(eased.y,pointer.y,18,dt);
     burst=damp(burst,burstTarget,15,dt);burstTarget=damp(burstTarget,0,3,dt);
     if(!dragging){dragOffset.x=damp(dragOffset.x,0,1.8,dt);dragOffset.y=damp(dragOffset.y,0,1.8,dt);}
-    cluster.rotation.y=damp(cluster.rotation.y,eased.x*.24+dragOffset.x,dragging?12:4,dt);
-    cluster.rotation.x=damp(cluster.rotation.x,-eased.y*.12+dragOffset.y,dragging?12:4,dt);
+    cluster.rotation.y=damp(cluster.rotation.y,eased.x*.24+dragOffset.x,dragging?18:12,dt);
+    cluster.rotation.x=damp(cluster.rotation.x,-eased.y*.12+dragOffset.y,dragging?18:12,dt);
     pieces.forEach(piece=>{
       const d=piece.userData;
       piece.rotation.x=d.rotation.x+Math.sin(time*.2+d.phase)*.09+burst*d.spin.x*8;
@@ -305,6 +338,6 @@ initHero();
 motionQuery.addEventListener('change',event=>{
   reduced=event.matches;
   syncLoops();
-  if(reduced){lenis?.destroy();lenis=null;$$('.ambient-video').forEach(video=>video.pause());trail=[];ctx.clearRect(0,0,innerWidth,innerHeight);}else{startSmoothScroll();if($$('dialog[open]').length)lenis?.stop();$$('.ambient-video').forEach(video=>{if(video.getBoundingClientRect().bottom>0&&video.getBoundingClientRect().top<innerHeight){if(!video.src)video.src=video.dataset.src;video.play().catch(()=>{});}});}
+  if(reduced){lenis?.destroy();lenis=null;$$('.ambient-video').forEach(video=>video.pause());resetPaint();}else{startSmoothScroll();if($$('dialog[open]').length)lenis?.stop();$$('.ambient-video').forEach(video=>{if(video.getBoundingClientRect().bottom>0&&video.getBoundingClientRect().top<innerHeight){if(!video.src)video.src=video.dataset.src;video.play().catch(()=>{});}});}
 });
 window.addEventListener('load',()=>{ScrollTrigger.refresh();updateProgress();});
