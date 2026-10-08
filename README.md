@@ -22,7 +22,7 @@ Custom Three.js sculpture made from hollow rounded cross forms, drawn in three m
 
 Fogstores leads the work section, followed by Infinity Kitchens and BNM Cafe. Each project opens a detail view and links to its actual live site. Source records and project descriptions are defined in `src/projects.js`.
 
-- Fogstores: https://fogstores.vercel.app/ — original campaign and look photography from `Hazestudios/public/fogstores`.
+- Fogstores: https://fogstores.vercel.app/ — streetwear feature cover from `Hazestudios/public/fogstores/men/hero-desktop.webp`, with original campaign and look photography from `Hazestudios/public/fogstores` in the detail gallery.
 - Infinity Kitchens: https://infinitykitchensblr.com/ — original food photography and brand mark from Cloud-Kitchen, with actual customer homepage and menu screenshots recorded in its September 19, 2026 capture assets.
 - BNM Cafe: https://bnm-cafe-rho.vercel.app/menu — actual mobile menu screenshot and cafe logo from `bnm/BNM-Cafe`.
 
