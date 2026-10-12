@@ -5,6 +5,7 @@ import { projects, projectCover } from './projects.js';
 import { damp } from './motion.js';
 import { initHero } from './hero.js';
 import { PointerTrail } from './pointer-trail.js';
+import { initPills, initSoundWave, fillPill, drainPill } from './pills.js';
 
 gsap.registerPlugin(ScrollTrigger);
 // Mobile browser bars resize the viewport while scrolling; refreshing then makes pins jump.
@@ -44,11 +45,15 @@ const audio = {
   async toggle(){
     this.enabled=!this.enabled;
     if(this.enabled){try{await this.music.play();}catch{this.enabled=false;}}else this.music.pause();
-    $('.sound').setAttribute('aria-pressed',String(this.enabled));
+    const sound=$('.sound');sound.setAttribute('aria-pressed',String(this.enabled));
+    soundWave.set(this.enabled);
+    if(this.enabled)fillPill(sound,undefined,undefined,reduced);else if(!sound.matches(':hover'))drainPill(sound,undefined,undefined,reduced);
     $('.sound').setAttribute('aria-label',this.enabled?'Disable sound':'Enable sound');
     $('.sound').title=this.enabled?'Sound on':'Sound off';
   }
 };
+initPills(()=>reduced);
+const soundWave=initSoundWave($('.sound'),()=>reduced);
 audio.music.loop=true;audio.music.volume=.3;
 $('.sound').addEventListener('click',()=>audio.toggle());
 document.addEventListener('pointerover',event=>{
@@ -58,12 +63,11 @@ document.addEventListener('pointerover',event=>{
 document.addEventListener('click',event=>{if(event.target.closest('a,button'))audio.play('click');});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)audio.music.pause();else if(audio.enabled&&!$('#media-dialog').open)audio.music.play().catch(()=>{});});
 
-const menu=$('#menu-dialog'), contact=$('#contact-dialog'), media=$('#media-dialog');
+const menuPanel=$('#menu-panel'), menuButton=$('.menu-button'), contact=$('#contact-dialog'), media=$('#media-dialog');
 $$('dialog').forEach(dialog=>dialog.setAttribute('data-lenis-prevent',''));
-menu.insertAdjacentHTML('afterbegin','<a class="menu-logo logo" href="#home">ZEL</a><button class="dialog-close pill menu-close" aria-label="Close menu">CLOSE ••</button>');
-let previousFocus;
+let previousFocus,menuOpen=false;
 const lockScroll=()=>{lenis?.stop();document.documentElement.style.overflow='hidden';document.body.style.overflow='hidden';};
-const unlockScroll=()=>{if($$('dialog[open]').length)return;document.documentElement.style.overflow='';document.body.style.overflow='';lenis?.start();previousFocus?.focus({preventScroll:true});};
+const unlockScroll=()=>{if($$('dialog[open]').length||menuOpen)return;document.documentElement.style.overflow='';document.body.style.overflow='';lenis?.start();previousFocus?.focus({preventScroll:true});};
 function showDialog(dialog){
   previousFocus=document.activeElement;
   dialog.showModal();lockScroll();
@@ -75,15 +79,24 @@ function dismissDialog(dialog){
   const exit=dialog.animate([{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(18px)'}],{duration:180,easing:'cubic-bezier(.4,0,1,1)'});
   exit.finished.catch(()=>{}).then(()=>{delete dialog.dataset.closing;dialog.close();});
 }
-function closeMenu(){dismissDialog(menu);$('.menu-button').setAttribute('aria-expanded','false');}
-$('.menu-button').addEventListener('click',()=>{showDialog(menu);$('.menu-button').setAttribute('aria-expanded','true');});
-$('.menu-close').addEventListener('click',closeMenu);
-menu.addEventListener('close',()=>{$('.menu-button').setAttribute('aria-expanded','false');unlockScroll();});
+// Dropdown menu: the header stays live above a dimmed page so MENU can become CLOSE.
+function setMenu(open,{restoreFocus=true}={}){
+  if(open===menuOpen)return;
+  menuOpen=open;menuPanel.inert=!open;
+  menuButton.setAttribute('aria-expanded',String(open));
+  document.documentElement.toggleAttribute('data-menu-open',open);
+  if(open){previousFocus=menuButton;lockScroll();$('.menu-link',menuPanel).focus({preventScroll:true});}
+  else{unlockScroll();if(restoreFocus&&menuPanel.contains(document.activeElement))menuButton.focus({preventScroll:true});}
+}
+menuButton.addEventListener('click',()=>setMenu(!menuOpen));
+$('.menu-backdrop').addEventListener('click',()=>setMenu(false));
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&menuOpen&&!$$('dialog[open]').length)setMenu(false);});
+$('.header').addEventListener('focusout',event=>{if(menuOpen&&event.relatedTarget&&!event.currentTarget.contains(event.relatedTarget))setMenu(false,{restoreFocus:false});});
 $$('a[href^="#"]').forEach(link=>link.addEventListener('click',event=>{
   const target=link.getAttribute('href');if(!$(target))return;
-  event.preventDefault();if(menu.open){menu.close();}jump(target);
+  event.preventDefault();setMenu(false,{restoreFocus:false});jump(target);
 }));
-$$('[data-contact]').forEach(button=>button.addEventListener('click',()=>{if(menu.open)menu.close();showDialog(contact);}));
+$$('[data-contact]').forEach(button=>button.addEventListener('click',()=>{const fromMenu=menuOpen;setMenu(false,{restoreFocus:false});showDialog(contact);if(fromMenu)previousFocus=menuButton;}));
 $$('[data-close]').forEach(button=>button.addEventListener('click',()=>dismissDialog(button.closest('dialog'))));
 $$('dialog').forEach(dialog=>{
   dialog.addEventListener('cancel',event=>{event.preventDefault();dismissDialog(dialog);});

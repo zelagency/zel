@@ -6,7 +6,7 @@
   <meta name="description" content="ZEL builds unique digital solutions for businesses and bold thinkers. Custom websites, commerce platforms and tools that turn ambitious ideas into reality.">
   <title>ZEL — Bold Ideas, Brought to Life</title>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/style.css?v=6800e0837bba">
+  <link rel="stylesheet" href="/style.css?v=f68ca347f14a">
   <link rel="stylesheet" href="/projects.css?v=347b130371e2">
 </head>
 <body>
@@ -14,11 +14,16 @@
   <header class="header">
     <a class="logo" href="#home" aria-label="ZEL home">ZEL</a>
     <nav class="header-actions" aria-label="Main navigation">
-      <button class="sound pill" aria-label="Enable sound" aria-pressed="false" title="Sound off"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M3 15c4 0 3-10 7-10s4 18 8 18 3-10 7-10"/></svg></button>
-      <button class="talk pill dark" data-contact>LET’S TALK <span class="small-dot">•</span></button>
-      <button class="menu-button pill" aria-expanded="false" aria-controls="menu-dialog">MENU <span class="menu-dots">••</span></button>
+      <button class="sound pill" aria-label="Enable sound" aria-pressed="false" title="Sound off"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M3 14H25"/></svg></button>
+      <button class="talk pill dark" data-contact><span class="talk-arrow" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span><span class="talk-label">LET’S TALK</span><span class="talk-dot" aria-hidden="true"></span></button>
+      <button class="menu-button pill" aria-expanded="false" aria-controls="menu-panel"><span class="menu-label"><span>MENU</span><span aria-hidden="true">CLOSE</span></span><span class="menu-dots" aria-hidden="true"><i></i><i></i></span></button>
     </nav>
+    <div class="menu-panel" id="menu-panel" inert>
+      <nav class="menu-links" aria-label="Explore"><a class="menu-link" href="#home"><span class="menu-link-bg"></span><span class="menu-link-inner"><span class="menu-link-text">Home</span><span class="menu-link-clone" aria-hidden="true">Home</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></span></a><a class="menu-link" href="#about"><span class="menu-link-bg"></span><span class="menu-link-inner"><span class="menu-link-text">About</span><span class="menu-link-clone" aria-hidden="true">About</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></span></a><a class="menu-link" href="#work"><span class="menu-link-bg"></span><span class="menu-link-inner"><span class="menu-link-text">Work</span><span class="menu-link-clone" aria-hidden="true">Work</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></span></a><a class="menu-link" href="#ideas"><span class="menu-link-bg"></span><span class="menu-link-inner"><span class="menu-link-text">Approach</span><span class="menu-link-clone" aria-hidden="true">Approach</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></span></a></nav>
+      <button class="menu-talk menu-contact" data-contact><span class="menu-link-inner"><span class="menu-link-text">Let’s talk</span><span class="menu-link-clone" aria-hidden="true">Let’s talk</span></span><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><rect width="12" height="4" x="6" y="14" rx="2" class="fill"/></svg></button>
+    </div>
   </header>
+  <div class="menu-backdrop" aria-hidden="true"></div>
   <main id="main">
     <section class="hero" id="home" aria-labelledby="hero-title">
       <h1 id="hero-title">We build unique digital solutions<br class="desktop-break"> for businesses and bold thinkers,<br class="desktop-break"> turning ambitious ideas into reality</h1>
@@ -69,9 +74,8 @@
   </main>
   <div class="scroll-indicator" aria-hidden="true"><i></i></div>
   <canvas id="fluid-canvas" aria-hidden="true"></canvas>
-  <dialog id="menu-dialog" class="menu-dialog"><div class="menu-inner"><span class="menu-label">EXPLORE ZEL</span><nav aria-label="Explore"><a href="#home">Home <span>01</span></a><a href="#about">About <span>02</span></a><a href="#work">Work <span>03</span></a><a href="#ideas">Approach <span>04</span></a></nav><button class="menu-contact" data-contact>Let’s make something extraordinary. ↗</button></div></dialog>
-  <dialog id="contact-dialog" class="contact-dialog"><button class="dialog-close pill" data-close aria-label="Close contact">CLOSE ×</button><span class="menu-label">LET’S TALK</span><h2>Your next<br>big idea.</h2><p>Tell us what you have in mind.</p><form id="contact-form"><label>Your name<input name="name" autocomplete="name" required placeholder="How should we call you?"></label><label>Email address<input name="email" type="email" autocomplete="email" required placeholder="you@company.com"></label><label>Your project<textarea name="project" required placeholder="The idea, the ambition, the possibilities…" rows="3"></textarea></label><button class="pill dark" type="submit">PREPARE PROJECT BRIEF ↗</button><p class="form-status" aria-live="polite"></p></form></dialog>
+    <dialog id="contact-dialog" class="contact-dialog"><button class="dialog-close pill" data-close aria-label="Close contact">CLOSE ×</button><span class="menu-label">LET’S TALK</span><h2>Your next<br>big idea.</h2><p>Tell us what you have in mind.</p><form id="contact-form"><label>Your name<input name="name" autocomplete="name" required placeholder="How should we call you?"></label><label>Email address<input name="email" type="email" autocomplete="email" required placeholder="you@company.com"></label><label>Your project<textarea name="project" required placeholder="The idea, the ambition, the possibilities…" rows="3"></textarea></label><button class="pill dark" type="submit">PREPARE PROJECT BRIEF ↗</button><p class="form-status" aria-live="polite"></p></form></dialog>
   <dialog id="media-dialog" class="media-dialog"><button class="dialog-close pill" data-close aria-label="Close media">CLOSE ×</button><div class="media-dialog-content"></div></dialog>
-  <script type="module" src="/app.js?v=83c08905e649"></script>
+  <script type="module" src="/app.js?v=1a2fe35853db"></script>
 </body>
 </html>

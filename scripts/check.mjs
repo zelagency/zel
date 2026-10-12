@@ -70,13 +70,17 @@ for(const project of projects){
   assert.equal($(`[data-project-id="${project.id}"] .project-title a`).href,project.url,'Correct live project link');
   for(const image of project.images)assert.ok(fs.existsSync(path.join('dist',image.src)),`Missing real project image ${image.src}`);
 }
-$('.menu-button').click();assert.ok($('#menu-dialog').open);assert.equal($('.menu-button').getAttribute('aria-expanded'),'true');
+const menuIsOpen=()=>document.documentElement.hasAttribute('data-menu-open')&&!$('#menu-panel').inert;
+$('.menu-button').click();assert.ok(menuIsOpen());assert.equal($('.menu-button').getAttribute('aria-expanded'),'true');
+assert.equal(document.activeElement,$('.menu-link'),'Focus moves into the menu');
 assert.equal(document.documentElement.style.overflow,'hidden','Root scrolling locks while menu is open');
-$('.menu-close').click();assert.ok(!$('#menu-dialog').open);assert.equal(document.body.style.overflow,'');
+$('.menu-button').click();assert.ok(!menuIsOpen());assert.ok($('#menu-panel').inert,'Closed menu is inert');assert.equal(document.body.style.overflow,'');
 assert.equal(document.documentElement.style.overflow,'','Root scrolling unlocks after close');
-$('.menu-button').click();$('.menu-contact').click();assert.ok($('#contact-dialog').open);assert.equal(document.documentElement.style.overflow,'hidden','Menu-to-contact transition retains root lock');
+$('.menu-button').click();document.dispatchEvent(new window.KeyboardEvent('keydown',{key:'Escape'}));assert.ok(!menuIsOpen(),'Escape closes the menu');
+$('.menu-button').click();$('.menu-backdrop').click();assert.ok(!menuIsOpen(),'Backdrop click closes the menu');
+$('.menu-button').click();$('.menu-contact').click();assert.ok(!menuIsOpen());assert.ok($('#contact-dialog').open);assert.equal(document.documentElement.style.overflow,'hidden','Menu-to-contact transition retains root lock');
 $('#contact-dialog [data-close]').click();assert.equal(document.documentElement.style.overflow,'');
-$('.sound').click();await new Promise(r=>setTimeout(r,0));assert.equal($('.sound').getAttribute('aria-pressed'),'true');
+$('.sound').click();await new Promise(r=>setTimeout(r,0));assert.equal($('.sound').getAttribute('aria-pressed'),'true');assert.ok($('.sound').hasAttribute('data-filled'),'Sound on keeps the fluid fill pinned');
 $('.sound').click();await new Promise(r=>setTimeout(r,0));assert.equal($('.sound').getAttribute('aria-pressed'),'false');
 $('[data-project="0"]').focus();$('[data-project="0"]').click();assert.ok($('#media-dialog').open);assert.equal($('.media-dialog-content h2').textContent,'Fogstores');
 assert.equal($('.case-heading a').href,projects[0].url);
