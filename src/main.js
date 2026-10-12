@@ -6,6 +6,8 @@ import { damp } from './motion.js';
 import { initHero } from './hero.js';
 import { PointerTrail } from './pointer-trail.js';
 import { initPills, initSoundWave, fillPill, drainPill } from './pills.js';
+import { playPreloader } from './intro.js';
+import { prepareIntro, playIntro, initReveals } from './reveals.js';
 
 gsap.registerPlugin(ScrollTrigger);
 // Mobile browser bars resize the viewport while scrolling; refreshing then makes pins jump.
@@ -20,7 +22,7 @@ document.addEventListener('pointerdown',()=>{document.documentElement.dataset.in
 document.addEventListener('keydown',event=>{
   if(!event.metaKey&&!event.ctrlKey&&!event.altKey)document.documentElement.dataset.inputMode='keyboard';
 },{capture:true});
-$('#project-grid').innerHTML = projects.map((project,i)=>`<article class="project ${i===0?'project-featured':''}" data-project-id="${project.id}"><button class="project-image" data-project="${i}" aria-label="Explore ${project.title}">${projectCover(project)}<span class="project-arrow" aria-hidden="true">↗</span></button><p class="project-meta">${project.tags}</p><div class="project-title"><h3>${project.title}</h3><a href="${project.url}" target="_blank" rel="noopener" aria-label="Visit ${project.title} live website">VISIT SITE ↗</a></div><p class="project-summary">${project.description}</p></article>`).join('');
+$('#project-grid').innerHTML = projects.map((project,i)=>`<article class="project ${i===0?'project-featured':''}" data-project-id="${project.id}"><button class="project-image" data-project="${i}" aria-label="Explore ${project.title}">${projectCover(project)}<span class="project-arrow" aria-hidden="true">↗</span></button><p class="project-meta">${project.tags}</p><div class="project-title"><h3><span class="project-title-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span><span class="project-title-text">${project.title}</span></h3><a href="${project.url}" target="_blank" rel="noopener" aria-label="Visit ${project.title} live website">VISIT SITE ↗</a></div><p class="project-summary">${project.description}</p></article>`).join('');
 
 // Smooth scroll is deliberately slow enough to give the visual sequence room.
 let lenis;
@@ -133,17 +135,13 @@ $$('.ambient-video').forEach(video=>videoObserver.observe(video));
 // Animation contexts revert themselves when reduced motion is enabled.
 const mm=gsap.matchMedia();
 mm.add('(prefers-reduced-motion: no-preference)',()=>{
-  gsap.from('.hero h1',{y:30,opacity:.65,duration:1.15,ease:'power3.out'});
-  gsap.from('.hero-visual',{scale:.97,duration:1.5,ease:'power3.out'});
   gsap.to('.hero h1',{y:-70,ease:'none',scrollTrigger:{trigger:'.hero',start:'top top',end:'bottom top',scrub:1}});
-  $$('.about-title .line').forEach((line,i)=>gsap.from(line,{x:i?-90:100,rotate:i?1.2:-1.2,ease:'power2.out',scrollTrigger:{trigger:'.about',start:'top 85%',end:'top 20%',scrub:1}}));
+  const restoreReveals=initReveals();
   $$('.ribbon path').forEach(path=>{const length=path.getTotalLength();gsap.fromTo(path,{strokeDasharray:length,strokeDashoffset:length},{strokeDashoffset:0,ease:'none',scrollTrigger:{trigger:path.closest('section'),start:'top 90%',end:'bottom 70%',scrub:1.2}});});
   gsap.from('.flower-frame',{y:90,rotation:-3,ease:'none',scrollTrigger:{trigger:'.about-content',start:'top bottom',end:'bottom 30%',scrub:1}});
   gsap.from('.reel-frame',{scale:.86,ease:'power1.inOut',scrollTrigger:{trigger:'.reel',start:'top bottom',end:'top 5%',scrub:1}});
-  $$('.project-image').forEach(image=>gsap.from(image,{y:32,ease:'power2.out',scrollTrigger:{trigger:image,start:'top 95%',end:'top 55%',scrub:.6}}));
-  $$('#ideas-title .line').forEach((line,i)=>gsap.from(line,{x:i===1?-65:65,ease:'power1.out',scrollTrigger:{trigger:'#ideas',start:'top 90%',end:'top 10%',scrub:1}}));
   gsap.fromTo('.device',{rotationY:15,rotationX:12,rotationZ:-5},{rotationY:-7,rotationX:0,rotationZ:2,ease:'none',scrollTrigger:{trigger:'.ideas-content',start:'top bottom',end:'bottom 30%',scrub:1}});
-  return ()=>{};
+  return restoreReveals;
 });
 mm.add('(min-width: 813px) and (prefers-reduced-motion: no-preference)',()=>{
   ScrollTrigger.create({trigger:'.reel-pin',start:'top 5%',end:'+=100%',pin:true,anticipatePin:1});
@@ -281,6 +279,9 @@ function drawPaint(now){
 }
 
 initHero(motionQuery);
+// Preloader, then the hero intro. The page starts at the top so the intro is what is seen.
+if(!reduced){window.history.scrollRestoration='manual';window.scrollTo(0,0);prepareIntro();lenis?.stop();}
+playPreloader({reduced,onReveal:skipped=>{if(skipped)return;lenis?.start();playIntro();}});
 motionQuery.addEventListener('change',event=>{
   reduced=event.matches;
   syncLoops();

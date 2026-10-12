@@ -103,3 +103,27 @@ html[data-input-mode="pointer"] :is(button,a):focus{outline:none}
 .play-pill svg{position:relative;transition:fill .3s var(--snap)}
 @media(hover:hover){.play-pill:hover{background:var(--blue);transition:background-color .1s .3s}.play-pill:hover::before{transform:translateY(-48%)}.play-pill:hover svg{fill:white}.reel-frame:has(.play-pill:hover) .reel-cursor{opacity:0}}
 .reel-frame:focus-visible .play-pill::before{transform:translateY(-48%)}.reel-frame:focus-visible .play-pill svg{fill:white}
+/* Preloader ----------------------------------------------------------------------- */
+.preloader{position:fixed;inset:0;z-index:100;background:#000;color:#fff;overflow:hidden;animation:preloader-failsafe .01s 7s forwards}
+@keyframes preloader-failsafe{to{visibility:hidden;opacity:0}}
+.pl-mark{position:absolute;left:50%;top:50%;width:120px;height:84px;margin:-42px 0 0 -60px}
+.pl-mark i{position:absolute;display:block;background:#fff}
+.pl-mark .pl-track{left:5px;top:34px;width:110px;height:16px;background:#2b2b31}
+.pl-fill{left:5px;top:34px;width:110px;height:16px;transform-origin:0 50%;transform:scaleX(0)}
+.pl-top,.pl-bottom{opacity:0}
+.pl-diag{left:18px;top:35px;width:84px;height:14px;transform:scaleX(0)}
+.pl-count{position:absolute;left:clamp(14px,1.6vw,30px);bottom:clamp(10px,1.4vw,26px);display:flex;font-size:clamp(64px,9vw,170px);line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.pl-digit{display:block;height:1em;overflow:hidden;width:.6em}
+.pl-digit>span{display:block;transition:transform .45s var(--snap)}
+.pl-digit i{display:block;height:1em;font-style:normal;text-align:center}
+@media(prefers-reduced-motion:reduce){.preloader{display:none}}
+/* Masked line reveals: pad the clip so descenders are not cut. */
+.split-line-mask{padding-bottom:.14em;margin-bottom:-.14em}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+/* Project titles: an arrow slides in as the card is hovered. */
+.project-title h3{position:relative;display:flex;align-items:center}
+.project-title-arrow{position:absolute;left:0;top:50%;width:.8em;height:.8em;margin-top:-.4em;opacity:0;transform:translateX(-130%);transition:transform .5s var(--snap),opacity .3s}
+.project-title-arrow svg{display:block;width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.project-title-text{display:block;transition:transform .5s var(--snap)}
+@media(hover:hover){.project:has(.project-image:hover) .project-title-arrow{opacity:1;transform:none}.project:has(.project-image:hover) .project-title-text{transform:translateX(1.15em)}}
+.project:has(.project-image:focus-visible) .project-title-arrow{opacity:1;transform:none}.project:has(.project-image:focus-visible) .project-title-text{transform:translateX(1.15em)}
