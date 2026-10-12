@@ -1,13 +1,14 @@
 import gsap from 'gsap';
 
-// Page transition curtain, drawn on one canvas in the top layer.
-//   cover():  black wedges close diagonally over the shrinking, dimming page, then a dot-matrix
-//             "LOADING..." scans in. Resolves once the screen is fully covered.
-//   reveal(): the dots collapse while the Z mark (the preloader's mark) folds in, the Z lifts
-//             away and the wedges retract onto the new page. onOpen fires as the wedges start.
-// Nothing here navigates; the router swaps the page while the screen is covered.
+// Page transition, after Lusion's TransitionOverlay. Everything is drawn on one canvas in the
+// top layer with plain fills and a cut-out; the page underneath is never filtered or scaled.
+//   cover():  the page is seen through a huge window that spins and shrinks into a white bar,
+//             which then prints a dot-matrix "LOADING...". Resolves once fully covered.
+//   reveal(): the dots sweep away, the bar turns into the Z's diagonal as its strokes slide out,
+//             then the Z becomes the window: it spins and grows until the new page fills the
+//             screen. onOpen fires as the window starts to open.
+// Shapes are drawn in "units" of n px (the bar is 5×1 units), like the reference.
 
-// 5×7 dot-matrix glyphs, rows top to bottom.
 const GLYPHS={
   L:['10000','10000','10000','10000','10000','10000','11111'],
   O:['01110','10001','10001','10001','10001','10001','01110'],
@@ -18,11 +19,13 @@ const GLYPHS={
   G:['01110','10001','10000','10111','10001','10001','01111'],
 };
 const BLUE='#4b5cff';
-const ease={wipe:gsap.parseEase('expo.inOut'),out:gsap.parseEase('expo.out'),in:gsap.parseEase('power2.in'),pop:gsap.parseEase('back.out(2)')};
-// Each beat finishes before the next starts: cover, LOADING, collapse, Z, lift, reveal.
-const T={wipe:620,scan:300,pop:170,minLoading:160,collapse:300,fold:460,zHold:90,zOut:220,reveal:720};
+const expoInOut=gsap.parseEase('expo.inOut'),expoOut=gsap.parseEase('expo.out'),expoIn=gsap.parseEase('expo.in');
+// The window must respond the moment it is clicked, so its curves start faster than expo.
+const windowIn=gsap.parseEase('power2.inOut'),windowOut=gsap.parseEase('power3.inOut');
+const T={cover:850,barOut:240,scan:300,pop:170,minHold:180,dotsOut:300,zForm:500,zHold:50,reveal:1000};
+const DIAGONAL=-Math.atan2(3,4);           // the Z's diagonal: 5 units long, 4 across, 3 down
+const Z_SCALE=.5;                          // Z size relative to the bar
 const clamp01=v=>Math.max(0,Math.min(1,v));
-const lerp=(a,b,t)=>a+(b-a)*t;
 
 function layoutDots(pitch){
   const dots=[];let col=0;
@@ -35,7 +38,7 @@ function layoutDots(pitch){
   const cols=col-1,width=(cols-1)*pitch,height=6*pitch;
   dots.forEach(dot=>{
     dot.x=dot.gx*pitch-width/2;dot.y=dot.gy*pitch-height/2;dot.u=dot.gx/cols;
-    dot.jitter=Math.random()*90;dot.blue=Math.random()<.09;dot.phase=Math.random()*Math.PI*2;dot.out=Math.random()*120;
+    dot.jitter=Math.random();dot.blue=Math.random()<.09;dot.phase=Math.random()*Math.PI*2;
   });
   return dots;
 }
@@ -54,44 +57,38 @@ export function createPageTransition({isReduced}){
   const isOpen=()=>supportsPopover?host.matches(':popover-open'):host.classList.contains('is-open');
   function show(){if(supportsPopover){if(isOpen())host.hidePopover();host.showPopover();}else host.classList.add('is-open');}
   function hide(){if(supportsPopover){if(isOpen())host.hidePopover();}else host.classList.remove('is-open');}
-  function size(){
-    const w=innerWidth,h=innerHeight,dpr=Math.min(devicePixelRatio||1,2);
-    canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
-    const pitch=gsap.utils.clamp(4.5,8,w*.0048);
-    return {w,h,pitch,radius:pitch*.36,dots:layoutDots(pitch),mark:gsap.utils.clamp(.62,1,w/1400)};
+  function measure(){
+    const w=innerWidth,h=innerHeight,dpr=Math.min(devicePixelRatio||1,1.5);
+    canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);
+    const n=Math.max(18,Math.min(42,w/30)),diag=Math.hypot(w,h);
+    return {w,h,dpr,n,c:diag/n,pitch:n*.16,dots:layoutDots(n*.16)};
   }
-  // Wedges from the top-right and bottom-left corners: c=0 closed, c≥1.03 clear.
-  function wedges(w,h,c){
-    if(c>=1.03)return;
-    const o=.02;ctx.beginPath();
-    ctx.moveTo((c-o)*w,0);ctx.lineTo(w+1,0);ctx.lineTo(w+1,(1-c+o)*h);ctx.closePath();
-    ctx.moveTo(-1,(c-o)*h);ctx.lineTo(-1,h+1);ctx.lineTo((1-c+o)*w,h+1);ctx.closePath();
-    ctx.fillStyle='#000';ctx.fill();
+  function begin(g){ctx.setTransform(g.dpr,0,0,g.dpr,0,0);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;ctx.fillStyle='#000';ctx.fillRect(0,0,g.w,g.h);}
+  // Paint shape() as a window onto the page, then a white fill over it at `white` opacity.
+  function windowed(shape,white){
+    ctx.globalCompositeOperation='destination-out';ctx.beginPath();shape();ctx.fill();
+    ctx.globalCompositeOperation='source-over';
+    if(white>0){ctx.globalAlpha=white;ctx.fillStyle='#fff';ctx.beginPath();shape();ctx.fill();ctx.globalAlpha=1;}
   }
-  // The preloader's Z: one bar splits into top and bottom strokes joined by a diagonal.
-  function drawZ(cx,cy,scale,fold,alpha){
-    if(alpha<=0||fold<=0)return;
-    ctx.save();ctx.globalAlpha=alpha;ctx.translate(cx,cy);ctx.scale(scale,scale);ctx.translate(-60,-42);ctx.fillStyle='#fff';
-    const grow=ease.out(clamp01(fold/.3)),f=ease.wipe(clamp01((fold-.15)/.6));
-    const bar=top=>{const width=lerp(110*grow,64,f);ctx.fillRect(lerp(60-width/2,28,f),lerp(34,top,f),width,lerp(16,14,f));};
-    bar(4);bar(66);
-    const d=ease.out(clamp01((fold-.5)/.5));
-    if(d>0){ctx.save();ctx.translate(60,42);ctx.rotate(-36.87*Math.PI/180);ctx.fillRect(-42*d,-7,84*d,14);ctx.restore();}
-    ctx.restore();
+  const bar=()=>ctx.rect(-2.5,-.5,5,1);
+  // Z in units: top and bottom strokes 4×1, joined by the bar rotated onto the diagonal.
+  // `form` 0→1: the bar turns onto the diagonal, then the top and bottom strokes slide out.
+  function zShape(form){
+    const turn=expoInOut(clamp01(form/.55)),slide=expoOut(clamp01((form-.4)/.6));
+    return ()=>{
+      ctx.save();ctx.rotate(DIAGONAL*turn);ctx.rect(-2.5,-.5,5,1);ctx.restore();
+      if(slide>0){const width=4*slide;ctx.rect(2-width,-2.5,width,1);ctx.rect(-2,1.5,width,1);}
+    };
   }
-  // LOADING scans in left to right; on collapse the dots shrink away in the same direction.
-  function drawLoading(geo,now,tl,collapseT){
-    const {w,h,radius,dots}=geo,cx=w/2,cy=h/2;
-    for(const dot of dots){
-      const appear=clamp01((tl-dot.u*T.scan-dot.jitter*.5)/T.pop);if(appear<=0)continue;
-      // Sweeps left to right and is complete (≤ .85×collapse) before the Z starts.
-      const gone=collapseT>0?clamp01((collapseT-dot.u*T.collapse*.45-dot.out*.25)/(T.collapse*.3)):0;
-      if(gone>=1)continue;
+  function drawDots(g,now,appearT,goneT){
+    const cx=g.w/2,cy=g.h/2,radius=g.pitch*.36;
+    for(const dot of g.dots){
+      const appear=clamp01((appearT-dot.u*T.scan-dot.jitter*40)/T.pop);if(appear<=0)continue;
+      const gone=goneT>0?clamp01((goneT-dot.u*T.dotsOut*.55-dot.jitter*30)/(T.dotsOut*.35)):0;if(gone>=1)continue;
       const alpha=dot.ellipsis>=0?.22+.78*(.5+.5*Math.sin(now/150-dot.ellipsis*1.4)):1;
-      const r=radius*ease.pop(appear)*(1-ease.in(gone));
       const twinkle=dot.blue&&.5+.5*Math.sin(now/110+dot.phase)>.6;
       ctx.globalAlpha=alpha;ctx.fillStyle=twinkle?BLUE:'#fff';
-      ctx.beginPath();ctx.arc(cx+dot.x,cy+dot.y-gone*radius*2,Math.max(0,r),0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.arc(cx+dot.x,cy+dot.y,radius*expoOut(appear)*(1-expoIn(gone)),0,Math.PI*2);ctx.fill();
     }
     ctx.globalAlpha=1;
   }
@@ -103,7 +100,7 @@ export function createPageTransition({isReduced}){
   }
   function finish(){
     const pending=state;state=null;if(frameId)cancelAnimationFrame(frameId);frameId=null;
-    ctx?.clearRect?.(0,0,canvas.width,canvas.height);hide();document.documentElement.classList.remove('is-leaving');
+    ctx?.setTransform?.(1,0,0,1,0,0);ctx?.clearRect?.(0,0,canvas.width,canvas.height);hide();
     pending?.resolveCover?.(true);pending?.onOpen?.();pending?.resolveReveal?.();
   }
 
@@ -114,41 +111,57 @@ export function createPageTransition({isReduced}){
     cover(){
       if(state)return Promise.resolve(false);
       if(isReduced()||!ctx)return Promise.resolve(true);
-      const geo=size();show();document.documentElement.classList.add('is-leaving');
+      const g=measure();show();
       return new Promise(resolve=>{
-        const start=performance.now(),loadingAt=start+T.wipe;
-        state={geo,start,loadingAt,resolveCover:resolve,
+        const start=performance.now(),textAt=start+T.cover;
+        state={g,textAt,resolveCover:resolve,
           draw(now){
-            const {w,h}=geo,t=now-start;ctx.clearRect(0,0,w,h);
-            const p=ease.wipe(clamp01(t/T.wipe));
-            if(p<1){ctx.fillStyle=`rgba(8,9,20,${.4*p})`;ctx.fillRect(0,0,w,h);wedges(w,h,1.03*(1-p));}
-            else{ctx.fillStyle='#000';ctx.fillRect(0,0,w,h);}
-            if(now>loadingAt)drawLoading(geo,now,now-loadingAt,0);
-            if(this.resolveCover&&t>=T.wipe){const done=this.resolveCover;this.resolveCover=null;done(true);}
+            const t=now-start;begin(g);
+            ctx.save();ctx.translate(g.w/2,g.h/2);
+            if(t<T.cover){
+              // f: 1 = window covers the whole screen, 0 = the white loading bar.
+              // At f=1 a unit equals the diagonal, so the window just covers the screen and starts closing at once.
+              const f=1-windowIn(t/T.cover),scale=(1+f*g.c)*g.n;
+              ctx.rotate(-f);ctx.scale(scale,scale);
+              windowed(bar,expoIn(1-f));
+            }else{
+              // The bar thins away as LOADING prints out of it.
+              const out=expoIn(clamp01((t-T.cover)/T.barOut));
+              if(out<1){ctx.scale(g.n,g.n*(1-out));ctx.fillStyle='#fff';ctx.fillRect(-2.5,-.5,5,1);}
+            }
+            ctx.restore();
+            if(now>textAt+T.barOut*.4)drawDots(g,now,now-textAt-T.barOut*.4,0);
+            if(this.resolveCover&&t>=T.cover){const done=this.resolveCover;this.resolveCover=null;done(true);}
           }};
         loop();
       });
     },
     reveal({onOpen}={}){
       if(!state){onOpen?.();return Promise.resolve();}
-      const s=state,geo=s.geo;
+      const s=state,g=s.g;
       return new Promise(resolve=>{
         // Hold LOADING for a beat if the page arrived instantly, so the sequence reads.
-        const start=Math.max(performance.now(),s.loadingAt+T.scan+T.pop+T.minLoading);
-        const tz=T.collapse*.9,tOut=tz+T.fold+T.zHold,tOpen=tOut+T.zOut,tEnd=tOpen+T.reveal;
+        const start=Math.max(performance.now(),s.textAt+T.barOut*.4+T.scan+T.pop+T.minHold);
+        const zAt=T.dotsOut*.7,openAt=zAt+T.zForm+T.zHold,end=openAt+T.reveal;
         s.resolveReveal=resolve;s.onOpen=onOpen;
         s.draw=function(now){
-          const {w,h}=geo;ctx.clearRect(0,0,w,h);
-          const t=now-start;
-          if(t<tOpen){ctx.fillStyle='#000';ctx.fillRect(0,0,w,h);}
-          else{
-            if(this.onOpen){const open=this.onOpen;this.onOpen=null;document.documentElement.classList.remove('is-leaving');open();}
-            wedges(w,h,1.03*ease.wipe(clamp01((t-tOpen)/T.reveal)));
+          const t=now-start;begin(g);
+          drawDots(g,now,now-s.textAt-T.barOut*.4,Math.max(0,t));
+          ctx.save();ctx.translate(g.w/2,g.h/2);
+          if(t>=zAt&&t<openAt){
+            // The Z forms: a bar scales in, turns onto the diagonal, strokes slide out.
+            const form=clamp01((t-zAt)/T.zForm),grow=expoOut(clamp01(form/.35))*Z_SCALE*g.n;
+            ctx.scale(grow,grow);ctx.fillStyle='#fff';ctx.beginPath();zShape(form)();ctx.fill();
+          }else if(t>=openAt){
+            if(this.onOpen){const open=this.onOpen;this.onOpen=null;open();}
+            // f: 0 = the Z mark, 1 = the Z window covers the screen (its strokes are 1 unit thick,
+            // so once a unit exceeds the diagonal the centre stroke alone covers everything).
+            const f=windowOut(clamp01((t-openAt)/T.reveal)),scale=(Z_SCALE+f*g.c*1.12)*g.n;
+            ctx.rotate(f);ctx.scale(scale,scale);
+            windowed(zShape(1),1-expoOut(f));
           }
-          drawLoading(geo,now,now-s.loadingAt,Math.max(0,t));
-          const out=clamp01((t-tOut)/T.zOut);
-          drawZ(w/2,h/2,geo.mark*(1-.18*ease.in(out)),(t-tz)/T.fold,1-ease.in(out));
-          if(t>=tEnd){const done=this.resolveReveal;this.resolveReveal=null;state=null;ctx.clearRect(0,0,w,h);hide();done?.();}
+          ctx.restore();
+          if(t>=end){const done=this.resolveReveal;this.resolveReveal=null;state=null;ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);hide();done?.();}
         };
         if(!frameId)loop();
       });
