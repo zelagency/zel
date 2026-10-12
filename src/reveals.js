@@ -9,7 +9,7 @@ const $$=(s,root=document)=>[...root.querySelectorAll(s)];
 // Lines rise out of masks. autoSplit re-splits on resize/font load and replays the
 // returned tween in place, so wrapping always matches the current layout.
 function riseLines(element,{trigger=element,start='top 88%',duration=1.25,stagger=.09,delay=0,scroll=true}={}){
-  return SplitText.create(element,{type:'lines',mask:'lines',linesClass:'split-line',autoSplit:true,
+  return SplitText.create(element,{type:'lines',mask:'lines',linesClass:'splitline',autoSplit:true,
     onSplit:self=>gsap.from(self.lines,{yPercent:115,duration,stagger,delay,ease:'expo.out',
       scrollTrigger:scroll?{trigger,start,once:true}:undefined})});
 }

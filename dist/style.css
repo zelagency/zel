@@ -43,7 +43,7 @@ html[data-input-mode="pointer"] :is(button,a):focus{outline:none}
 /* Tablet portrait and small landscape: the desktop headline would collide with the header. */
 @media(min-width:813px) and (max-width:1100px){
   .hero h1{left:var(--margin);top:118px;width:min(82vw,800px);font-size:4.4vw;line-height:1.12}
-  .hero-visual{top:calc(150px + 14.5vw)}
+  .hero-visual{top:calc(150px + 10vw)}
   .about-copy,.ideas-copy{font-size:max(2.2vw,19px)}
   .work-heading p{width:32vw;font-size:12px}
   .project-meta{font-size:11px}
@@ -118,7 +118,7 @@ html[data-input-mode="pointer"] :is(button,a):focus{outline:none}
 .pl-digit i{display:block;height:1em;font-style:normal;text-align:center}
 @media(prefers-reduced-motion:reduce){.preloader{display:none}}
 /* Masked line reveals: pad the clip so descenders are not cut. */
-.split-line-mask{padding-bottom:.14em;margin-bottom:-.14em}
+.splitline-mask{padding-bottom:.14em;margin-bottom:-.14em}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 /* Project titles: an arrow slides in as the card is hovered. */
 .project-title h3{position:relative;display:flex;align-items:center}
@@ -127,3 +127,5 @@ html[data-input-mode="pointer"] :is(button,a):focus{outline:none}
 .project-title-text{display:block;transition:transform .5s var(--snap)}
 @media(hover:hover){.project:has(.project-image:hover) .project-title-arrow{opacity:1;transform:none}.project:has(.project-image:hover) .project-title-text{transform:translateX(1.15em)}}
 .project:has(.project-image:focus-visible) .project-title-arrow{opacity:1;transform:none}.project:has(.project-image:focus-visible) .project-title-text{transform:translateX(1.15em)}
+/* Two-line hero headline on phones as well: keep the break and size each line to fit. */
+@media(max-width:812px){.hero h1 .desktop-break{display:inline}.hero h1{font-size:5.5vw}}
