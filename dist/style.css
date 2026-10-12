@@ -21,3 +21,49 @@ html[data-input-mode="pointer"] :is(button,a):focus{outline:none}
 .hero-visual .hero-hint{opacity:.85;color:inherit;right:32px;bottom:30px;font-size:11px;letter-spacing:.02em}
 .hero-visual[data-inverted="true"]{background:#dce0ff;color:#242bf4}
 @media(max-width:812px){.kinetic-word{height:52%;top:20%;width:94%;left:3%}.hero-caption{left:20px;bottom:22px;font-size:19px}.hero-visual .hero-hint{display:block;left:20px;right:auto;bottom:48px;font-size:11px;max-width:80%;text-align:left}}
+/* Phone & tablet ------------------------------------------------------------ */
+.hint-touch{display:none}
+/* Once content scrolls beneath it, the fixed header needs its own surface on smaller screens. */
+@media(max-width:1180px),(hover:none){
+  .header{transition:padding .35s var(--ease),background-color .35s var(--ease),box-shadow .35s var(--ease)}
+  .header[data-scrolled]{padding-top:14px;padding-bottom:14px;background:color-mix(in oklch,var(--paper) 84%,transparent);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4);box-shadow:0 1px 0 #0000000d}
+}
+/* Touch: no sticky hover states after a tap, touch-appropriate hint, comfortable targets. */
+@media(hover:none){
+  .hint-pointer{display:none}.hint-touch{display:inline}
+  .pill:hover{background:var(--muted);color:inherit}
+  .pill.dark:hover{background:var(--nav);color:white}
+  .pill.white:hover{background:white;color:var(--ink)}
+  .sound[aria-pressed=true]:hover{background:var(--blue);color:white}
+  .pill:hover .arrow{transform:none}
+  .menu-inner nav>a:hover{padding-left:0;color:inherit}
+  .project-arrow{transform:none}
+  .reel-frame:hover .play-pill{transform:none}
+  .scroll-indicator{display:none}
+  .logo{padding:10px 0;margin:-10px 0}
+  .end-note a{padding:14px 0;margin:-14px 0}
+  .project-title a{min-height:44px}
+}
+/* Tablet portrait and small landscape: the desktop headline would collide with the header. */
+@media(min-width:813px) and (max-width:1100px){
+  .hero h1{left:var(--margin);top:118px;width:min(82vw,800px);font-size:4.4vw;line-height:1.12}
+  .hero-visual{top:calc(150px + 14.5vw)}
+  .about-copy,.ideas-copy{font-size:max(2.2vw,19px)}
+  .work-heading p{width:32vw;font-size:12px}
+  .project-meta{font-size:11px}
+  .project-summary{font-size:17px}
+  .menu-inner{padding-top:140px}
+}
+@media(min-width:813px) and (max-width:1100px) and (orientation:portrait){
+  .kinetic-word{height:58%;top:15%}
+  .about-content{grid-template-columns:1fr;gap:50px}
+  .about-copy{order:-1;max-width:640px;font-size:24px}
+  .flower-frame{width:75%;margin-top:0}
+  .ideas-content{grid-template-columns:1fr;gap:60px}
+  .ideas-copy{font-size:24px;max-width:640px}
+  .device-scene{width:80%;justify-self:center}
+}
+@media(max-width:812px){
+  .scroll-cue span:nth-child(2),.scroll-cue span:nth-last-child(2){display:none}
+  .header[data-scrolled]{padding-left:20px;padding-right:20px}
+}

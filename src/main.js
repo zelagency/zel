@@ -7,6 +7,8 @@ import { initHero } from './hero.js';
 import { PointerTrail } from './pointer-trail.js';
 
 gsap.registerPlugin(ScrollTrigger);
+// Mobile browser bars resize the viewport while scrolling; refreshing then makes pins jump.
+ScrollTrigger.config({ignoreMobileResize:true});
 const $ = (s, root = document) => root.querySelector(s);
 const $$ = (s, root = document) => [...root.querySelectorAll(s)];
 const motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
@@ -201,7 +203,8 @@ const loopObserver=new IntersectionObserver(entries=>{entries.forEach(({target,i
 loopElements.forEach(element=>loopObserver.observe(element));syncLoops();
 document.addEventListener('visibilitychange',()=>{syncLoops();$$('.ambient-video').forEach(video=>{if(document.hidden)video.pause();else if(!reduced){const rect=video.getBoundingClientRect();if(rect.bottom>0&&rect.top<innerHeight&&video.src)video.play().catch(()=>{});}});});
 const progress=$('.scroll-indicator i');
-function updateProgress(){const total=document.documentElement.scrollHeight-innerHeight;progress.style.transform=`translateY(${Math.max(0,(innerHeight*.2-35)*scrollY/Math.max(1,total))}px)`;}
+const header=$('.header');
+function updateProgress(){header.toggleAttribute('data-scrolled',scrollY>40);const total=document.documentElement.scrollHeight-innerHeight;progress.style.transform=`translateY(${Math.max(0,(innerHeight*.2-35)*scrollY/Math.max(1,total))}px)`;}
 window.addEventListener('scroll',updateProgress,{passive:true});
 
 // Capture every coalesced input sample, plus the browser's prediction for the next one;
