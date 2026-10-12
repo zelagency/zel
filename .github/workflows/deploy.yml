@@ -1,9 +1,24 @@
-﻿name: Deploy to Vercel
+name: Deploy to Vercel
 
+# Vercel's Git integration is disconnected: on the Hobby plan it only deploys commits from the
+# account owner. This workflow deploys every push to main with the owner's token, so any
+# collaborator's commit goes live.
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+# One production deploy at a time; a newer push waits rather than racing the current one.
+concurrency:
+  group: vercel-production
+  cancel-in-progress: false
+
+env:
+  # Which Vercel team and project to deploy (identifiers, not credentials). Repository secrets
+  # of the same name take precedence when they are set.
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID || 'team_BowZtTjBf5W1vvJNwTL3gMyT' }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID || 'prj_LWDfOz0ygne1sGWZ3zRRn7ToSvCC' }}
 
 jobs:
   deploy:
@@ -11,6 +26,20 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      # Same Node.js major version as the Vercel project.
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      # A commit that breaks the site never reaches production.
+      - name: Check the site
+        run: |
+          npm ci
+          npm run build
+          npm run check
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
