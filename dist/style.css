@@ -122,10 +122,10 @@ html[data-menu-open] .menu-talk{transition-delay:.06s}
 .menu-talk:is(:hover,:focus-visible){color:var(--blue)}
 @media(max-width:812px){.menu-panel{width:calc(100vw - 2 * var(--margin))}.menu-link-text,.menu-link-clone,.menu-talk{font-size:22px}}
 @media(prefers-reduced-motion:reduce){.menu-links,.menu-talk{transform:none!important}}
-/* Reel play pill: white at rest; on hover a blue fill rises from below with a curved,
+/* Reel play pill: white at rest; hovering the pill itself makes a blue fill rises from below with a curved,
    liquid leading edge (a large disc), and drains back down on leave. */
 .play-pill{position:relative;overflow:hidden;isolation:isolate;transition:background-color .1s}
 .play-pill::before{content:"";position:absolute;left:-40%;top:100%;width:180%;aspect-ratio:1;border-radius:50%;background:var(--blue);z-index:-1;transition:transform .55s var(--snap)}
 .play-pill svg{position:relative;transition:fill .3s var(--snap)}
-@media(hover:hover){.reel-frame:hover .play-pill{background:var(--blue);transition:background-color .1s .3s}.reel-frame:hover .play-pill::before{transform:translateY(-48%)}.reel-frame:hover .play-pill svg{fill:white}}
+@media(hover:hover){.play-pill:hover{background:var(--blue);transition:background-color .1s .3s}.play-pill:hover::before{transform:translateY(-48%)}.play-pill:hover svg{fill:white}.reel-frame:has(.play-pill:hover) .reel-cursor{opacity:0}}
 .reel-frame:focus-visible .play-pill::before{transform:translateY(-48%)}.reel-frame:focus-visible .play-pill svg{fill:white}
