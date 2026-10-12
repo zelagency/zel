@@ -8,6 +8,7 @@ import { PointerTrail } from './pointer-trail.js';
 import { initPills, initSoundWave, fillPill, drainPill } from './pills.js';
 import { playPreloader } from './intro.js';
 import { prepareIntro, playIntro, initReveals } from './reveals.js';
+import { createPageTransition } from './transition.js';
 
 gsap.registerPlugin(ScrollTrigger);
 // Mobile browser bars resize the viewport while scrolling; refreshing then makes pins jump.
@@ -86,9 +87,14 @@ function closeMenu(){dismissDialog(menu);$('.menu-button').setAttribute('aria-ex
 $('.menu-button').addEventListener('click',()=>{showDialog(menu);$('.menu-button').setAttribute('aria-expanded','true');});
 $('.menu-close').addEventListener('click',closeMenu);
 menu.addEventListener('close',()=>{$('.menu-button').setAttribute('aria-expanded','false');unlockScroll();});
+const pageTransition=createPageTransition({isReduced:()=>reduced});
+// Menu navigation behaves like a page change: the jump happens under the transition.
+const jumpNow=target=>lenis?lenis.scrollTo(target,{offset:target==='#home'?0:-80,immediate:true,force:true}):$(target)?.scrollIntoView({behavior:'instant'});
 $$('a[href^="#"]').forEach(link=>link.addEventListener('click',event=>{
   const target=link.getAttribute('href');if(!$(target))return;
-  event.preventDefault();if(menu.open){menu.close();}jump(target);
+  event.preventDefault();
+  if(menu.open&&menu.contains(link))pageTransition.run(()=>{menu.close();jumpNow(target);});
+  else{if(menu.open)menu.close();jump(target);}
 }));
 $$('[data-contact]').forEach(button=>button.addEventListener('click',()=>{if(menu.open)menu.close();showDialog(contact);}));
 $$('[data-close]').forEach(button=>button.addEventListener('click',()=>dismissDialog(button.closest('dialog'))));
@@ -113,14 +119,14 @@ function renderProject(index){
   $('[data-back-projects]',media).addEventListener('click',renderGallery);
   media.scrollTop=0;
 }
-function openProject(index){renderProject(index);showDialog(media);}
+function openProject(index){pageTransition.run(()=>{renderProject(index);showDialog(media);pageTransition.raise();});}
 $$('[data-project]').forEach(button=>button.addEventListener('click',()=>openProject(Number(button.dataset.project))));
 function renderGallery(){
   $('.media-dialog-content').innerHTML='<h2>Selected projects</h2><div class="gallery-grid">'+projects.map((project,i)=>`<button data-gallery-project="${i}" aria-label="Explore ${project.title}">${projectCover(project)}<span>${project.title} ↗</span></button>`).join('')+'</div>';
   $$('[data-gallery-project]',media).forEach(button=>button.addEventListener('click',()=>renderProject(Number(button.dataset.galleryProject))));
   media.scrollTop=0;
 }
-$('#all-projects').addEventListener('click',()=>{renderGallery();showDialog(media);});
+$('#all-projects').addEventListener('click',()=>pageTransition.run(()=>{renderGallery();showDialog(media);pageTransition.raise();}));
 $$('[data-reel]').forEach(button=>button.addEventListener('click',()=>{
   $('.media-dialog-content').innerHTML='<video src="/assets/reel.mp4" controls playsinline loop aria-label="Lusion creative reference reel"></video><p class="media-credit">Creative reference reel by <a href="https://lusion.co/" target="_blank" rel="noopener">Lusion</a> · ZEL visual study</p>';
   showDialog(media);audio.music.pause();const video=$('video',media);video.muted=!audio.enabled;video.play().catch(()=>{});

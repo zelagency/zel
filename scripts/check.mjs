@@ -54,13 +54,16 @@ window.matchMedia=globalThis.matchMedia;
 window.scrollTo=()=>{};
 window.HTMLMediaElement.prototype.play=async()=>{};
 window.HTMLMediaElement.prototype.pause=()=>{};
-window.HTMLCanvasElement.prototype.getContext=function(type){if(type!=='2d')return null;return{setTransform(){},clearRect(){}};};
+window.HTMLCanvasElement.prototype.getContext=function(type){if(type!=='2d')return null;return new Proxy({},{get:(target,key)=>key in target?target[key]:()=>{},set:(target,key,value)=>{target[key]=value;return true;}});};
 window.HTMLDialogElement.prototype.showModal=function(){this.open=true;};
 window.HTMLDialogElement.prototype.close=function(){this.open=false;this.dispatchEvent(new window.Event('close'));};
 window.Element.prototype.scrollIntoView=function(){};
 window.SVGElement.prototype.getTotalLength=()=>2000;
 try{await import('../dist/app.js');}catch(error){console.error(error.stack.split('\n').map(line=>line.slice(0,400)).join('\n'));process.exit(1);}
 const $=s=>document.querySelector(s);
+// With motion on, project views open once the page transition has covered the screen.
+const until=async(test,ms=5000)=>{const end=Date.now()+ms;while(!test()){if(Date.now()>end)throw new Error('Timed out waiting for transition');await new Promise(r=>setTimeout(r,20));}};
+const idle=()=>until(()=>!document.querySelector('.page-transition.is-open,.page-transition:popover-open'));
 assert.equal(document.querySelectorAll('#hero-visual [data-letter]').length,3,'Three vector letters in hero');
 $('#hero-visual').click();assert.equal($('#hero-visual').getAttribute('aria-pressed'),'true');assert.equal($('#hero-visual').dataset.inverted,'true');
 $('#hero-visual').click();assert.equal($('#hero-visual').getAttribute('aria-pressed'),'false');assert.equal($('#hero-visual').dataset.inverted,'false');
@@ -78,11 +81,11 @@ $('.menu-button').click();$('.menu-contact').click();assert.ok($('#contact-dialo
 $('#contact-dialog [data-close]').click();assert.equal(document.documentElement.style.overflow,'');
 $('.sound').click();await new Promise(r=>setTimeout(r,0));assert.equal($('.sound').getAttribute('aria-pressed'),'true');assert.ok($('.sound').hasAttribute('data-filled'),'Sound on keeps the fluid fill pinned');
 $('.sound').click();await new Promise(r=>setTimeout(r,0));assert.equal($('.sound').getAttribute('aria-pressed'),'false');
-$('[data-project="0"]').focus();$('[data-project="0"]').click();assert.ok($('#media-dialog').open);assert.equal($('.media-dialog-content h2').textContent,'Fogstores');
+$('[data-project="0"]').focus();$('[data-project="0"]').click();await until(()=>$('#media-dialog').open);await idle();assert.ok($('#media-dialog').open);assert.equal($('.media-dialog-content h2').textContent,'Fogstores');
 assert.equal($('.case-heading a').href,projects[0].url);
 $('#media-dialog [data-close]').click();assert.ok(!$('#media-dialog').open);
 assert.equal(document.activeElement,$('[data-project="0"]'),'Return focus to project opener');
-$('#all-projects').click();assert.equal(document.querySelectorAll('[data-gallery-project]').length,3);
+$('#all-projects').click();await until(()=>$('#media-dialog').open);await idle();assert.equal(document.querySelectorAll('[data-gallery-project]').length,3);
 $('[data-gallery-project="1"]').click();assert.equal($('.media-dialog-content h2').textContent,'Infinity Kitchens');
 assert.equal(document.querySelectorAll('.case-screens img').length,2);
 $('[data-back-projects]').click();assert.equal(document.querySelectorAll('[data-gallery-project]').length,3);
