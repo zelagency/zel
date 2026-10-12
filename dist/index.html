@@ -6,26 +6,26 @@
   <meta name="description" content="ZEL builds unique digital solutions for businesses and bold thinkers. Custom websites, commerce platforms and tools that turn ambitious ideas into reality.">
   <title>ZEL — Bold Ideas, Brought to Life</title>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/style.css?v=d63e3b4cc909">
+  <link rel="stylesheet" href="/style.css?v=ab739fdf91ae">
   <link rel="stylesheet" href="/projects.css?v=347b130371e2">
 </head>
-<body>
+<body data-page="home">
   <div class="preloader" aria-hidden="true">
     <div class="pl-mark"><i class="pl-track"></i><i class="pl-fill"></i><i class="pl-top"></i><i class="pl-diag"></i><i class="pl-bottom"></i></div>
     <div class="pl-count"><span class="pl-digit"><span><i>0</i><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i><i>8</i><i>9</i></span></span><span class="pl-digit"><span><i>0</i><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i><i>8</i><i>9</i></span></span><span class="pl-digit"><span><i>0</i><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i><i>8</i><i>9</i></span></span></div>
   </div>
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="header">
-    <a class="logo" href="#home" aria-label="ZEL home">ZEL</a>
+    <a class="logo" href="/" aria-label="ZEL home">ZEL</a>
     <nav class="header-actions" aria-label="Main navigation">
       <button class="sound pill" aria-label="Enable sound" aria-pressed="false" title="Sound off"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M3 14H25"/></svg></button>
       <button class="talk pill dark" data-contact><span class="talk-arrow" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span><span class="talk-label">LET’S TALK</span><span class="talk-dot" aria-hidden="true"></span></button>
       <button class="menu-button pill" aria-expanded="false" aria-controls="menu-dialog"><span class="menu-button-label"><span>MENU</span><span aria-hidden="true">CLOSE</span></span><span class="menu-dots" aria-hidden="true"><i></i><i></i></span></button>
     </nav>
   </header>
-  <main id="main">
+  <main id="main" data-page-root>
     <section class="hero" id="home" aria-labelledby="hero-title">
-      <h1 id="hero-title">We build unique digital solutions<br class="desktop-break"> turning ambitious ideas into reality</h1>
+      <h1 id="hero-title" data-intro-lines>We build unique digital solutions<br class="desktop-break"> turning ambitious ideas into reality</h1>
       <button class="hero-visual" id="hero-visual" aria-label="Interactive ZEL wordmark. Move your pointer to stretch the letters; click to switch colours." aria-pressed="false">
         <svg class="kinetic-word" viewBox="0 0 1100 520" preserveAspectRatio="none" aria-hidden="true">
           <g data-letter="Z" transform="translate(64 60)"><path d="M0 0H300V64L87 336H300V400H0V336L213 64H0Z"/></g>
@@ -39,9 +39,9 @@
     </section>
     <section class="about section" id="about" aria-labelledby="about-title">
       <svg class="ribbon ribbon-blue" viewBox="0 0 1900 1500" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="blue-gradient"><stop stop-color="#302bfa"/><stop offset="1" stop-color="#597fff"/></linearGradient></defs><path d="M-120 150 C160 210 350 290 520 600 C700 900 560 1230 290 1190 C-50 1130 -20 800 290 740 C640 650 1070 760 1240 980 C1430 1270 1490 950 1690 1060 C1790 1120 1780 1260 1790 1320" stroke="url(#blue-gradient)"/></svg>
-      <h2 class="about-title" id="about-title"><span class="line first">Bold Ideas,</span><span class="line">Brought to Life</span></h2>
+      <h2 class="about-title" id="about-title" data-reveal-heading><span class="line first">Bold Ideas,</span><span class="line">Brought to Life</span></h2>
       <div class="about-content"><div class="flower-frame media-frame"><video class="ambient-video" muted loop playsinline preload="none" poster="/assets/flowers.jpg" data-src="/assets/flowers.mp4" aria-label="Abstract flowers in motion"></video><div class="flower-tint"></div></div>
-        <div class="about-copy"><p>Every business has its own challenges. Every new idea has its own possibilities. We design and build digital solutions around both—from distinctive storefronts to ordering platforms and tools that make everyday operations simpler.</p><a class="approach pill white" href="#ideas"><span class="dot"></span><span>OUR APPROACH</span><span class="arrow">↗</span></a></div>
+        <div class="about-copy"><p data-reveal-lines>Every business has its own challenges. Every new idea has its own possibilities. We design and build digital solutions around both—from distinctive storefronts to ordering platforms and tools that make everyday operations simpler.</p><a class="approach pill white" href="/about/"><span class="dot"></span><span>OUR APPROACH</span><span class="arrow">↗</span></a></div>
       </div>
     </section>
     <section class="reel section" id="reel" aria-label="Creative reel">
@@ -57,25 +57,34 @@
       </div>
     </section>
     <section class="work section" id="work" aria-labelledby="work-title">
-      <div class="work-heading"><h2 id="work-title">Featured Work</h2><p>SELECTED PROJECTS BY ZEL.<br>FASHION, FOOD, AND DIGITAL EXPERIENCES<br>BUILT FROM IDEA TO LAUNCH.</p></div>
+      <div class="work-heading"><h2 id="work-title" data-reveal-heading>Featured Work</h2><p data-reveal-lines>SELECTED PROJECTS BY ZEL.<br>FASHION, FOOD, AND DIGITAL EXPERIENCES<br>BUILT FROM IDEA TO LAUNCH.</p></div>
       <div class="project-grid" id="project-grid"></div>
-      <button class="pill white all-projects" id="all-projects"><span class="dot"></span>SEE ALL PROJECTS <span class="arrow">↗</span></button>
+      <a class="pill white all-projects" id="all-projects" href="/projects/"><span class="dot"></span>SEE ALL PROJECTS <span class="arrow">↗</span></a>
     </section>
     <section class="ideas section" id="ideas" aria-labelledby="ideas-title">
       <svg class="ribbon ribbon-aqua" viewBox="0 0 1900 1500" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="aqua-gradient"><stop stop-color="#47dfe9"/><stop offset="1" stop-color="#8bfff6"/></linearGradient></defs><path d="M430 -180 C210 360 500 700 960 690 C1430 680 1260 310 1310 60 C1390 -250 1700 -100 1620 270 C1510 690 1250 760 1260 890" stroke="url(#aqua-gradient)"/></svg>
-      <h2 id="ideas-title"><span class="line">Where Creative Ideas</span><span class="line">Become Immersive</span><span class="line">Experiences</span></h2>
+      <h2 id="ideas-title" data-reveal-heading><span class="line">Where Creative Ideas</span><span class="line">Become Immersive</span><span class="line">Experiences</span></h2>
       <div class="ideas-content">
         <div class="device-scene" aria-hidden="true"><div class="device"><div class="device-toolbar"><i></i><i></i><i></i><span>fogstores.vercel.app</span></div><div class="device-screen"><img src="/assets/projects/fogstores-hero.webp" alt="" loading="lazy"><span>Built to<br>stand out.</span><div class="device-orb"></div></div></div><div class="device-base"></div></div>
-        <div class="ideas-copy"><p>Original ideas deserve extraordinary experiences. At ZEL, we bring creative direction, digital craft, and interactive technology together to build worlds that feel unmistakably yours.</p><p>Every detail has a purpose. Every interaction invites discovery. We create work that connects with people and stays with them long after they leave.</p><button class="pill white" data-contact><span class="dot"></span>START A CONVERSATION <span class="arrow">↗</span></button></div>
+        <div class="ideas-copy"><p data-reveal-lines>Original ideas deserve extraordinary experiences. At ZEL, we bring creative direction, digital craft, and interactive technology together to build worlds that feel unmistakably yours.</p><p data-reveal-lines>Every detail has a purpose. Every interaction invites discovery. We create work that connects with people and stays with them long after they leave.</p><button class="pill white" data-contact><span class="dot"></span>START A CONVERSATION <span class="arrow">↗</span></button></div>
       </div>
-      <div class="end-note"><span>© 2026 ZEL</span><span>VISUAL STUDY · REFERENCE MEDIA BY <a href="https://lusion.co/" target="_blank" rel="noopener">LUSION ↗</a></span><a href="#home">BACK TO TOP ↑</a></div>
     </section>
   </main>
+  <footer class="site-footer">
+    <div class="footer-grid section">
+      <div class="footer-brand"><a class="footer-logo" href="/">ZEL</a><p>Bold ideas, brought to life.</p></div>
+      <nav class="footer-col" aria-label="Footer"><span class="footer-label">EXPLORE</span><a href="/" aria-current="page">Home</a><a href="/about/">About us</a><a href="/projects/">Projects</a><a href="/contact/">Contact</a></nav>
+      <div class="footer-col"><span class="footer-label">LIVE WORK</span><a href="https://fogstores.vercel.app/" target="_blank" rel="noopener">Fogstores ↗</a><a href="https://infinitykitchensblr.com/" target="_blank" rel="noopener">Infinity Kitchens ↗</a><a href="https://bnm-cafe-rho.vercel.app/menu" target="_blank" rel="noopener">BNM Cafe ↗</a></div>
+      <div class="footer-col"><span class="footer-label">START A PROJECT</span><p>Have an idea worth building?</p><button class="pill dark" data-contact>LET’S TALK <span class="small-dot">•</span></button></div>
+    </div>
+    <div class="footer-bottom section"><span>© 2026 ZEL</span><span>VISUAL STUDY · REFERENCE MEDIA BY <a href="https://lusion.co/" target="_blank" rel="noopener">LUSION ↗</a></span><a href="#main">BACK TO TOP ↑</a></div>
+    <a class="next-page" href="/about/" data-next-page><span class="next-hint">KEEP SCROLLING<br>TO LEARN MORE</span><span class="next-title">About us</span><span class="next-label">NEXT PAGE <i><b></b><b></b></i></span></a>
+  </footer>
   <div class="scroll-indicator" aria-hidden="true"><i></i></div>
   <canvas id="fluid-canvas" aria-hidden="true"></canvas>
-    <dialog id="menu-dialog" class="menu-dialog"><div class="menu-inner"><span class="menu-label">EXPLORE ZEL</span><nav aria-label="Explore"><a href="#home">Home <span>01</span></a><a href="#about">About <span>02</span></a><a href="#work">Work <span>03</span></a><a href="#ideas">Approach <span>04</span></a></nav><button class="menu-contact" data-contact>Let’s make something extraordinary. ↗</button></div></dialog>
-  <dialog id="contact-dialog" class="contact-dialog"><button class="dialog-close pill" data-close aria-label="Close contact">CLOSE ×</button><span class="menu-label">LET’S TALK</span><h2>Your next<br>big idea.</h2><p>Tell us what you have in mind.</p><form id="contact-form"><label>Your name<input name="name" autocomplete="name" required placeholder="How should we call you?"></label><label>Email address<input name="email" type="email" autocomplete="email" required placeholder="you@company.com"></label><label>Your project<textarea name="project" required placeholder="The idea, the ambition, the possibilities…" rows="3"></textarea></label><button class="pill dark" type="submit">PREPARE PROJECT BRIEF ↗</button><p class="form-status" aria-live="polite"></p></form></dialog>
+  <dialog id="menu-dialog" class="menu-dialog"><div class="menu-inner"><span class="menu-label">EXPLORE ZEL</span><nav aria-label="Explore"><a href="/" aria-current="page">Home <span>01</span></a><a href="/about/">About <span>02</span></a><a href="/projects/">Projects <span>03</span></a><a href="/contact/">Contact <span>04</span></a></nav><button class="menu-contact" data-contact>Let’s make something extraordinary. ↗</button></div></dialog>
+  <dialog id="contact-dialog" class="contact-dialog"><button class="dialog-close pill" data-close aria-label="Close contact">CLOSE ×</button><span class="menu-label">LET’S TALK</span><h2>Your next<br>big idea.</h2><p>Tell us what you have in mind.</p><form id="contact-form" data-brief-form><label>Your name<input name="name" autocomplete="name" required placeholder="How should we call you?"></label><label>Email address<input name="email" type="email" autocomplete="email" required placeholder="you@company.com"></label><label>Your project<textarea name="project" required placeholder="The idea, the ambition, the possibilities…" rows="3"></textarea></label><button class="pill dark" type="submit">PREPARE PROJECT BRIEF ↗</button><p class="form-status" aria-live="polite"></p></form></dialog>
   <dialog id="media-dialog" class="media-dialog"><button class="dialog-close pill" data-close aria-label="Close media">CLOSE ×</button><div class="media-dialog-content"></div></dialog>
-  <script type="module" src="/app.js?v=e8ccf9e6fb6e"></script>
+  <script type="module" src="/app.js?v=a8a3e7d86015"></script>
 </body>
 </html>

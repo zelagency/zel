@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f0f1fa">
+  <meta name="description" content="{{description}}">
+  <title>{{title}}</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/projects.css">
+</head>
+<body data-page="{{page}}">
+  <div class="preloader" aria-hidden="true">
+    <div class="pl-mark"><i class="pl-track"></i><i class="pl-fill"></i><i class="pl-top"></i><i class="pl-diag"></i><i class="pl-bottom"></i></div>
+    <div class="pl-count"><span class="pl-digit"><span><i>0</i><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i><i>8</i><i>9</i></span></span><span class="pl-digit"><span><i>0</i><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i><i>8</i><i>9</i></span></span><span class="pl-digit"><span><i>0</i><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i><i>8</i><i>9</i></span></span></div>
+  </div>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="header">
+    <a class="logo" href="/" aria-label="ZEL home">ZEL</a>
+    <nav class="header-actions" aria-label="Main navigation">
+      <button class="sound pill" aria-label="Enable sound" aria-pressed="false" title="Sound off"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M3 14H25"/></svg></button>
+      <button class="talk pill dark" data-contact><span class="talk-arrow" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span><span class="talk-label">LET’S TALK</span><span class="talk-dot" aria-hidden="true"></span></button>
+      <button class="menu-button pill" aria-expanded="false" aria-controls="menu-dialog"><span class="menu-button-label"><span>MENU</span><span aria-hidden="true">CLOSE</span></span><span class="menu-dots" aria-hidden="true"><i></i><i></i></span></button>
+    </nav>
+  </header>
+  <main id="main" data-page-root>
+{{main}}
+  </main>
+{{footer}}
+  <div class="scroll-indicator" aria-hidden="true"><i></i></div>
+  <canvas id="fluid-canvas" aria-hidden="true"></canvas>
+  <dialog id="menu-dialog" class="menu-dialog"><div class="menu-inner"><span class="menu-label">EXPLORE ZEL</span><nav aria-label="Explore"><a href="/">Home <span>01</span></a><a href="/about/">About <span>02</span></a><a href="/projects/">Projects <span>03</span></a><a href="/contact/">Contact <span>04</span></a></nav><button class="menu-contact" data-contact>Let’s make something extraordinary. ↗</button></div></dialog>
+  <dialog id="contact-dialog" class="contact-dialog"><button class="dialog-close pill" data-close aria-label="Close contact">CLOSE ×</button><span class="menu-label">LET’S TALK</span><h2>Your next<br>big idea.</h2><p>Tell us what you have in mind.</p><form id="contact-form" data-brief-form><label>Your name<input name="name" autocomplete="name" required placeholder="How should we call you?"></label><label>Email address<input name="email" type="email" autocomplete="email" required placeholder="you@company.com"></label><label>Your project<textarea name="project" required placeholder="The idea, the ambition, the possibilities…" rows="3"></textarea></label><button class="pill dark" type="submit">PREPARE PROJECT BRIEF ↗</button><p class="form-status" aria-live="polite"></p></form></dialog>
+  <dialog id="media-dialog" class="media-dialog"><button class="dialog-close pill" data-close aria-label="Close media">CLOSE ×</button><div class="media-dialog-content"></div></dialog>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

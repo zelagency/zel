@@ -1,10 +1,13 @@
 import gsap from 'gsap';
 
-// Page transition: black wedges close diagonally over a dimming page, a dot-matrix
-// "LOADING..." assembles, its dots stream into the Z mark, and the wedges retract to
-// reveal the destination. The navigation itself runs while the screen is fully covered.
+// Page transition curtain, drawn on one canvas in the top layer.
+//   cover():  black wedges close diagonally over the shrinking, dimming page, then a dot-matrix
+//             "LOADING..." scans in. Resolves once the screen is fully covered.
+//   reveal(): the dots collapse while the Z mark (the preloader's mark) folds in, the Z lifts
+//             away and the wedges retract onto the new page. onOpen fires as the wedges start.
+// Nothing here navigates; the router swaps the page while the screen is covered.
 
-// 5×7 dot-matrix glyphs (rows top to bottom).
+// 5×7 dot-matrix glyphs, rows top to bottom.
 const GLYPHS={
   L:['10000','10000','10000','10000','10000','10000','11111'],
   O:['01110','10001','10001','10001','10001','10001','01110'],
@@ -14,12 +17,12 @@ const GLYPHS={
   N:['10001','11001','10101','10011','10001','10001','10001'],
   G:['01110','10001','10000','10111','10001','10001','01111'],
 };
-// 9×11 Z the dots converge into.
-const Z=['111111111','000000011','000000110','000001100','000011000','000110000','001100000','011000000','110000000','110000000','111111111'];
 const BLUE='#4b5cff';
-const easeWipe=gsap.parseEase('expo.inOut'),easeMove=gsap.parseEase('expo.inOut'),easePop=gsap.parseEase('back.out(2.2)');
-// Timeline (ms).
-const T={wipeIn:650,build:420,pop:180,hold:260,converge:560,sweep:240,zHold:180,wipeOut:780};
+const ease={wipe:gsap.parseEase('expo.inOut'),out:gsap.parseEase('expo.out'),in:gsap.parseEase('power2.in'),pop:gsap.parseEase('back.out(2)')};
+// Each beat finishes before the next starts: cover, LOADING, collapse, Z, lift, reveal.
+const T={wipe:620,scan:300,pop:170,minLoading:160,collapse:300,fold:460,zHold:90,zOut:220,reveal:720};
+const clamp01=v=>Math.max(0,Math.min(1,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
 
 function layoutDots(pitch){
   const dots=[];let col=0;
@@ -29,14 +32,12 @@ function layoutDots(pitch){
   }
   col+=1;
   for(let i=0;i<3;i++){dots.push({gx:col,gy:6,ellipsis:i});col+=2;}
-  const width=(col-2)*pitch,height=6*pitch;
-  dots.forEach(dot=>{dot.x=dot.gx*pitch-width/2;dot.y=dot.gy*pitch-height/2;});
+  const cols=col-1,width=(cols-1)*pitch,height=6*pitch;
+  dots.forEach(dot=>{
+    dot.x=dot.gx*pitch-width/2;dot.y=dot.gy*pitch-height/2;dot.u=dot.gx/cols;
+    dot.jitter=Math.random()*90;dot.blue=Math.random()<.09;dot.phase=Math.random()*Math.PI*2;dot.out=Math.random()*120;
+  });
   return dots;
-}
-function zTargets(pitch){
-  const targets=[];
-  Z.forEach((row,y)=>[...row].forEach((on,x)=>{if(on==='1')targets.push({x:(x-4)*pitch,y:(y-5)*pitch});}));
-  return targets;
 }
 
 export function createPageTransition({isReduced}){
@@ -45,85 +46,121 @@ export function createPageTransition({isReduced}){
   const supportsPopover=typeof host.showPopover==='function';
   if(supportsPopover)host.popover='manual';
   const canvas=document.createElement('canvas');host.append(canvas);document.body.append(host);
-  // The page must not scroll underneath while it is covered.
   const block=event=>event.preventDefault();
   host.addEventListener('wheel',block,{passive:false});host.addEventListener('touchmove',block,{passive:false});
   const ctx=canvas.getContext('2d');
-  let running=false;
+  let state=null,frameId=null;
 
-  function show(){if(supportsPopover){host.hidePopover?.();host.showPopover();}else host.classList.add('is-open');}
-  function hide(){if(supportsPopover)host.hidePopover();else host.classList.remove('is-open');}
+  const isOpen=()=>supportsPopover?host.matches(':popover-open'):host.classList.contains('is-open');
+  function show(){if(supportsPopover){if(isOpen())host.hidePopover();host.showPopover();}else host.classList.add('is-open');}
+  function hide(){if(supportsPopover){if(isOpen())host.hidePopover();}else host.classList.remove('is-open');}
+  function size(){
+    const w=innerWidth,h=innerHeight,dpr=Math.min(devicePixelRatio||1,2);
+    canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
+    const pitch=gsap.utils.clamp(4.5,8,w*.0048);
+    return {w,h,pitch,radius:pitch*.36,dots:layoutDots(pitch),mark:gsap.utils.clamp(.62,1,w/1400)};
+  }
+  // Wedges from the top-right and bottom-left corners: c=0 closed, c≥1.03 clear.
+  function wedges(w,h,c){
+    if(c>=1.03)return;
+    const o=.02;ctx.beginPath();
+    ctx.moveTo((c-o)*w,0);ctx.lineTo(w+1,0);ctx.lineTo(w+1,(1-c+o)*h);ctx.closePath();
+    ctx.moveTo(-1,(c-o)*h);ctx.lineTo(-1,h+1);ctx.lineTo((1-c+o)*w,h+1);ctx.closePath();
+    ctx.fillStyle='#000';ctx.fill();
+  }
+  // The preloader's Z: one bar splits into top and bottom strokes joined by a diagonal.
+  function drawZ(cx,cy,scale,fold,alpha){
+    if(alpha<=0||fold<=0)return;
+    ctx.save();ctx.globalAlpha=alpha;ctx.translate(cx,cy);ctx.scale(scale,scale);ctx.translate(-60,-42);ctx.fillStyle='#fff';
+    const grow=ease.out(clamp01(fold/.3)),f=ease.wipe(clamp01((fold-.15)/.6));
+    const bar=top=>{const width=lerp(110*grow,64,f);ctx.fillRect(lerp(60-width/2,28,f),lerp(34,top,f),width,lerp(16,14,f));};
+    bar(4);bar(66);
+    const d=ease.out(clamp01((fold-.5)/.5));
+    if(d>0){ctx.save();ctx.translate(60,42);ctx.rotate(-36.87*Math.PI/180);ctx.fillRect(-42*d,-7,84*d,14);ctx.restore();}
+    ctx.restore();
+  }
+  // LOADING scans in left to right; on collapse the dots shrink away in the same direction.
+  function drawLoading(geo,now,tl,collapseT){
+    const {w,h,radius,dots}=geo,cx=w/2,cy=h/2;
+    for(const dot of dots){
+      const appear=clamp01((tl-dot.u*T.scan-dot.jitter*.5)/T.pop);if(appear<=0)continue;
+      // Sweeps left to right and is complete (≤ .85×collapse) before the Z starts.
+      const gone=collapseT>0?clamp01((collapseT-dot.u*T.collapse*.45-dot.out*.25)/(T.collapse*.3)):0;
+      if(gone>=1)continue;
+      const alpha=dot.ellipsis>=0?.22+.78*(.5+.5*Math.sin(now/150-dot.ellipsis*1.4)):1;
+      const r=radius*ease.pop(appear)*(1-ease.in(gone));
+      const twinkle=dot.blue&&.5+.5*Math.sin(now/110+dot.phase)>.6;
+      ctx.globalAlpha=alpha;ctx.fillStyle=twinkle?BLUE:'#fff';
+      ctx.beginPath();ctx.arc(cx+dot.x,cy+dot.y-gone*radius*2,Math.max(0,r),0,Math.PI*2);ctx.fill();
+    }
+    ctx.globalAlpha=1;
+  }
+  function loop(){
+    frameId=null;if(!state)return;
+    // Never leave the curtain up: on any drawing error, release everything waiting on it.
+    try{state.draw(performance.now());}catch(error){console.error(error);finish();return;}
+    if(state)frameId=requestAnimationFrame(loop);
+  }
+  function finish(){
+    const pending=state;state=null;if(frameId)cancelAnimationFrame(frameId);frameId=null;
+    ctx?.clearRect?.(0,0,canvas.width,canvas.height);hide();document.documentElement.classList.remove('is-leaving');
+    pending?.resolveCover?.(true);pending?.onOpen?.();pending?.resolveReveal?.();
+  }
 
-  return {
-    get running(){return running;},
+  const api={
+    get running(){return !!state;},
     // Re-enter the top layer so the curtain stays above a dialog opened while covered.
-    raise(){if(running&&supportsPopover){host.hidePopover();host.showPopover();}},
-    run(action){
-      if(running)return;
-      if(isReduced()||!ctx){action();return;}
-      running=true;show();
-      const w=innerWidth,h=innerHeight,dpr=Math.min(devicePixelRatio||1,2);
-      canvas.width=w*dpr;canvas.height=h*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
-      const pitch=Math.round(gsap.utils.clamp(4,7,w*.0042)*2)/2,radius=pitch*.36;
-      const dots=layoutDots(pitch),targets=zTargets(pitch*2.1),zRadius=pitch*2.1*.42;
-      const span=Math.max(...dots.map(d=>d.gx))||1;
-      dots.forEach((dot,i)=>{
-        dot.delay=Math.random()*T.build;
-        dot.blue=Math.random()<.09;dot.flicker=Math.random()*Math.PI*2;
-        const target=targets[Math.floor(i*targets.length/dots.length)];
-        dot.tx=target.x;dot.ty=target.y;dot.sweep=dot.gx/span*T.sweep;
+    raise(){if(state&&supportsPopover){host.hidePopover();host.showPopover();}},
+    cover(){
+      if(state)return Promise.resolve(false);
+      if(isReduced()||!ctx)return Promise.resolve(true);
+      const geo=size();show();document.documentElement.classList.add('is-leaving');
+      return new Promise(resolve=>{
+        const start=performance.now(),loadingAt=start+T.wipe;
+        state={geo,start,loadingAt,resolveCover:resolve,
+          draw(now){
+            const {w,h}=geo,t=now-start;ctx.clearRect(0,0,w,h);
+            const p=ease.wipe(clamp01(t/T.wipe));
+            if(p<1){ctx.fillStyle=`rgba(8,9,20,${.4*p})`;ctx.fillRect(0,0,w,h);wedges(w,h,1.03*(1-p));}
+            else{ctx.fillStyle='#000';ctx.fillRect(0,0,w,h);}
+            if(now>loadingAt)drawLoading(geo,now,now-loadingAt,0);
+            if(this.resolveCover&&t>=T.wipe){const done=this.resolveCover;this.resolveCover=null;done(true);}
+          }};
+        loop();
       });
-      const cx=w/2,cy=h/2;
-      const tLoad=T.wipeIn,tConverge=tLoad+T.build+T.pop+T.hold,tZ=tConverge+T.sweep+T.converge,tOut=tZ+T.zHold,tEnd=tOut+T.wipeOut;
-      let acted=false;const start=performance.now();
-
-      // Black wedges from the top-right and bottom-left corners; c=0 closed, c≥1.03 fully clear.
-      function wedges(c){
-        const o=.02;
-        ctx.beginPath();ctx.moveTo((c-o)*w,0);ctx.lineTo(w+1,0);ctx.lineTo(w+1,(1-c+o)*h);ctx.closePath();
-        ctx.moveTo(-1,(c-o)*h);ctx.lineTo(-1,h+1);ctx.lineTo((1-c+o)*w,h+1);ctx.closePath();
-        ctx.fillStyle='#000';ctx.fill();
-      }
-      // Never leave the curtain up: on any drawing error, finish the navigation and remove it.
-      function frame(){
-        try{draw();}catch(error){if(!acted){acted=true;action();}ctx.clearRect?.(0,0,w,h);hide();running=false;console.error(error);}
-      }
-      function draw(){
-        const t=performance.now()-start;
-        ctx.clearRect(0,0,w,h);
-        if(t<tLoad){
-          const p=easeWipe(t/T.wipeIn);
-          ctx.fillStyle=`rgba(10,11,22,${.35*p})`;ctx.fillRect(0,0,w,h);
-          wedges(1.03*(1-p));
-        }else if(t<tOut){
-          if(!acted){acted=true;action();}
-          ctx.fillStyle='#000';ctx.fillRect(0,0,w,h);
-        }else{
-          const p=easeWipe(Math.min(1,(t-tOut)/T.wipeOut));
-          wedges(1.03*p);
-        }
-        // Dots: pop in at random, twinkle, then stream into the Z, which fades as the page opens.
-        if(t>=tLoad&&t<tOut+T.wipeOut*.45){
-          const fadeOut=t>tOut?1-Math.min(1,(t-tOut)/(T.wipeOut*.45)):1;
-          for(const dot of dots){
-            const local=t-tLoad-dot.delay;if(local<=0)continue;
-            const pop=easePop(Math.min(1,local/T.pop));
-            const move=easeMove(gsap.utils.clamp(0,1,(t-tConverge-dot.sweep)/T.converge));
-            let alpha=1;
-            if(dot.ellipsis>=0&&move===0)alpha=.25+.75*(.5+.5*Math.sin((t-tLoad)/140-dot.ellipsis*1.3));
-            const x=cx+dot.x+(dot.tx-dot.x)*move,y=cy+dot.y+(dot.ty-dot.y)*move;
-            const r=(radius+(zRadius-radius)*move)*Math.max(0,pop);
-            const twinkle=dot.blue&&move<1?.5+.5*Math.sin((t/90)+dot.flicker):0;
-            ctx.globalAlpha=alpha*fadeOut;
-            ctx.fillStyle=twinkle>.55?BLUE:'#fff';
-            ctx.beginPath();ctx.arc(x,y,Math.max(0,r),0,Math.PI*2);ctx.fill();
+    },
+    reveal({onOpen}={}){
+      if(!state){onOpen?.();return Promise.resolve();}
+      const s=state,geo=s.geo;
+      return new Promise(resolve=>{
+        // Hold LOADING for a beat if the page arrived instantly, so the sequence reads.
+        const start=Math.max(performance.now(),s.loadingAt+T.scan+T.pop+T.minLoading);
+        const tz=T.collapse*.9,tOut=tz+T.fold+T.zHold,tOpen=tOut+T.zOut,tEnd=tOpen+T.reveal;
+        s.resolveReveal=resolve;s.onOpen=onOpen;
+        s.draw=function(now){
+          const {w,h}=geo;ctx.clearRect(0,0,w,h);
+          const t=now-start;
+          if(t<tOpen){ctx.fillStyle='#000';ctx.fillRect(0,0,w,h);}
+          else{
+            if(this.onOpen){const open=this.onOpen;this.onOpen=null;document.documentElement.classList.remove('is-leaving');open();}
+            wedges(w,h,1.03*ease.wipe(clamp01((t-tOpen)/T.reveal)));
           }
-          ctx.globalAlpha=1;
-        }
-        if(t<tEnd)requestAnimationFrame(frame);
-        else{ctx.clearRect(0,0,w,h);hide();running=false;}
-      }
-      requestAnimationFrame(frame);
+          drawLoading(geo,now,now-s.loadingAt,Math.max(0,t));
+          const out=clamp01((t-tOut)/T.zOut);
+          drawZ(w/2,h/2,geo.mark*(1-.18*ease.in(out)),(t-tz)/T.fold,1-ease.in(out));
+          if(t>=tEnd){const done=this.resolveReveal;this.resolveReveal=null;state=null;ctx.clearRect(0,0,w,h);hide();done?.();}
+        };
+        if(!frameId)loop();
+      });
+    },
+    // In-page views (case studies): cover, act while covered, reveal.
+    async run(action){
+      if(state)return;
+      if(await api.cover()===false)return;
+      action();api.raise();
+      await api.reveal();
     }
   };
+  window.addEventListener('pagehide',()=>{if(state)finish();});
+  return api;
 }

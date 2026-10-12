@@ -2,13 +2,11 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import { projects, projectCover } from './projects.js';
-import { damp } from './motion.js';
-import { initHero } from './hero.js';
 import { PointerTrail } from './pointer-trail.js';
 import { initPills, initSoundWave, fillPill, drainPill } from './pills.js';
 import { playPreloader } from './intro.js';
-import { prepareIntro, playIntro, initReveals } from './reveals.js';
 import { createPageTransition } from './transition.js';
+import { mountPage } from './page.js';
 
 gsap.registerPlugin(ScrollTrigger);
 // Mobile browser bars resize the viewport while scrolling; refreshing then makes pins jump.
@@ -23,8 +21,6 @@ document.addEventListener('pointerdown',()=>{document.documentElement.dataset.in
 document.addEventListener('keydown',event=>{
   if(!event.metaKey&&!event.ctrlKey&&!event.altKey)document.documentElement.dataset.inputMode='keyboard';
 },{capture:true});
-$('#project-grid').innerHTML = projects.map((project,i)=>`<article class="project ${i===0?'project-featured':''}" data-project-id="${project.id}"><button class="project-image" data-project="${i}" aria-label="Explore ${project.title}">${projectCover(project)}<span class="project-arrow" aria-hidden="true">↗</span></button><p class="project-meta">${project.tags}</p><div class="project-title"><h3><span class="project-title-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span><span class="project-title-text">${project.title}</span></h3><a href="${project.url}" target="_blank" rel="noopener" aria-label="Visit ${project.title} live website">VISIT SITE ↗</a></div><p class="project-summary">${project.description}</p></article>`).join('');
-
 // Smooth scroll is deliberately slow enough to give the visual sequence room.
 let lenis;
 function startSmoothScroll() {
@@ -68,7 +64,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)audio.music
 
 const menu=$('#menu-dialog'), contact=$('#contact-dialog'), media=$('#media-dialog');
 $$('dialog').forEach(dialog=>dialog.setAttribute('data-lenis-prevent',''));
-menu.insertAdjacentHTML('afterbegin','<a class="menu-logo logo" href="#home">ZEL</a><button class="dialog-close pill menu-close" aria-label="Close menu">CLOSE ••</button>');
+menu.insertAdjacentHTML('afterbegin','<a class="menu-logo logo" href="/">ZEL</a><button class="dialog-close pill menu-close" aria-label="Close menu">CLOSE ••</button>');
 let previousFocus;
 const lockScroll=()=>{lenis?.stop();document.documentElement.style.overflow='hidden';document.body.style.overflow='hidden';};
 const unlockScroll=()=>{if($$('dialog[open]').length)return;document.documentElement.style.overflow='';document.body.style.overflow='';lenis?.start();previousFocus?.focus({preventScroll:true});};
@@ -87,30 +83,90 @@ function closeMenu(){dismissDialog(menu);$('.menu-button').setAttribute('aria-ex
 $('.menu-button').addEventListener('click',()=>{showDialog(menu);$('.menu-button').setAttribute('aria-expanded','true');});
 $('.menu-close').addEventListener('click',closeMenu);
 menu.addEventListener('close',()=>{$('.menu-button').setAttribute('aria-expanded','false');unlockScroll();});
+
+// Routing: pages are swapped in place (the header, sound and dialogs persist) under the
+// page transition. Any failure falls back to a normal navigation.
 const pageTransition=createPageTransition({isReduced:()=>reduced});
-// Menu navigation behaves like a page change: the jump happens under the transition.
-const jumpNow=target=>lenis?lenis.scrollTo(target,{offset:target==='#home'?0:-80,immediate:true,force:true}):$(target)?.scrollIntoView({behavior:'instant'});
-$$('a[href^="#"]').forEach(link=>link.addEventListener('click',event=>{
-  const target=link.getAttribute('href');if(!$(target))return;
-  event.preventDefault();
-  if(menu.open&&menu.contains(link))pageTransition.run(()=>{menu.close();jumpNow(target);});
-  else{if(menu.open)menu.close();jump(target);}
-}));
-$$('[data-contact]').forEach(button=>button.addEventListener('click',()=>{if(menu.open)menu.close();showDialog(contact);}));
+const ROUTES=new Set(['/','/about/','/projects/','/contact/']);
+const routeOf=pathname=>pathname.endsWith('/')?pathname:pathname+'/';
+const toTop=target=>target==='#main'||target==='#home'||target==='#top';
+const jumpNow=target=>{
+  if(toTop(target)){lenis?lenis.scrollTo(0,{immediate:true,force:true}):window.scrollTo(0,0);return;}
+  lenis?lenis.scrollTo(target,{offset:-80,immediate:true,force:true}):$(target)?.scrollIntoView({behavior:'instant'});
+};
+const scrollToHash=hash=>{
+  if(toTop(hash)){lenis?lenis.scrollTo(0):window.scrollTo({top:0,behavior:reduced?'instant':'smooth'});return true;}
+  if(!$(hash))return false;jump(hash);return true;
+};
+let page=null,currentRoute=routeOf(location.pathname),navigating=false;
+function syncNav(){
+  $$('#menu-dialog nav a,.site-footer nav a').forEach(link=>{
+    if(routeOf(new URL(link.href).pathname)===currentRoute)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');
+  });
+}
+function mount(){page=mountPage({root:$('[data-page-root]'),footer:$('.site-footer'),motionQuery,isReduced:()=>reduced,ui:{openProject,openReel,navigate}});}
+async function navigate(href,{push=true}={}){
+  const url=new URL(href,location.href),route=routeOf(url.pathname);
+  if(navigating||pageTransition.running)return;
+  if(route===currentRoute){if(menu.open)menu.close();if(!url.hash||!scrollToHash(url.hash))scrollToHash('#main');return;}
+  navigating=true;
+  const request=fetch(route,{headers:{Accept:'text/html'}}).then(response=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.text();});
+  try{
+    await pageTransition.cover();
+    const doc=new DOMParser().parseFromString(await request,'text/html');
+    const nextMain=doc.querySelector('[data-page-root]'),nextFooter=doc.querySelector('.site-footer');
+    if(!nextMain)throw new Error('No page content');
+    $$('dialog[open]').forEach(dialog=>dialog.close());
+    page?.unmount();
+    $('[data-page-root]').innerHTML=nextMain.innerHTML;
+    if(nextFooter)$('.site-footer').replaceWith(document.importNode(nextFooter,true));
+    document.title=doc.title;document.body.dataset.page=doc.body.dataset.page||'';
+    const description=doc.querySelector('meta[name="description"]')?.content;
+    if(description)$('meta[name="description"]').content=description;
+    if(push)history.pushState(null,'',url);
+    currentRoute=route;syncNav();
+    jumpNow('#main');
+    mount();page.prepareIntro();
+    ScrollTrigger.refresh();
+    if(url.hash)jumpNow(url.hash);
+    await pageTransition.reveal({onOpen:()=>page.playIntro()});
+  }catch(error){console.error(error);location.href=url.href;}
+  finally{navigating=false;}
+}
+document.addEventListener('click',event=>{
+  if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+  const link=event.target.closest('a[href]');if(!link||link.target||link.hasAttribute('download'))return;
+  const url=new URL(link.href,location.href);if(url.origin!==location.origin)return;
+  const route=routeOf(url.pathname),inMenu=!!link.closest('#menu-dialog');
+  if(route===currentRoute){
+    // Same page: anchors scroll smoothly; the menu closes first.
+    event.preventDefault();if(menu.open)menu.close();
+    if(!url.hash||!scrollToHash(url.hash))scrollToHash('#main');
+    return;
+  }
+  if(!ROUTES.has(route))return;
+  event.preventDefault();navigate(url.href);
+});
+window.addEventListener('popstate',()=>{if(routeOf(location.pathname)!==currentRoute)navigate(location.href,{push:false});});
+// Contact triggers live in pages, the footer and the menu, so one delegated listener covers them.
+document.addEventListener('click',event=>{if(!event.target.closest('[data-contact]'))return;if(menu.open)menu.close();showDialog(contact);});
 $$('[data-close]').forEach(button=>button.addEventListener('click',()=>dismissDialog(button.closest('dialog'))));
 $$('dialog').forEach(dialog=>{
   dialog.addEventListener('cancel',event=>{event.preventDefault();dismissDialog(dialog);});
   dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dismissDialog(dialog);}});
   dialog.addEventListener('close',unlockScroll);
 });
-let briefUrl;
-$('#contact-form').addEventListener('submit',event=>{
-  event.preventDefault();const values=new FormData(event.target);
-  if(briefUrl)URL.revokeObjectURL(briefUrl);
+// Project brief forms (contact dialog and contact page) prepare a local download.
+const briefUrls=new WeakMap();
+document.addEventListener('submit',event=>{
+  const form=event.target.closest('form[data-brief-form]');if(!form)return;
+  event.preventDefault();const values=new FormData(form);
+  if(briefUrls.has(form))URL.revokeObjectURL(briefUrls.get(form));
   const brief=`ZEL — Project brief\n\nName: ${values.get('name')}\nEmail: ${values.get('email')}\n\nProject\n${values.get('project')}\n`;
-  briefUrl=URL.createObjectURL(new Blob([brief],{type:'text/plain;charset=utf-8'}));
-  $('.form-status').innerHTML='Your project brief is ready to download. <br><a class="brief-download" download="ZEL-project-brief.txt">Download your brief ↗</a>';
-  $('.brief-download').href=briefUrl;
+  const url=URL.createObjectURL(new Blob([brief],{type:'text/plain;charset=utf-8'}));briefUrls.set(form,url);
+  const status=$('.form-status',form);
+  status.innerHTML='Your project brief is ready to download. <br><a class="brief-download" download="ZEL-project-brief.txt">Download your brief ↗</a>';
+  $('.brief-download',status).href=url;
 });
 media.addEventListener('close',()=>{const video=$('video',media);video?.pause();$('.media-dialog-content').replaceChildren();if(audio.enabled)audio.music.play().catch(()=>{});});
 function renderProject(index){
@@ -119,98 +175,17 @@ function renderProject(index){
   $('[data-back-projects]',media).addEventListener('click',renderGallery);
   media.scrollTop=0;
 }
-function openProject(index){pageTransition.run(()=>{renderProject(index);showDialog(media);pageTransition.raise();});}
-$$('[data-project]').forEach(button=>button.addEventListener('click',()=>openProject(Number(button.dataset.project))));
+function openProject(index){pageTransition.run(()=>{renderProject(index);showDialog(media);});}
 function renderGallery(){
   $('.media-dialog-content').innerHTML='<h2>Selected projects</h2><div class="gallery-grid">'+projects.map((project,i)=>`<button data-gallery-project="${i}" aria-label="Explore ${project.title}">${projectCover(project)}<span>${project.title} ↗</span></button>`).join('')+'</div>';
   $$('[data-gallery-project]',media).forEach(button=>button.addEventListener('click',()=>renderProject(Number(button.dataset.galleryProject))));
   media.scrollTop=0;
 }
-$('#all-projects').addEventListener('click',()=>pageTransition.run(()=>{renderGallery();showDialog(media);pageTransition.raise();}));
-$$('[data-reel]').forEach(button=>button.addEventListener('click',()=>{
+function openReel(){
   $('.media-dialog-content').innerHTML='<video src="/assets/reel.mp4" controls playsinline loop aria-label="Lusion creative reference reel"></video><p class="media-credit">Creative reference reel by <a href="https://lusion.co/" target="_blank" rel="noopener">Lusion</a> · ZEL visual study</p>';
   showDialog(media);audio.music.pause();const video=$('video',media);video.muted=!audio.enabled;video.play().catch(()=>{});
-}));
+}
 
-// Load only the video loops that are approaching the screen.
-const videoObserver=new IntersectionObserver(entries=>entries.forEach(({target,isIntersecting})=>{
-  if(isIntersecting&&!reduced){if(!target.src){target.addEventListener('loadedmetadata',()=>{if(target.dataset.start)target.currentTime=Number(target.dataset.start);},{once:true});target.src=target.dataset.src;}target.play().catch(()=>{});}else target.pause();
-}),{rootMargin:'0px'});
-$$('.ambient-video').forEach(video=>videoObserver.observe(video));
-
-// Animation contexts revert themselves when reduced motion is enabled.
-const mm=gsap.matchMedia();
-mm.add('(prefers-reduced-motion: no-preference)',()=>{
-  gsap.to('.hero h1',{y:-70,ease:'none',scrollTrigger:{trigger:'.hero',start:'top top',end:'bottom top',scrub:1}});
-  const restoreReveals=initReveals();
-  $$('.ribbon path').forEach(path=>{const length=path.getTotalLength();gsap.fromTo(path,{strokeDasharray:length,strokeDashoffset:length},{strokeDashoffset:0,ease:'none',scrollTrigger:{trigger:path.closest('section'),start:'top 90%',end:'bottom 70%',scrub:1.2}});});
-  gsap.from('.flower-frame',{y:90,rotation:-3,ease:'none',scrollTrigger:{trigger:'.about-content',start:'top bottom',end:'bottom 30%',scrub:1}});
-  gsap.from('.reel-frame',{scale:.86,ease:'power1.inOut',scrollTrigger:{trigger:'.reel',start:'top bottom',end:'top 5%',scrub:1}});
-  gsap.fromTo('.device',{rotationY:15,rotationX:12,rotationZ:-5},{rotationY:-7,rotationX:0,rotationZ:2,ease:'none',scrollTrigger:{trigger:'.ideas-content',start:'top bottom',end:'bottom 30%',scrub:1}});
-  return restoreReveals;
-});
-mm.add('(min-width: 813px) and (prefers-reduced-motion: no-preference)',()=>{
-  ScrollTrigger.create({trigger:'.reel-pin',start:'top 5%',end:'+=100%',pin:true,anticipatePin:1});
-});
-
-mm.add('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)',()=>{
-  const cleanups=[];
-  function listen(element,type,handler){element.addEventListener(type,handler);cleanups.push(()=>element.removeEventListener(type,handler));}
-  const reel=$('.reel-frame'), cursor=$('.reel-cursor');
-  gsap.set(cursor,{xPercent:-50,yPercent:-50,x:0,y:0});
-  const cursorX=gsap.quickSetter(cursor,'x','px'),cursorY=gsap.quickSetter(cursor,'y','px');
-  const cursorRotation=gsap.quickSetter(cursor,'rotation','deg');
-  const follower={inside:false,ready:false,x:0,y:0,clientX:0,clientY:0,rotation:0};
-  listen(reel,'pointerenter',event=>{follower.inside=true;follower.ready=false;follower.clientX=event.clientX;follower.clientY=event.clientY;});
-  listen(reel,'pointermove',event=>{
-    follower.clientX=event.clientX;follower.clientY=event.clientY;
-  });
-  listen(reel,'pointerleave',()=>{follower.inside=false;follower.ready=false;delete reel.dataset.pointerInside;});
-  const buttons=new Set();
-  $$('.pill').forEach(button=>{
-    const state={button,inside:false,x:0,y:0,clientX:0,clientY:0,setX:gsap.quickSetter(button,'x','px'),setY:gsap.quickSetter(button,'y','px')};
-    listen(button,'pointerenter',event=>{state.inside=true;state.clientX=event.clientX;state.clientY=event.clientY;buttons.add(state);});
-    listen(button,'pointermove',event=>{
-      state.clientX=event.clientX;state.clientY=event.clientY;
-    });
-    listen(button,'pointerleave',()=>{state.inside=false;});
-    listen(button,'focus',()=>{state.inside=false;buttons.add(state);});
-  });
-  function tick(time,deltaMs){
-    if(document.hidden)return;
-    const dt=Math.min(deltaMs/1000,.05);
-    // Read geometry before any transform writes; compensate for existing transforms.
-    const reelRect=follower.inside?reel.getBoundingClientRect():null;
-    const reelWidth=reelRect?reel.offsetWidth:1,reelHeight=reelRect?reel.offsetHeight:1;
-    const plans=[...buttons].map(state=>({state,rect:state.inside?state.button.getBoundingClientRect():null}));
-    if(reelRect){
-      const x=(follower.clientX-reelRect.left)*reelWidth/(reelRect.width||1);
-      const y=(follower.clientY-reelRect.top)*reelHeight/(reelRect.height||1);
-      const oldX=follower.x;
-      if(!follower.ready){follower.x=x;follower.y=y;follower.rotation=0;follower.ready=true;}
-      else{follower.x=damp(follower.x,x,22,dt);follower.y=damp(follower.y,y,22,dt);follower.rotation=damp(follower.rotation,gsap.utils.clamp(-10,10,(follower.x-oldX)/(dt||1)/100),12,dt);}
-      cursorX(follower.x);cursorY(follower.y);cursorRotation(follower.rotation);reel.dataset.pointerInside='true';
-    }
-    plans.forEach(({state,rect})=>{
-      const targetX=rect?gsap.utils.clamp(-5,5,(state.clientX-(rect.left+rect.width/2-state.x))*.09):0;
-      const targetY=rect?gsap.utils.clamp(-4,4,(state.clientY-(rect.top+rect.height/2-state.y))*.12):0;
-      state.x=damp(state.x,targetX,18,dt);state.y=damp(state.y,targetY,18,dt);
-      if(!state.inside&&Math.abs(state.x)+Math.abs(state.y)<.02){state.x=0;state.y=0;buttons.delete(state);}
-      state.setX(state.x);state.setY(state.y);
-    });
-  }
-  gsap.ticker.add(tick);
-  listen(window,'blur',()=>{follower.inside=false;delete reel.dataset.pointerInside;buttons.forEach(state=>{state.inside=false;});});
-  return ()=>{cleanups.forEach(cleanup=>cleanup());gsap.ticker.remove(tick);buttons.forEach(state=>{state.setX(0);state.setY(0);});buttons.clear();delete reel.dataset.pointerInside;};
-});
-
-// Decorative loops share the same visibility lifecycle as the video loops.
-const loopElements=$$('.marquee>div,.device-orb');
-const visibleLoops=new Set();
-function syncLoops(){loopElements.forEach(element=>{element.style.animationPlayState=!reduced&&!document.hidden&&visibleLoops.has(element)?'running':'paused';});}
-const loopObserver=new IntersectionObserver(entries=>{entries.forEach(({target,isIntersecting})=>{isIntersecting?visibleLoops.add(target):visibleLoops.delete(target);});syncLoops();});
-loopElements.forEach(element=>loopObserver.observe(element));syncLoops();
-document.addEventListener('visibilitychange',()=>{syncLoops();$$('.ambient-video').forEach(video=>{if(document.hidden)video.pause();else if(!reduced){const rect=video.getBoundingClientRect();if(rect.bottom>0&&rect.top<innerHeight&&video.src)video.play().catch(()=>{});}});});
 const progress=$('.scroll-indicator i');
 const header=$('.header');
 function updateProgress(){header.toggleAttribute('data-scrolled',scrollY>40);const total=document.documentElement.scrollHeight-innerHeight;progress.style.transform=`translateY(${Math.max(0,(innerHeight*.2-35)*scrollY/Math.max(1,total))}px)`;}
@@ -284,13 +259,13 @@ function drawPaint(now){
   if(trail.active)paintRaf=requestAnimationFrame(drawPaint);
 }
 
-initHero(motionQuery);
-// Preloader, then the hero intro. The page starts at the top so the intro is what is seen.
-if(!reduced){window.history.scrollRestoration='manual';window.scrollTo(0,0);prepareIntro();lenis?.stop();}
-playPreloader({reduced,onReveal:skipped=>{if(skipped)return;lenis?.start();playIntro();}});
+
+// First load: preloader, then the page intro. The page starts at the top so the intro is what is seen.
+if(!reduced){window.history.scrollRestoration='manual';window.scrollTo(0,0);lenis?.stop();}
+mount();page.prepareIntro({header:true});syncNav();
+playPreloader({reduced,onReveal:skipped=>{if(skipped)return;lenis?.start();page.playIntro({header:true});}});
 motionQuery.addEventListener('change',event=>{
   reduced=event.matches;
-  syncLoops();
   if(reduced){lenis?.destroy();lenis=null;$$('.ambient-video').forEach(video=>video.pause());resetPaint();}else{startSmoothScroll();if($$('dialog[open]').length)lenis?.stop();$$('.ambient-video').forEach(video=>{if(video.getBoundingClientRect().bottom>0&&video.getBoundingClientRect().top<innerHeight){if(!video.src)video.src=video.dataset.src;video.play().catch(()=>{});}});}
 });
 window.addEventListener('load',()=>{ScrollTrigger.refresh();updateProgress();});

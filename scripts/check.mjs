@@ -48,7 +48,7 @@ const html=fs.readFileSync('dist/index.html','utf8');
 const dom=new JSDOM(html,{url:'http://localhost:5173',pretendToBeVisual:true});
 const {window}=dom;
 const motionEnabled=process.argv.includes('--motion');
-for(const key of ['window','Window','document','navigator','HTMLElement','Element','Node','getComputedStyle','requestAnimationFrame','cancelAnimationFrame','HTMLCanvasElement','HTMLVideoElement','HTMLMediaElement','FormData','Blob'])Object.defineProperty(globalThis,key,{value:window[key],configurable:true});
+for(const key of ['window','Window','document','navigator','location','history','DOMParser','AbortController','AbortSignal','Event','KeyboardEvent','HTMLElement','Element','Node','getComputedStyle','requestAnimationFrame','cancelAnimationFrame','HTMLCanvasElement','HTMLVideoElement','HTMLMediaElement','FormData','Blob'])Object.defineProperty(globalThis,key,{value:window[key],configurable:true});
 Object.assign(globalThis,{innerWidth:1907,innerHeight:908,scrollY:0,devicePixelRatio:1,matchMedia:query=>({matches:query.includes('prefers-reduced-motion')?(query.includes('no-preference')?motionEnabled:!motionEnabled):true,addListener(){},removeListener(){},addEventListener(){},removeEventListener(){}}),IntersectionObserver:class{observe(){} disconnect(){}},ResizeObserver:class{observe(){} disconnect(){}},Audio:window.Audio});
 window.matchMedia=globalThis.matchMedia;
 window.scrollTo=()=>{};
@@ -85,7 +85,8 @@ $('[data-project="0"]').focus();$('[data-project="0"]').click();await until(()=>
 assert.equal($('.case-heading a').href,projects[0].url);
 $('#media-dialog [data-close]').click();assert.ok(!$('#media-dialog').open);
 assert.equal(document.activeElement,$('[data-project="0"]'),'Return focus to project opener');
-$('#all-projects').click();await until(()=>$('#media-dialog').open);await idle();assert.equal(document.querySelectorAll('[data-gallery-project]').length,3);
+assert.equal(new URL($('#all-projects').href).pathname,'/projects/','See all projects routes to the projects page');
+$('[data-project="0"]').click();await until(()=>$('#media-dialog').open);await idle();$('[data-back-projects]').click();assert.equal(document.querySelectorAll('[data-gallery-project]').length,3,'Case study links back to the gallery');
 $('[data-gallery-project="1"]').click();assert.equal($('.media-dialog-content h2').textContent,'Infinity Kitchens');
 assert.equal(document.querySelectorAll('.case-screens img').length,2);
 $('[data-back-projects]').click();assert.equal(document.querySelectorAll('[data-gallery-project]').length,3);
@@ -93,7 +94,7 @@ $('[data-gallery-project="2"]').click();assert.equal($('.media-dialog-content h2
 assert.equal($('.case-heading a').href,'https://bnm-cafe-rho.vercel.app/menu');
 $('#media-dialog').dispatchEvent(new window.Event('cancel',{cancelable:true}));assert.ok(!$('#media-dialog').open,'Escape dismisses case study');
 $('[data-reel]').click();assert.ok($('.media-dialog-content video'));$('#media-dialog [data-close]').click();
-$('[data-contact]').click();assert.ok($('#contact-dialog').open);
+$('.talk[data-contact]').click();assert.ok($('#contact-dialog').open);
 $('#contact-form [name=name]').value='Test client';$('#contact-form [name=email]').value='test@example.com';$('#contact-form [name=project]').value='Interactive website';
 globalThis.URL.createObjectURL=()=> 'blob:test-brief';globalThis.URL.revokeObjectURL=()=>{};
 $('#contact-form').dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true}));assert.equal($('.brief-download').getAttribute('download'),'ZEL-project-brief.txt');
@@ -103,5 +104,13 @@ for(const element of [...document.querySelectorAll('[src],[href],[data-src]')]){
 }
 await transform(fs.readFileSync('dist/style.css','utf8'),{loader:'css',minify:true});
 await transform(fs.readFileSync('dist/projects.css','utf8'),{loader:'css',minify:true});
-console.log('PASS: hero colour toggle; project navigation/URLs; dialogs/root scroll lock and restoration; sound/reel/brief; versioned assets; CSS; consistent damping and pointer trajectories at multiple refresh rates; pointer pause/re-entry/expiry.');
+// Every route is a complete page: own content, current menu item and the next page in the footer.
+for(const [file,route,next,heading] of [['dist/index.html','/','/about/','We build'],['dist/about/index.html','/about/','/projects/','We are ZEL'],['dist/projects/index.html','/projects/','/contact/','Projects'],['dist/contact/index.html','/contact/','/','Let’s work']]){
+  const page=new JSDOM(fs.readFileSync(file,'utf8')).window.document;
+  assert.ok(page.querySelector('[data-page-root] h1')?.textContent.includes(heading),`${route} has its heading`);
+  assert.equal(page.querySelector('#menu-dialog [aria-current="page"]')?.getAttribute('href'),route,`${route} marks itself current in the menu`);
+  assert.equal(page.querySelector('[data-next-page]')?.getAttribute('href'),next,`${route} leads to ${next}`);
+  assert.ok(page.querySelector('script[src^="/app.js?v="]'),`${route} loads the versioned app`);
+}
+console.log('PASS: four routed pages; hero colour toggle; project navigation/URLs; dialogs/root scroll lock and restoration; sound/reel/brief; versioned assets; CSS; consistent damping and pointer trajectories at multiple refresh rates; pointer pause/re-entry/expiry.');
 dom.window.close();process.exit(0);

@@ -1,11 +1,13 @@
 import { damp } from './motion.js';
 
 // A responsive, vector-only wordmark. No shaders, textures, or 3D scene required.
-export function initHero(motionQuery){
-  const host=document.querySelector('#hero-visual');
+export function initHero(motionQuery,root=document){
+  const host=root.querySelector('#hero-visual');
+  if(!host)return ()=>{};
   const svg=host.querySelector('.kinetic-word');
   const letters=[...host.querySelectorAll('[data-letter]')];
-  if(!svg||letters.length!==3)return;
+  if(!svg||letters.length!==3)return ()=>{};
+  const controller=new AbortController(),{signal}=controller;
   const widths=[300,300,300],targetWidths=[300,300,300];
   let pointerX=.5,pointerY=.5,inside=false,visible=true,frameId=null,last=0,shiftY=0;
 
@@ -41,15 +43,16 @@ export function initHero(motionQuery){
     pointerX=Math.max(0,Math.min(1,(event.clientX-rect.left)/Math.max(1,rect.width)));
     pointerY=Math.max(0,Math.min(1,(event.clientY-rect.top)/Math.max(1,rect.height)));
     inside=true;targets();schedule();
-  },{passive:true});
-  host.addEventListener('pointerleave',()=>{inside=false;targets();schedule();});
+  },{passive:true,signal});
+  host.addEventListener('pointerleave',()=>{inside=false;targets();schedule();},{signal});
   host.addEventListener('click',()=>{
     const inverted=host.dataset.inverted!=='true';
     host.dataset.inverted=String(inverted);host.setAttribute('aria-pressed',String(inverted));
-  });
-  new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;if(!visible)reset();}).observe(host);
-  document.addEventListener('visibilitychange',()=>{if(document.hidden)reset();});
-  window.addEventListener('blur',reset);
-  motionQuery.addEventListener('change',reset);
+  },{signal});
+  const observer=new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;if(!visible)reset();});observer.observe(host);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)reset();},{signal});
+  window.addEventListener('blur',reset,{signal});
+  motionQuery.addEventListener('change',reset,{signal});
   draw();
+  return ()=>{controller.abort();observer.disconnect();if(frameId!==null)cancelAnimationFrame(frameId);frameId=null;};
 }

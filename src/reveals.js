@@ -9,34 +9,46 @@ const $$=(s,root=document)=>[...root.querySelectorAll(s)];
 // Lines rise out of masks. autoSplit re-splits on resize/font load and replays the
 // returned tween in place, so wrapping always matches the current layout.
 function riseLines(element,{trigger=element,start='top 88%',duration=1.25,stagger=.09,delay=0,scroll=true}={}){
+  if(!element)return;
   return SplitText.create(element,{type:'lines',mask:'lines',linesClass:'splitline',autoSplit:true,
     onSplit:self=>gsap.from(self.lines,{yPercent:115,duration,stagger,delay,ease:'expo.out',
       scrollTrigger:scroll?{trigger,start,once:true}:undefined})});
 }
-
-// Hidden until the preloader lifts, so nothing flashes in its final position first.
-export function prepareIntro(){
-  gsap.set('.header .logo,.header-actions>.pill',{scale:0,transition:'none'});
-  gsap.set('.hero-visual',{scale:.92,opacity:0});
-  gsap.set('.scroll-cue',{opacity:0,y:20});
-  gsap.set('.hero h1',{opacity:0});
+// Headings made of .line spans rise line by line; plain headings split into lines.
+function riseHeading(heading,options){
+  const lines=$$(':scope>.line',heading);
+  if(lines.length)lines.forEach(line=>riseLines(line,{trigger:heading,stagger:.1,...options}));
+  else riseLines(heading,options);
 }
-export function playIntro(){
-  gsap.set('.hero h1',{opacity:1});
+
+// Elements, not a selector: intros run in a context scoped to the page root.
+// Skip empty lists so pages without a hero or scroll cue do not trigger GSAP warnings.
+const set=(targets,vars)=>{if(targets.length)gsap.set(targets,vars);};
+const headerEls=()=>[...document.querySelectorAll('.header .logo,.header-actions>.pill')];
+// Hidden until the curtain lifts, so nothing flashes in its final position first.
+export function prepareIntro(root,{header=false}={}){
+  if(header)set(headerEls(),{scale:0,transition:'none'});
+  set($$('.hero-visual',root),{scale:.92,opacity:0});
+  set($$('.scroll-cue',root),{opacity:0,y:20});
+  set($$('[data-intro-lines]',root),{opacity:0});
+}
+export function playIntro(root,{header=false}={}){
   const tl=gsap.timeline();
-  tl.to('.hero-visual',{scale:1,opacity:1,duration:1.4,ease:'expo.out'},0);
-  riseLines('.hero h1',{scroll:false,delay:.25,duration:1.3,stagger:.1});
-  tl.to('.header .logo,.header-actions>.pill',{scale:1,duration:.7,ease:'back.out(1.7)',stagger:.07,clearProps:'transform,transition'},.35);
-  tl.to('.scroll-cue',{opacity:1,y:0,duration:.9,ease:'expo.out',clearProps:'transform'},.6);
+  $$('[data-intro-lines]',root).forEach(heading=>{gsap.set(heading,{opacity:1});riseHeading(heading,{scroll:false,delay:.2,duration:1.3});});
+  const visual=$$('.hero-visual',root),cue=$$('.scroll-cue',root);
+  if(visual.length)tl.to(visual,{scale:1,opacity:1,duration:1.4,ease:'expo.out'},0);
+  if(header)tl.to(headerEls(),{scale:1,duration:.7,ease:'back.out(1.7)',stagger:.07,clearProps:'transform,transition'},.35);
+  if(cue.length)tl.to(cue,{opacity:1,y:0,duration:.9,ease:'expo.out',clearProps:'transform'},.6);
   return tl;
 }
 
-export function initReveals(){
+export function initReveals(root){
   const restore=[];
-  $$('.about-title .line,#ideas-title .line').forEach(line=>riseLines(line,{trigger:line.parentElement,stagger:.1}));
-  riseLines('#work-title');
-  $$('.about-copy>p,.ideas-copy>p,.work-heading>p').forEach(p=>riseLines(p,{duration:1.1,stagger:.05,start:'top 92%'}));
-  $$('.project').forEach(project=>{
+  $$('[data-reveal-heading]',root).forEach(heading=>riseHeading(heading));
+  $$('[data-reveal-lines]',root).forEach(p=>riseLines(p,{duration:1.1,stagger:.05,start:'top 92%'}));
+  // Lists and cards settle up into place.
+  $$('.service-list>li,.principles>article,.contact-steps>li',root).forEach((item,i)=>gsap.from(item,{y:50,opacity:0,duration:1.1,ease:'expo.out',delay:(i%4)*.06,scrollTrigger:{trigger:item,start:'top 92%',once:true}}));
+  $$('.project',root).forEach(project=>{
     const image=project.querySelector('.project-image'),meta=project.querySelector('.project-meta');
     // Cards tilt back in perspective as they enter and settle flat in place.
     gsap.fromTo(image,{rotationX:20,y:110,scale:.93,transformPerspective:1400,transformOrigin:'50% 0%'},
