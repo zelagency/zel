@@ -204,43 +204,70 @@ const progress=$('.scroll-indicator i');
 function updateProgress(){const total=document.documentElement.scrollHeight-innerHeight;progress.style.transform=`translateY(${Math.max(0,(innerHeight*.2-35)*scrollY/Math.max(1,total))}px)`;}
 window.addEventListener('scroll',updateProgress,{passive:true});
 
-// Capture every available input sample; filter and reuse one curve per frame.
+// Capture every coalesced input sample, plus the browser's prediction for the next one;
+// the trail is drawn in the same frame the input arrives (pointer events are rAF-aligned).
 const paint=$('#fluid-canvas'), ctx=paint.getContext('2d'), trail=new PointerTrail();let paintRaf=null;
 function resetPaint(){if(paintRaf!==null)cancelAnimationFrame(paintRaf);paintRaf=null;trail.clear();ctx?.clearRect(0,0,innerWidth,innerHeight);}
 function sizePaint(){resetPaint();const dpr=Math.min(devicePixelRatio,1.25);paint.width=innerWidth*dpr;paint.height=innerHeight*dpr;ctx?.setTransform(dpr,0,0,dpr,0,0);}
 sizePaint();window.addEventListener('resize',sizePaint);
 window.addEventListener('pointermove',event=>{
-  if(!ctx||reduced||document.hidden||event.pointerType!=='mouse'||innerWidth<813||event.target.closest('.hero-visual,.media-frame,dialog,.project-image')){resetPaint();return;}
+  if(!ctx||reduced||document.hidden||event.pointerType!=='mouse'||innerWidth<813)return;
+  // Over media the trail stops taking input and retracts instead of vanishing.
+  if(event.target.closest('.hero-visual,.media-frame,dialog,.project-image')){trail.break();return;}
   const now=performance.now(),samples=event.getCoalescedEvents?.();
   for(const sample of samples?.length?samples:[event]){
     const timestamp=Math.abs(now-sample.timeStamp)<10000?sample.timeStamp:now;
     trail.push(sample.clientX,sample.clientY,timestamp);
   }
+  const predicted=event.getPredictedEvents?.().at(-1);
+  if(predicted)trail.predict(predicted.clientX,predicted.clientY);
   if(paintRaf===null)paintRaf=requestAnimationFrame(drawPaint);
 },{passive:true});
 window.addEventListener('blur',resetPaint);
-document.documentElement.addEventListener('pointerleave',resetPaint);
+document.documentElement.addEventListener('pointerleave',()=>trail.break());
 document.addEventListener('visibilitychange',resetPaint);
+// Each colour band is the original 18% layer stack composited over white. Drawing the bands
+// opaque lets overlapping segments merge seamlessly; on the multiply-blended canvas, white is
+// invisible, so mixing toward white fades a band out along the trail.
+const trailBands=(()=>{
+  let colour=[255,255,255];
+  return [[173,207,255,34,-3],[230,200,220,27,-1],[185,255,244,20,1],[255,255,255,13,3]].map(([r,g,b,width,offset])=>{
+    colour=colour.map((c,i)=>c+([r,g,b][i]-c)*.18);return {colour,width,offset};
+  });
+})();
+const TRAIL_STEPS=32;
 function drawPaint(now){
   paintRaf=null;ctx.clearRect(0,0,innerWidth,innerHeight);
   if(reduced||document.hidden){resetPaint();return;}
-  const points=trail.frame(now);
-  if(points.length>2){
-    const first=points[0],last=points.at(-1),fade=trail.opacity(now);
-    const path=new Path2D();path.moveTo(first.x,first.y);
-    for(let i=1;i<points.length-1;i++){
-      const p=points[i],next=points[i+1];path.quadraticCurveTo(p.x,p.y,(p.x+next.x)/2,(p.y+next.y)/2);
+  const points=trail.frame(now),count=points.length;
+  if(count>1){
+    // Age drives both width and colour: the tip is strongest, the tail thins and fades.
+    const life=points.map(p=>Math.max(0,1-(now-p.t)/trail.lifetime));
+    const normals=points.map((p,i)=>{
+      const a=points[Math.max(0,i-1)],b=points[Math.min(count-1,i+1)],dx=b.x-a.x,dy=b.y-a.y,length=Math.hypot(dx,dy)||1;
+      return {x:-dy/length,y:dx/length};
+    });
+    ctx.lineCap='round';ctx.lineJoin='round';
+    for(const {colour,width,offset} of trailBands){
+      const at=i=>{const taper=Math.sqrt(life[i]);return {x:points[i].x+normals[i].x*offset*taper,y:points[i].y+normals[i].y*offset*taper};};
+      const mid=i=>{const a=at(i),b=at(i+1);return {x:(a.x+b.x)/2,y:(a.y+b.y)/2};};
+      // Quadratic segments through midpoints; consecutive segments in the same step share a stroke.
+      let step=-1,from=at(0);
+      for(let i=0;i<count-1;i++){
+        const control=i?at(i):null,to=i<count-2?mid(i):at(i+1);
+        const u=(life[i]+life[i+1])/2,next=Math.round(u*TRAIL_STEPS);
+        if(next!==step){
+          if(step>0)ctx.stroke();
+          step=next;const s=step/TRAIL_STEPS,strength=s*(2-s);
+          ctx.lineWidth=width*Math.sqrt(s);
+          ctx.strokeStyle=`rgb(${colour.map(c=>Math.round(255+(c-255)*strength)).join()})`;
+          ctx.beginPath();ctx.moveTo(from.x,from.y);
+        }
+        control?ctx.quadraticCurveTo(control.x,control.y,to.x,to.y):ctx.lineTo(to.x,to.y);
+        from=to;
+      }
+      if(step>0)ctx.stroke();
     }
-    path.lineTo(last.x,last.y);
-    ctx.lineCap='round';ctx.lineJoin='round';ctx.shadowBlur=0;
-    for(let layer=0;layer<4;layer++){
-      const gradient=ctx.createLinearGradient(first.x,first.y,last.x+.01,last.y+.01);
-      gradient.addColorStop(0,'transparent');gradient.addColorStop(.55,['#adcfff','#e6c8dc','#b9fff4','#ffffff'][layer]);gradient.addColorStop(1,'#ffffff');
-      ctx.lineWidth=34-layer*7;ctx.strokeStyle=gradient;ctx.globalAlpha=fade*.18;
-      const offset=(layer-1.5)*2;
-      ctx.save();ctx.translate(0,offset);ctx.stroke(path);ctx.restore();
-    }
-    ctx.globalAlpha=1;
   }
   if(trail.active)paintRaf=requestAnimationFrame(drawPaint);
 }
