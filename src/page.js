@@ -48,7 +48,11 @@ export function mountPage({root,footer,motionQuery,isReduced,ui}){
     $$('.ribbon path').forEach(path=>{const length=path.getTotalLength();gsap.fromTo(path,{strokeDasharray:length,strokeDashoffset:length},{strokeDashoffset:0,ease:'none',scrollTrigger:{trigger:path.closest('section'),start:'top 90%',end:'bottom 70%',scrub:1.2}});});
     $$('.flower-frame').forEach(frame=>gsap.from(frame,{y:90,rotation:-3,ease:'none',scrollTrigger:{trigger:frame.parentElement,start:'top bottom',end:'bottom 30%',scrub:1}}));
     if($('.reel-frame'))gsap.from($('.reel-frame'),{scale:.86,ease:'power1.inOut',scrollTrigger:{trigger:$('.reel'),start:'top bottom',end:'top 5%',scrub:1}});
-    if($('.device'))gsap.fromTo($('.device'),{rotationY:15,rotationX:12,rotationZ:-5},{rotationY:-7,rotationX:0,rotationZ:2,ease:'none',scrollTrigger:{trigger:$('.ideas-content'),start:'top bottom',end:'bottom 30%',scrub:1}});
+    // The laptop turns through the section while its lid opens on the hinge.
+    if($('.laptop')){
+      gsap.fromTo($('.laptop'),{rotationY:18},{rotationY:-12,ease:'none',scrollTrigger:{trigger:$('.ideas-content'),start:'top bottom',end:'bottom 30%',scrub:1}});
+      gsap.fromTo($('.laptop-lid'),{rotationX:-84},{rotationX:8,ease:'power1.inOut',scrollTrigger:{trigger:$('.device-scene'),start:'center bottom',end:'center 50%',scrub:1}});
+    }
     return restoreReveals;
   });
   mm.add('(min-width: 813px) and (prefers-reduced-motion: no-preference)',()=>{
