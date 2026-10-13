@@ -14,7 +14,8 @@ export const pages=[
   {page:'contact',route:'/contact/',out:'dist/contact/index.html',title:'Contact — ZEL',description:'Start a project with ZEL. Describe your idea and prepare a project brief.'},
 ];
 const labels={home:'Home',about:'About us',projects:'Projects',contact:'Contact'};
-const hashOf=file=>createHash('sha256').update(readFileSync(file)).digest('hex').slice(0,12);
+// Hash the text with line endings normalised, so a Windows checkout (CRLF) and CI (LF) agree.
+const hashOf=file=>createHash('sha256').update(readFileSync(file,'utf8').replaceAll('\r\n','\n')).digest('hex').slice(0,12);
 const versions=Object.fromEntries(['app.js','style.css','projects.css'].map(asset=>[asset,hashOf(`dist/${asset}`)]));
 const layout=readFileSync('src/site/layout.html','utf8');
 
