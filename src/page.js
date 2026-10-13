@@ -28,6 +28,11 @@ export function mountPage({root,footer,motionQuery,isReduced,ui}){
     if(isIntersecting&&!isReduced()){if(!target.src){target.addEventListener('loadedmetadata',()=>{if(target.dataset.start)target.currentTime=Number(target.dataset.start);},{once:true});target.src=target.dataset.src;}target.play().catch(()=>{});}else target.pause();
   }));
   videos.forEach(video=>videoObserver.observe(video));
+  // Posters are fetched a screen ahead of the videos, so they never compete with the first paint.
+  const posterObserver=new IntersectionObserver(entries=>entries.forEach(({target,isIntersecting})=>{
+    if(isIntersecting&&target.dataset.poster){target.poster=target.dataset.poster;delete target.dataset.poster;}
+  }),{rootMargin:'100% 0px'});
+  videos.forEach(video=>posterObserver.observe(video));
   // Decorative loops share the same visibility lifecycle as the video loops.
   const loops=$$('.marquee>div,.device-orb'),visibleLoops=new Set();
   const syncLoops=()=>loops.forEach(element=>{element.style.animationPlayState=!isReduced()&&!document.hidden&&visibleLoops.has(element)?'running':'paused';});
@@ -35,7 +40,7 @@ export function mountPage({root,footer,motionQuery,isReduced,ui}){
   loops.forEach(element=>loopObserver.observe(element));syncLoops();
   document.addEventListener('visibilitychange',syncLoops,{signal});
   motionQuery.addEventListener('change',syncLoops,{signal});
-  cleanups.push(()=>{videoObserver.disconnect();loopObserver.disconnect();videos.forEach(video=>video.pause());});
+  cleanups.push(()=>{videoObserver.disconnect();posterObserver.disconnect();loopObserver.disconnect();videos.forEach(video=>video.pause());});
 
   cleanups.push(initHero(motionQuery,root));
   cleanups.push(initConfetti($('.confetti'),{isReduced}));

@@ -99,8 +99,8 @@ $('#contact-form [name=name]').value='Test client';$('#contact-form [name=email]
 globalThis.URL.createObjectURL=()=> 'blob:test-brief';globalThis.URL.revokeObjectURL=()=>{};
 $('#contact-form').dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true}));assert.equal($('.brief-download').getAttribute('download'),'ZEL-project-brief.txt');
 $('#contact-dialog [data-close]').click();assert.equal(document.body.style.overflow,'');
-for(const element of [...document.querySelectorAll('[src],[href],[data-src]')]){
-  for(const attr of ['src','href','data-src']){const ref=element.getAttribute(attr);if(ref?.startsWith('/')&&!ref.startsWith('//'))assert.ok(fs.existsSync(path.join('dist',new URL(ref,'http://localhost').pathname)),`Missing asset ${ref}`);if(ref?.startsWith('#'))assert.ok(document.querySelector(ref),`Invalid anchor ${ref}`);}
+for(const element of [...document.querySelectorAll('[src],[href],[data-src],[data-poster]')]){
+  for(const attr of ['src','href','data-src','data-poster']){const ref=element.getAttribute(attr);if(ref?.startsWith('/')&&!ref.startsWith('//'))assert.ok(fs.existsSync(path.join('dist',new URL(ref,'http://localhost').pathname)),`Missing asset ${ref}`);if(ref?.startsWith('#'))assert.ok(document.querySelector(ref),`Invalid anchor ${ref}`);}
 }
 await transform(fs.readFileSync('dist/style.css','utf8'),{loader:'css',minify:true});
 await transform(fs.readFileSync('dist/projects.css','utf8'),{loader:'css',minify:true});

@@ -31,19 +31,24 @@ function startSmoothScroll() {
 startSmoothScroll();
 gsap.ticker.add(time=>lenis?.raf(time*1000));
 const jump = target => lenis ? lenis.scrollTo(target,{offset:target==='#home'?0:-80}) : $(target)?.scrollIntoView({behavior:reduced?'instant':'smooth'});
+// Sound starts off, so nothing is downloaded until it is first switched on.
+const SOUNDS={music:'/assets/ambient.ogg',hover:'/assets/hover.ogg',click:'/assets/click.ogg'};
 const audio = {
   enabled: false,
-  music: new Audio('/assets/ambient.ogg'),
-  hover: new Audio('/assets/hover.ogg'),
-  click: new Audio('/assets/click.ogg'),
+  players: {},
+  get(type){
+    if(!this.players[type]){const player=this.players[type]=new Audio(SOUNDS[type]);if(type==='music'){player.loop=true;player.volume=.3;}}
+    return this.players[type];
+  },
+  pauseMusic(){this.players.music?.pause();},
   play(type) {
     if(!this.enabled||document.hidden) return;
-    const player=this[type].cloneNode(); player.volume=type==='hover'?.24:.4;
+    const player=this.get(type).cloneNode(); player.volume=type==='hover'?.24:.4;
     player.play().catch(()=>{});
   },
   async toggle(){
     this.enabled=!this.enabled;
-    if(this.enabled){try{await this.music.play();}catch{this.enabled=false;}}else this.music.pause();
+    if(this.enabled){this.get('hover');this.get('click');try{await this.get('music').play();}catch{this.enabled=false;}}else this.pauseMusic();
     const sound=$('.sound');sound.setAttribute('aria-pressed',String(this.enabled));
     soundWave.set(this.enabled);
     if(this.enabled)fillPill(sound,undefined,undefined,reduced);else if(!sound.matches(':hover'))drainPill(sound,undefined,undefined,reduced);
@@ -53,14 +58,13 @@ const audio = {
 };
 initPills(()=>reduced);
 const soundWave=initSoundWave($('.sound'),()=>reduced);
-audio.music.loop=true;audio.music.volume=.3;
 $('.sound').addEventListener('click',()=>audio.toggle());
 document.addEventListener('pointerover',event=>{
   const hit=event.target.closest('a,button');
   if(hit&&!hit.contains(event.relatedTarget))audio.play('hover');
 });
 document.addEventListener('click',event=>{if(event.target.closest('a,button'))audio.play('click');});
-document.addEventListener('visibilitychange',()=>{if(document.hidden)audio.music.pause();else if(audio.enabled&&!$('#media-dialog').open)audio.music.play().catch(()=>{});});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)audio.pauseMusic();else if(audio.enabled&&!$('#media-dialog').open)audio.get('music').play().catch(()=>{});});
 
 const menu=$('#menu-dialog'), contact=$('#contact-dialog'), media=$('#media-dialog');
 $$('dialog').forEach(dialog=>dialog.setAttribute('data-lenis-prevent',''));
@@ -168,7 +172,7 @@ document.addEventListener('submit',event=>{
   status.innerHTML='Your project brief is ready to download. <br><a class="brief-download" download="ZEL-project-brief.txt">Download your brief ↗</a>';
   $('.brief-download',status).href=url;
 });
-media.addEventListener('close',()=>{const video=$('video',media);video?.pause();$('.media-dialog-content').replaceChildren();if(audio.enabled)audio.music.play().catch(()=>{});});
+media.addEventListener('close',()=>{const video=$('video',media);video?.pause();$('.media-dialog-content').replaceChildren();if(audio.enabled)audio.get('music').play().catch(()=>{});});
 function renderProject(index){
   const project=projects[index];
   $('.media-dialog-content').innerHTML=`<article class="case-study"><div class="case-heading"><div><h2>${project.title}</h2><p>${project.type}</p></div><a class="pill white" href="${project.url}" target="_blank" rel="noopener">VISIT LIVE SITE ↗</a></div><div class="case-cover">${projectCover(project)}</div><div class="case-description"><p>${project.description}</p><ul>${project.features.map(feature=>`<li>${feature}</li>`).join('')}</ul></div><div class="case-screens">${project.images.map(image=>`<figure><img src="${image.src}" alt="${image.alt}" loading="lazy"><figcaption>${image.alt}</figcaption></figure>`).join('')}</div><button class="case-back" data-back-projects>← Back to all projects</button></article>`;
@@ -183,7 +187,7 @@ function renderGallery(){
 }
 function openReel(){
   $('.media-dialog-content').innerHTML='<video src="/assets/reel.mp4" controls playsinline loop aria-label="Lusion creative reference reel"></video><p class="media-credit">Creative reference reel by <a href="https://lusion.co/" target="_blank" rel="noopener">Lusion</a> · ZEL visual study</p>';
-  showDialog(media);audio.music.pause();const video=$('video',media);video.muted=!audio.enabled;video.play().catch(()=>{});
+  showDialog(media);audio.pauseMusic();const video=$('video',media);video.muted=!audio.enabled;video.play().catch(()=>{});
 }
 
 const progress=$('.scroll-indicator i');

@@ -1,15 +1,18 @@
 import gsap from 'gsap';
 
-// Preloader: a progress bar and an odometer counter track real page loading (with a short
-// minimum so it reads as intentional), then the bar folds into the Z mark and the curtain lifts.
-const MIN_MS=1400,MAX_MS=6000;
+// Preloader: a progress bar and an odometer counter track what the first screen needs (markup,
+// styles and script have arrived by the time this runs; the web font is awaited), with a short
+// minimum so it reads as intentional, then the bar folds into the Z mark and the curtain lifts.
+// It deliberately does not wait for window load: posters, sound and below-the-fold images
+// load on demand and should not hold the page back.
+const MIN_MS=700,MAX_MS=3000,EXIT_SPEED=1.5;
 
 export function playPreloader({reduced,onReveal}){
   const root=document.querySelector('.preloader');
   if(!root||reduced){root?.remove();onReveal(true);return Promise.resolve();}
   const $=s=>root.querySelector(s),columns=[...root.querySelectorAll('.pl-digit>span')];
-  let loaded=document.readyState==='complete',shown=-1;
-  if(!loaded)window.addEventListener('load',()=>{loaded=true;},{once:true});
+  let loaded=!document.fonts,shown=-1;
+  document.fonts?.load('1em Aeonik').catch(()=>{}).then(()=>{loaded=true;});
   const setCount=value=>{
     if(value===shown)return;shown=value;
     [Math.floor(value/100),Math.floor(value/10)%10,value%10].forEach((digit,i)=>{columns[i].style.transform=`translateY(${-digit*10}%)`;});
@@ -27,7 +30,7 @@ export function playPreloader({reduced,onReveal}){
     }
     function finish(){
       const bar={left:5,top:34,width:110,height:16};
-      gsap.timeline({defaults:{ease:'expo.inOut'},onComplete(){root.remove();resolve();}})
+      gsap.timeline({defaults:{ease:'expo.inOut'},onComplete(){root.remove();resolve();}}).timeScale(EXIT_SPEED)
         .set($('.pl-track'),{opacity:0},.12)
         .set([$('.pl-top'),$('.pl-bottom')],{...bar,opacity:1},.12)
         .set($('.pl-fill'),{opacity:0},.12)
