@@ -1,4 +1,4 @@
-# ZEL — creative agency visual study
+# ZEL — creative agency
 
 Recreates the supplied Lusion reference through the end of “Where Creative Ideas Become Immersive Experiences”, branded ZEL.
 
