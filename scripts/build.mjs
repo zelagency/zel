@@ -9,7 +9,7 @@ await build({ entryPoints: ['src/main.js'], bundle: true, minify: true, format: 
 // Each route is the shared layout plus its own content; the footer ends in a "next page" band.
 export const pages=[
   {page:'home',route:'/',out:'dist/index.html',title:'ZEL — Bold Ideas, Brought to Life',description:'ZEL builds unique digital solutions for businesses and bold thinkers. Custom websites, commerce platforms and tools that turn ambitious ideas into reality.'},
-  {page:'about',route:'/about/',out:'dist/about/index.html',title:'About — ZEL',description:'ZEL is a digital studio designing and building distinctive websites, commerce platforms and tools, from idea to launch.'},
+  {page:'about',route:'/about/',out:'dist/about/index.html',title:'About — ZEL',description:'ZEL builds both sides of the counter: the storefronts customers see and the POS, kitchen and admin systems teams run on, on one source of truth.'},
   {page:'projects',route:'/projects/',out:'dist/projects/index.html',title:'Projects — ZEL',description:'Selected ZEL projects across fashion, food and digital experiences: Fogstores, Infinity Kitchens and BNM Cafe.'},
   {page:'contact',route:'/contact/',out:'dist/contact/index.html',title:'Contact — ZEL',description:'Start a project with ZEL. Describe your idea and prepare a project brief.'},
 ];

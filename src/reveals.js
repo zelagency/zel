@@ -47,7 +47,18 @@ export function initReveals(root){
   $$('[data-reveal-heading]',root).forEach(heading=>riseHeading(heading));
   $$('[data-reveal-lines]',root).forEach(p=>riseLines(p,{duration:1.1,stagger:.05,start:'top 92%'}));
   // Lists and cards settle up into place.
-  $$('.service-list>li,.principles>article,.contact-steps>li',root).forEach((item,i)=>gsap.from(item,{y:50,opacity:0,duration:1.1,ease:'expo.out',delay:(i%4)*.06,scrollTrigger:{trigger:item,start:'top 92%',once:true}}));
+  // Statements ink in word by word (inline image chips included) as they scroll through.
+  $$('[data-reveal-words]',root).forEach(p=>SplitText.create(p,{type:'words',wordsClass:'word',autoSplit:true,
+    onSplit:()=>gsap.fromTo(p.querySelectorAll('.word,.chip'),{opacity:.14},{opacity:1,stagger:.1,ease:'none',
+      scrollTrigger:{trigger:p,start:'top 80%',end:'bottom 50%',scrub:true}})}));
+  // Ledger figures count up once; the markup keeps the final value for no-JS and reduced motion.
+  $$('[data-count]',root).forEach(element=>{
+    const value=Number(element.dataset.count),state={n:0};if(!value)return;
+    element.textContent='0';restore.push(()=>{element.textContent=String(value);});
+    ScrollTrigger.create({trigger:element,start:'top 92%',once:true,onEnter:()=>gsap.to(state,{n:value,duration:1.8,ease:'expo.out',
+      onUpdate:()=>{element.textContent=String(Math.round(state.n));}})});
+  });
+  $$('.service-list>li,.principles>article,.contact-steps>li,.house-side,.stat,.lab-list>li',root).forEach((item,i)=>gsap.from(item,{y:50,opacity:0,duration:1.1,ease:'expo.out',delay:(i%4)*.06,scrollTrigger:{trigger:item,start:'top 92%',once:true}}));
   $$('.project',root).forEach(project=>{
     const image=project.querySelector('.project-image'),meta=project.querySelector('.project-meta');
     // Cards tilt back in perspective as they enter and settle flat in place.

@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f0f1fa">
-  <meta name="description" content="ZEL is a digital studio designing and building distinctive websites, commerce platforms and tools, from idea to launch.">
+  <meta name="description" content="ZEL builds both sides of the counter: the storefronts customers see and the POS, kitchen and admin systems teams run on, on one source of truth.">
   <title>About — ZEL</title>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/style.css?v=5327ca10006a">
+  <link rel="stylesheet" href="/style.css?v=98998ce38d8c">
   <link rel="stylesheet" href="/projects.css?v=fea068a6b06e">
 </head>
 <body data-page="about">
@@ -24,33 +24,104 @@
     </nav>
   </header>
   <main id="main" data-page-root>
-    <section class="page-hero section" id="top" aria-labelledby="page-title">
-      <p class="eyebrow">ABOUT ZEL</p>
-      <h1 class="page-title" id="page-title" data-intro-lines><span class="line">We are ZEL,</span><span class="line">a digital studio</span></h1>
-      <p class="page-lede" data-reveal-lines>We design and build distinctive websites, commerce platforms and tools for businesses with ambitious ideas.</p>
+    <section class="page-hero about-hero section" id="top" aria-labelledby="page-title">
+      <p class="eyebrow">ABOUT ZEL · BANGALORE, INDIA</p>
+      <h1 class="page-title" id="page-title" data-intro-lines><span class="line">We build both </span><span class="line">sides of </span><span class="line">the counter</span></h1>
+      <p class="page-lede" data-reveal-lines>The storefront your customers see, and the systems your team runs on: designed and engineered together, on one source of truth.</p>
     </section>
-    <section class="section about-media-section" aria-label="Studio reel">
-      <div class="flower-frame media-frame about-media"><video class="ambient-video" muted loop playsinline preload="none" poster="/assets/flowers.jpg" data-src="/assets/flowers.mp4" aria-label="Abstract flowers in motion"></video><div class="flower-tint"></div></div>
+
+    <section class="section manifesto" aria-labelledby="manifesto-title">
+      <h2 class="sr-only" id="manifesto-title">How ZEL started</h2>
+      <p class="manifesto-copy" data-reveal-words>ZEL started behind a till. A streetwear label <span class="chip" aria-hidden="true"><img src="/assets/projects/fogstores-look.webp" alt="" loading="lazy" decoding="async"></span> needed more than a theme, so we built the store and the admin behind it. Then a cloud kitchen <span class="chip" aria-hidden="true"><img src="/assets/projects/infinity-hero.jpg" alt="" loading="lazy" decoding="async"></span> needed one ticket for three ordering apps, and a campus cafe <span class="chip chip-logo" aria-hidden="true"><img src="/assets/projects/bnm-logo.png" alt="" loading="lazy" decoding="async"></span> needed a queue that talks back. Every time, the website was the easy half.</p>
     </section>
+
+    <section class="section house" id="house" aria-labelledby="house-title">
+      <div class="section-head"><p class="eyebrow">WHAT WE ACTUALLY BUILD</p><h2 class="section-title" id="house-title" data-reveal-heading>Front of house,<br>back of house</h2></div>
+      <p class="house-hint" aria-hidden="true">HOVER A LINE TO SEE WHAT IT RUNS ON ↘</p>
+      <div class="house-grid">
+        <div class="house-side house-front">
+          <h3><span>FRONT OF HOUSE</span><small>What customers touch</small></h3>
+          <ul>
+            <li data-pair="1"><span>Campaign-led storefront</span><i>FOG</i></li>
+            <li data-pair="2"><span>Daily menus and meal subscriptions</span><i>INF</i></li>
+            <li data-pair="3"><span>Checkout and online payments</span><i>ALL</i></li>
+            <li data-pair="4"><span>Live order tracking</span><i>BNM</i></li>
+            <li data-pair="5"><span>Mobile menu and cart</span><i>BNM</i></li>
+            <li data-pair="6"><span>Accounts and order history</span><i>ALL</i></li>
+          </ul>
+        </div>
+        <div class="house-seam" aria-hidden="true"><span>ONE DATABASE · ONE TRUTH</span></div>
+        <div class="house-side house-back">
+          <h3><span>BACK OF HOUSE</span><small>What your team runs on</small></h3>
+          <ul>
+            <li data-pair="1"><span>Products, collections and multi-location inventory</span><i>FOG</i></li>
+            <li data-pair="2"><span>Subscription credit ledger</span><i>INF</i></li>
+            <li data-pair="3"><span>Server-verified payments and refunds</span><i>ALL</i></li>
+            <li data-pair="4"><span>Realtime kitchen tickets and per-station displays</span><i>BNM</i></li>
+            <li data-pair="5"><span>Cashier POS for counter, cash and UPI</span><i>BNM</i></li>
+            <li data-pair="6"><span>Owner analytics and a full audit trail</span><i>INF</i></li>
+          </ul>
+        </div>
+      </div>
+      <p class="house-key">FOG — Fogstores &nbsp;·&nbsp; INF — Infinity Kitchens &nbsp;·&nbsp; BNM — BNM Cafe</p>
+    </section>
+
+    <section class="section ledger" id="ledger" aria-labelledby="ledger-title">
+      <div class="section-head"><p class="eyebrow">THE LEDGER</p><h2 class="section-title" id="ledger-title" data-reveal-heading>Numbers from<br>the codebase</h2></div>
+      <p class="ledger-note">No vanity metrics. Every figure below is counted from a shipped repository.</p>
+      <ol class="stats">
+        <li class="stat"><strong><span data-count="3">3</span>→<span data-count="1">1</span></strong><p>Website, Swiggy and Zomato orders arrive on one kitchen ticket board.</p><small>INFINITY KITCHENS</small></li>
+        <li class="stat"><strong><span data-count="0">0</span><em>₹</em></strong><p>Money on the kitchen screen. Cooks see the food; owners see the figures.</p><small>INFINITY KITCHENS</small></li>
+        <li class="stat"><strong data-count="90">90</strong><p>Access policies in the database, so every role only ever reads what it should.</p><small>INFINITY KITCHENS</small></li>
+        <li class="stat"><strong data-count="162">162</strong><p>Automated tests guarding checkout, payments, subscriptions and the kitchen flow.</p><small>INFINITY KITCHENS</small></li>
+        <li class="stat"><strong data-count="4">4</strong><p>Surfaces in one app: customer, cashier, station and admin.</p><small>BNM CAFE</small></li>
+        <li class="stat"><strong data-count="386">386</strong><p>Commits from first menu to live POS.</p><small>BNM CAFE</small></li>
+      </ol>
+    </section>
+
     <section class="section services" id="services" aria-labelledby="services-title">
       <div class="section-head"><p class="eyebrow">WHAT WE DO</p><h2 class="section-title" id="services-title" data-reveal-heading>From idea to launch</h2></div>
       <ol class="service-list">
-        <li><span class="service-index">01</span><h3>Strategy &amp; direction</h3><p>We start with the business: who it serves, what it needs to do, and what will make it stand apart.</p></li>
-        <li><span class="service-index">02</span><h3>Design</h3><p>Interfaces with a clear point of view, with typography, motion and interaction shaped around the brand.</p></li>
-        <li><span class="service-index">03</span><h3>Development</h3><p>Fast, accessible builds: storefronts, ordering platforms, dashboards and the tools behind them.</p></li>
-        <li><span class="service-index">04</span><h3>Launch &amp; growth</h3><p>We ship, measure and refine, so the work keeps improving long after launch day.</p></li>
+        <li><span class="service-index">01</span><h3>Strategy</h3><p>We map the business before the screens: who orders, who cooks, who counts the money, and what each of them needs to see. <span class="service-tags">Discovery · Product briefs · Roles &amp; permissions</span></p></li>
+        <li><span class="service-index">02</span><h3>Design</h3><p>Two registers, one system: an expressive storefront that sells, and quiet operational screens built to be read mid-rush. <span class="service-tags">Brand interfaces · UX/UI · Motion · Ops dashboards</span></p></li>
+        <li><span class="service-index">03</span><h3>Engineering</h3><p>Full-stack builds on a database you own, with realtime updates, payments and access rules enforced at the source. <span class="service-tags">Next.js · TypeScript · Postgres · Supabase · Razorpay</span></p></li>
+        <li><span class="service-index">04</span><h3>Operations &amp; growth</h3><p>We ship, then stay: analytics, audit trails and forecasting so the business can see itself clearly and improve. <span class="service-tags">Analytics · Monitoring · ML forecasting · Docker</span></p></li>
       </ol>
     </section>
+
     <section class="section approach-section" id="approach" aria-labelledby="approach-title">
-      <div class="section-head"><p class="eyebrow">OUR APPROACH</p><h2 class="section-title" id="approach-title" data-reveal-heading>Every detail has a purpose</h2></div>
+      <div class="section-head"><p class="eyebrow">HOW WE THINK</p><h2 class="section-title" id="approach-title" data-reveal-heading>Rules we build by</h2></div>
       <div class="principles">
-        <article><span class="principle-mark">A</span><h3>Every business is different</h3><p>Every business has its own challenges. Every new idea has its own possibilities. We design around both.</p></article>
-        <article><span class="principle-mark">B</span><h3>Every interaction invites discovery</h3><p>Creative direction, digital craft and interactive technology come together to build work that feels unmistakably yours.</p></article>
-        <article><span class="principle-mark">C</span><h3>Built to connect</h3><p>We create work that connects with people and stays with them long after they leave.</p></article>
+        <article><span class="principle-mark">01</span><h3>The database is the truth</h3><p>The interface never claims more than it knows. No fake saves, no spinners without an outcome, no estimates dressed up as facts.</p></article>
+        <article><span class="principle-mark">02</span><h3>Every role gets its own screen</h3><p>Kitchen staff never see money. A manager never sees pricing they cannot change. The UI enforces what the data rules already guarantee.</p></article>
+        <article><span class="principle-mark">03</span><h3>Readable mid-rush</h3><p>Operational screens are instruments, not marketing: big type, high contrast and one obvious action, legible at arm’s length.</p></article>
+        <article><span class="principle-mark">04</span><h3>Own your data</h3><p>Your catalogue, orders and customers live in tables you control, not rented back to you by a platform.</p></article>
       </div>
     </section>
+
+    <section class="section lab" id="lab" aria-labelledby="lab-title">
+      <div class="section-head"><p class="eyebrow">ZEL LAB · OFF THE CLOCK</p><h2 class="section-title" id="lab-title" data-reveal-heading>Things we build<br>to stay sharp</h2></div>
+      <ol class="lab-list">
+        <li><span class="lab-index">L.01</span><h3>Everest Textile Mills</h3><p>Yarn to dispatch on one ledger: stock, production floor, QC, invoices and month-end profit, running entirely on the mill’s own machine.</p><small>ODOO × NMIT HACKATHON 2026 · WITH TEAM 42</small></li>
+        <li><span class="lab-index">L.02</span><h3>PulseGrid</h3><p>Point a base URL at it and every API call is measured, charted, forecast and explained. No SDK, no code change.</p><small>MLOPS HACKATHON · API ANALYTICS</small></li>
+        <li><span class="lab-index">L.03</span><h3>Predictive Resource Monitor</h3><p>Forecasts CPU, memory and storage, then prices the smallest allocation that stays inside an SLA.</p><small>MLOPS · PUBLISHED ON DOCKER HUB</small></li>
+      </ol>
+    </section>
+
+    <section class="section colophon" aria-labelledby="colophon-title">
+      <h2 class="eyebrow" id="colophon-title">CREDITS &amp; REFERENCES</h2>
+      <dl class="colophon-list">
+        <div><dt>SITE LANGUAGE</dt><dd>VISUAL STUDY OF <a href="https://lusion.co/" target="_blank" rel="noopener">LUSION ↗</a></dd></div>
+        <div><dt>AMBIENT &amp; UI SOUND</dt><dd>REFERENCE MEDIA BY <a href="https://lusion.co/" target="_blank" rel="noopener">LUSION ↗</a></dd></div>
+        <div><dt>THIS PAGE’S LEDGER</dt><dd>AFTER <a href="https://lusion.co/about" target="_blank" rel="noopener">LUSION/ABOUT ↗</a> &amp; <a href="https://basement.studio/" target="_blank" rel="noopener">BASEMENT.STUDIO ↗</a></dd></div>
+        <div><dt>TYPE</dt><dd>AEONIK BY <a href="https://cotypefoundry.com/" target="_blank" rel="noopener">COTYPE FOUNDRY ↗</a></dd></div>
+        <div><dt>PHOTOGRAPHY</dt><dd>OUR CLIENTS’ OWN: FOGSTORES, INFINITY KITCHENS, BNM CAFE</dd></div>
+        <div><dt>RULES WE BUILD BY</dt><dd>LIFTED FROM OUR OWN PROJECT BRIEFS</dd></div>
+      </dl>
+    </section>
+
     <section class="section cta-band" aria-labelledby="cta-title">
-      <h2 id="cta-title" data-reveal-heading>Have a bold idea?</h2>
+      <h2 id="cta-title" data-reveal-heading>What’s your<br>counter?</h2>
       <div class="cta-actions"><button class="pill dark" data-contact><span class="dot"></span>LET’S TALK</button><a class="pill white" href="/projects/"><span class="dot"></span>SEE OUR WORK <span class="arrow">↗</span></a></div>
     </section>
   </main>
@@ -69,6 +140,6 @@
   <dialog id="menu-dialog" class="menu-dialog"><div class="menu-inner"><span class="menu-label">EXPLORE ZEL</span><nav aria-label="Explore"><a href="/">Home <span>01</span></a><a href="/about/" aria-current="page">About <span>02</span></a><a href="/projects/">Projects <span>03</span></a><a href="/contact/">Contact <span>04</span></a></nav><button class="menu-contact" data-contact>Let’s make something extraordinary. ↗</button></div></dialog>
   <dialog id="contact-dialog" class="contact-dialog"><button class="dialog-close pill" data-close aria-label="Close contact">CLOSE ×</button><span class="menu-label">LET’S TALK</span><h2>Your next<br>big idea.</h2><p>Tell us what you have in mind.</p><form id="contact-form" data-brief-form><label>Your name<input name="name" autocomplete="name" required placeholder="How should we call you?"></label><label>Email address<input name="email" type="email" autocomplete="email" required placeholder="you@company.com"></label><label>Your project<textarea name="project" required placeholder="The idea, the ambition, the possibilities…" rows="3"></textarea></label><button class="pill dark" type="submit">PREPARE PROJECT BRIEF ↗</button><p class="form-status" aria-live="polite"></p></form></dialog>
   <dialog id="media-dialog" class="media-dialog"><button class="dialog-close pill" data-close aria-label="Close media">CLOSE ×</button><div class="media-dialog-content"></div></dialog>
-  <script type="module" src="/app.js?v=310dbddbe4a7"></script>
+  <script type="module" src="/app.js?v=6d6524f9a7ea"></script>
 </body>
 </html>

@@ -105,7 +105,7 @@ for(const element of [...document.querySelectorAll('[src],[href],[data-src]')]){
 await transform(fs.readFileSync('dist/style.css','utf8'),{loader:'css',minify:true});
 await transform(fs.readFileSync('dist/projects.css','utf8'),{loader:'css',minify:true});
 // Every route is a complete page: own content, current menu item and the next page in the footer.
-for(const [file,route,next,heading] of [['dist/index.html','/','/about/','We build'],['dist/about/index.html','/about/','/projects/','We are ZEL'],['dist/projects/index.html','/projects/','/contact/','Projects'],['dist/contact/index.html','/contact/','/','Let’s work']]){
+for(const [file,route,next,heading] of [['dist/index.html','/','/about/','We build'],['dist/about/index.html','/about/','/projects/','both sides'],['dist/projects/index.html','/projects/','/contact/','Projects'],['dist/contact/index.html','/contact/','/','Let’s work']]){
   const page=new JSDOM(fs.readFileSync(file,'utf8')).window.document;
   assert.ok(page.querySelector('[data-page-root] h1')?.textContent.includes(heading),`${route} has its heading`);
   assert.equal(page.querySelector('#menu-dialog [aria-current="page"]')?.getAttribute('href'),route,`${route} marks itself current in the menu`);
