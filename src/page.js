@@ -56,7 +56,8 @@ export function mountPage({root,footer,motionQuery,isReduced,ui}){
     return restoreReveals;
   });
   mm.add('(min-width: 813px) and (prefers-reduced-motion: no-preference)',()=>{
-    if($('.reel-pin'))ScrollTrigger.create({trigger:$('.reel-pin'),start:'top 5%',end:'+=100%',pin:true,anticipatePin:1});
+    // Created after the triggers below it, so it must refresh first or their starts ignore the pin spacing.
+    if($('.reel-pin'))ScrollTrigger.create({trigger:$('.reel-pin'),start:'top 5%',end:'+=100%',pin:true,anticipatePin:1,refreshPriority:1});
   });
   // Reel cursor follower and magnetic pills share one frame-damped ticker.
   mm.add('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)',()=>{
