@@ -13,6 +13,8 @@ export const pages=[
   {page:'projects',route:'/projects/',out:'dist/projects/index.html',title:'Projects — ZEL',description:'Selected ZEL projects across fashion, food and digital experiences: Fogstores, Infinity Kitchens and BNM Cafe.'},
   {page:'contact',route:'/contact/',out:'dist/contact/index.html',title:'Contact — ZEL',description:'Start a project with ZEL. Describe your idea and prepare a project brief.'},
 ];
+// Link previews (og:image, og:url) need absolute URLs.
+const site='https://zel-tau.vercel.app';
 const labels={home:'Home',about:'About us',projects:'Projects',contact:'Contact'};
 // Hash the text with line endings normalised, so a Windows checkout (CRLF) and CI (LF) agree.
 const hashOf=file=>createHash('sha256').update(readFileSync(file,'utf8').replaceAll('\r\n','\n')).digest('hex').slice(0,12);
@@ -36,7 +38,8 @@ function footer(next){
 pages.forEach((page,i)=>{
   const next=pages[(i+1)%pages.length];
   let html=layout
-    .replace('{{title}}',page.title).replace('{{description}}',page.description).replace('{{page}}',page.page)
+    .replaceAll('{{title}}',page.title).replaceAll('{{description}}',page.description).replace('{{page}}',page.page)
+    .replace('{{url}}',site+page.route).replaceAll('{{site}}',site)
     .replace('{{main}}',readFileSync(`src/site/pages/${page.page}.html`,'utf8').trimEnd())
     .replace('{{footer}}',footer(next))
     .replaceAll(`<a href="${page.route}">`,`<a href="${page.route}" aria-current="page">`);
