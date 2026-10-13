@@ -3,5 +3,15 @@
   "framework": null,
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "trailingSlash": true
+  "trailingSlash": true,
+  "headers": [
+    {
+      "source": "/(app\\.js|style\\.css|projects\\.css)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800" }]
+    }
+  ]
 }
