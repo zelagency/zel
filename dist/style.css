@@ -2,7 +2,7 @@
 @font-face{font-family:Aeonik;src:url('/assets/Aeonik-Regular.woff2') format('woff2');font-weight:400 500;font-style:normal;font-display:swap}body{font-family:Aeonik,Arial,Helvetica,sans-serif}.about-title{letter-spacing:-.02em}.ideas h2{letter-spacing:-.01em}.work-heading h2{letter-spacing:-.02em}.hero h1{letter-spacing:0}.menu-logo{position:absolute;left:var(--margin);top:clamp(30px,2.45vw,50px)}.gallery-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:25px;width:100%}.gallery-grid button{padding:0;text-align:left;background:none;color:white}.gallery-grid img{width:100%;max-height:none;aspect-ratio:1/.65;object-fit:cover;border-radius:12px}.gallery-grid span{display:block;margin-top:10px;font-size:16px}.media-dialog-content:has(.gallery-grid){height:auto;justify-content:flex-start}.media-dialog-content:has(.gallery-grid) h2{align-self:flex-start;margin-bottom:20px}
 @media(max-width:812px){.gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 12px}.gallery-grid span{font-size:12px}.menu-logo{top:30px}}
 @media(min-aspect-ratio:21/9){.hero h1{font-size:2vw;width:36vw}.about-title{font-size:8vw}.reel-frame{height:80svh}}
-@media(max-width:812px){:root{--margin:25px;--radius:15px}.header{padding:25px}.header-actions{gap:8px}.logo{font-size:29px}.pill{height:43px;padding:0 19px;gap:12px;font-size:11px}.sound{width:43px;padding:0}.sound svg{width:24px}.white{height:54px;font-size:13px;padding:0 23px}.hero{min-height:650px}.hero h1{left:25px;top:130px;width:calc(100% - 50px);font-size:6vw;line-height:1.1}.desktop-break{display:none}.hero-visual{top:34svh;bottom:8svh}.scroll-cue{bottom:3svh}.scroll-cue b{font-size:11px}.hero-hint{display:none}.about{padding-top:120px;padding-bottom:100px}.about-title{font-size:13.8vw;letter-spacing:-.045em}.about-title .first{padding-left:0}.about-content{grid-template-columns:1fr;gap:40px;margin-top:55px}.about-copy{font-size:22px;order:-1;line-height:1.4}.flower-frame{width:85%;margin-top:20px}.ribbon-blue{width:160%;left:-25%;opacity:.85}.ribbon path{stroke-width:28}.reel{padding-bottom:80px}.reel-frame{min-height:0;height:55svh}.reel-title{font-size:10vw;gap:15px}.play-pill{min-width:75px;min-height:52px}.play-pill svg{width:25px}.reel-cursor{display:none}.marquee{height:42px}.marquee span{width:50vw}.work{padding-top:30px}.work-heading{display:block}.work-heading h2{font-size:13vw}.work-heading p{width:100%;margin-top:25px;font-size:12px}.project-grid{grid-template-columns:1fr;gap:40px;margin-top:35px}.project-meta{font-size:10px}.project-title{font-size:30px}.project-arrow{width:45px;height:45px;right:15px;bottom:15px}.all-projects{margin-top:45px}.ideas{padding-top:110px}.ideas h2{font-size:10.4vw;line-height:1.05}.ideas-content{grid-template-columns:1fr;gap:45px;margin-top:90px}.ideas-copy{font-size:22px}.ribbon-aqua{height:850px;width:150%;left:-30%}.device-screen>span{font-size:8vw}.device-scene{padding-bottom:10px}.end-note{margin-top:80px;flex-wrap:wrap;font-size:9px}.scroll-indicator{display:none}.contact-dialog{padding:55px 25px 30px}.contact-dialog h2{font-size:62px}.dialog-close{right:15px;top:15px}.media-dialog{height:85svh;padding:75px 20px 25px}.menu-inner{padding:130px 25px 40px}.menu-inner nav>a{font-size:16vw}#fluid-canvas{display:none}}
+@media(max-width:812px){:root{--margin:25px;--radius:15px}.header{padding:25px}.header-actions{gap:8px}.logo{font-size:29px}.pill{height:43px;padding:0 19px;gap:12px;font-size:11px}.sound{width:43px;padding:0}.sound svg{width:24px}.white{height:54px;font-size:13px;padding:0 23px}.hero{min-height:650px}.hero h1{left:25px;top:130px;width:calc(100% - 50px);font-size:6vw;line-height:1.1}.hero-visual{top:34svh;bottom:8svh}.scroll-cue{bottom:3svh}.scroll-cue b{font-size:11px}.hero-hint{display:none}.about{padding-top:120px;padding-bottom:100px}.about-title{font-size:13.8vw;letter-spacing:-.045em}.about-title .first{padding-left:0}.about-content{grid-template-columns:1fr;gap:40px;margin-top:55px}.about-copy{font-size:22px;order:-1;line-height:1.4}.flower-frame{width:85%;margin-top:20px}.ribbon-blue{width:160%;left:-25%;opacity:.85}.ribbon path{stroke-width:28}.reel{padding-bottom:80px}.reel-frame{min-height:0;height:55svh}.reel-title{font-size:10vw;gap:15px}.play-pill{min-width:75px;min-height:52px}.play-pill svg{width:25px}.reel-cursor{display:none}.marquee{height:42px}.marquee span{width:50vw}.work{padding-top:30px}.work-heading{display:block}.work-heading h2{font-size:13vw}.work-heading p{width:100%;margin-top:25px;font-size:12px}.project-grid{grid-template-columns:1fr;gap:40px;margin-top:35px}.project-meta{font-size:10px}.project-title{font-size:30px}.project-arrow{width:45px;height:45px;right:15px;bottom:15px}.all-projects{margin-top:45px}.ideas{padding-top:110px}.ideas h2{font-size:10.4vw;line-height:1.05}.ideas-content{grid-template-columns:1fr;gap:45px;margin-top:90px}.ideas-copy{font-size:22px}.ribbon-aqua{height:850px;width:150%;left:-30%}.device-screen>span{font-size:8vw}.device-scene{padding-bottom:10px}.end-note{margin-top:80px;flex-wrap:wrap;font-size:9px}.scroll-indicator{display:none}.contact-dialog{padding:55px 25px 30px}.contact-dialog h2{font-size:62px}.dialog-close{right:15px;top:15px}.media-dialog{height:85svh;padding:75px 20px 25px}.menu-inner{padding:130px 25px 40px}.menu-inner nav>a{font-size:16vw}#fluid-canvas{display:none}}
 @media(max-width:420px){.talk{padding:0 13px}.header-actions{gap:6px}.menu-button{padding:0 14px}.logo{font-size:26px}.hero h1{font-size:7.3vw}.about-title{font-size:16vw}.ideas h2{font-size:11.4vw}.about-copy,.ideas-copy{font-size:19px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}.reel-cursor,#fluid-canvas{display:none!important}}
 /* Keep modal content scrollable without exposing native scrollbar tracks. */
@@ -20,7 +20,6 @@ html[data-input-mode="pointer"] :is(button,a):focus{outline:none}
 .hero-caption{position:absolute;left:32px;bottom:27px;font-size:clamp(18px,1.3vw,26px);letter-spacing:-.02em}
 .hero-visual .hero-hint{opacity:.85;color:inherit;right:32px;bottom:30px;font-size:11px;letter-spacing:.02em}
 .hero-visual[data-inverted="true"]{background:#dce0ff;color:#242bf4}
-@media(max-width:812px){.kinetic-word{height:52%;top:20%;width:94%;left:3%}.hero-caption{left:20px;bottom:22px;font-size:19px}.hero-visual .hero-hint{display:block;left:20px;right:auto;bottom:48px;font-size:11px;max-width:80%;text-align:left}}
 /* Phone & tablet ------------------------------------------------------------ */
 .hint-touch{display:none}
 /* Once content scrolls beneath it, the fixed header needs its own surface on smaller screens. */
@@ -51,7 +50,7 @@ html[data-input-mode="pointer"] :is(button,a):focus{outline:none}
   .menu-inner{padding-top:140px}
 }
 @media(min-width:813px) and (max-width:1100px) and (orientation:portrait){
-  .kinetic-word{height:58%;top:15%}
+  .kinetic-word{width:88%;height:auto;aspect-ratio:1100/520;left:6%;top:50%;translate:0 -50%}
   .about-content{grid-template-columns:1fr;gap:50px}
   .about-copy{order:-1;max-width:640px;font-size:24px}
   .flower-frame{width:75%;margin-top:0}
@@ -127,8 +126,21 @@ html[data-input-mode="pointer"] :is(button,a):focus{outline:none}
 .project-title-text{display:block;transition:transform .5s var(--snap)}
 @media(hover:hover){.project:has(.project-image:hover) .project-title-arrow{opacity:1;transform:none}.project:has(.project-image:hover) .project-title-text{transform:translateX(1.15em)}}
 .project:has(.project-image:focus-visible) .project-title-arrow{opacity:1;transform:none}.project:has(.project-image:focus-visible) .project-title-text{transform:translateX(1.15em)}
-/* Two-line hero headline on phones as well: keep the break and size each line to fit. */
-@media(max-width:812px){.hero h1 .desktop-break{display:inline}.hero h1{font-size:5.5vw}}
+/* Phone hero: headline and frame stack in normal flow, so the frame always starts just under the copy
+   and fills what is left of the screen. The wordmark box matches the SVG viewBox (it is drawn with
+   preserveAspectRatio="none"), so the letters keep their drawn proportions instead of stretching tall. */
+@media(max-width:812px){
+  .hero{height:auto;min-height:0;padding-top:108px;padding-bottom:calc(3svh + 42px)}
+  .hero h1{position:static;width:auto;font-size:7.4vw;line-height:1.1;letter-spacing:-.015em}
+  .hero h1 .line{text-wrap:balance}
+  /* Fill the screen below a ~4-line headline, but never taller than a poster so the wordmark is not lost in it. */
+  .hero-visual{position:relative;inset:auto;flex:none;height:clamp(300px,calc(97svh - 180px - 33vw),125vw);margin-top:clamp(22px,4svh,40px)}
+  .kinetic-word{width:88%;height:auto;aspect-ratio:1100/520;left:6%;top:50%;translate:0 -50%}
+  .hero-visual .hero-hint{display:block;top:20px;left:20px;right:auto;bottom:auto;font-size:11px;letter-spacing:.04em;text-align:left}
+  .hero-caption{left:20px;right:20px;bottom:18px;font-size:22px;text-align:left}
+  .scroll-cue{bottom:calc(3svh + 4px)}
+}
+@media(max-width:812px) and (max-height:700px){.hero{padding-top:96px}.hero h1{font-size:6.6vw}}
 /* Page transition curtain (top layer via popover where supported). */
 .page-transition{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:transparent;overflow:hidden;z-index:200;display:none;cursor:progress}
 .page-transition:popover-open,.page-transition.is-open{display:block}
