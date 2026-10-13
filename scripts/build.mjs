@@ -27,7 +27,7 @@ function footer(next){
       <div class="footer-col"><span class="footer-label">LIVE WORK</span>${live}</div>
       <div class="footer-col"><span class="footer-label">START A PROJECT</span><p>Have an idea worth building?</p><button class="pill dark" data-contact>LET’S TALK <span class="small-dot">•</span></button></div>
     </div>
-    <div class="footer-bottom section"><span>© 2026 ZEL</span><span>VISUAL STUDY · REFERENCE MEDIA BY <a href="https://lusion.co/" target="_blank" rel="noopener">LUSION ↗</a></span><a href="#main">BACK TO TOP ↑</a></div>
+    <div class="footer-bottom section"><span>© 2026 ZEL</span><a href="#main">BACK TO TOP ↑</a></div>
     <a class="next-page" href="${next.route}" data-next-page><span class="next-hint">KEEP SCROLLING<br>TO LEARN MORE</span><span class="next-title">${labels[next.page]}</span><span class="next-label">NEXT PAGE <i><b></b><b></b></i></span></a>
   </footer>`;
 }
