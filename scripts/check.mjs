@@ -104,6 +104,8 @@ for(const element of [...document.querySelectorAll('[src],[href],[data-src],[dat
 }
 await transform(fs.readFileSync('dist/style.css','utf8'),{loader:'css',minify:true});
 await transform(fs.readFileSync('dist/projects.css','utf8'),{loader:'css',minify:true});
+// Case-study images only appear when a project opens, so check the project data directly.
+for(const project of projects)for(const image of [project.cover,...project.images].filter(Boolean))assert.ok(fs.existsSync(path.join('dist',image.src)),`Missing project image ${image.src}`);
 // Every route is a complete page: own content, current menu item and the next page in the footer.
 for(const [file,route,next,heading] of [['dist/index.html','/','/about/','We build'],['dist/about/index.html','/about/','/projects/','both sides'],['dist/projects/index.html','/projects/','/contact/','Projects'],['dist/contact/index.html','/contact/','/','Let’s work']]){
   const page=new JSDOM(fs.readFileSync(file,'utf8')).window.document;
@@ -111,6 +113,9 @@ for(const [file,route,next,heading] of [['dist/index.html','/','/about/','We bui
   assert.equal(page.querySelector('#menu-dialog [aria-current="page"]')?.getAttribute('href'),route,`${route} marks itself current in the menu`);
   assert.equal(page.querySelector('[data-next-page]')?.getAttribute('href'),next,`${route} leads to ${next}`);
   assert.ok(page.querySelector('script[src^="/app.js?v="]'),`${route} loads the versioned app`);
+  for(const element of page.querySelectorAll('[src],[href],[data-src],[data-poster]'))for(const attr of ['src','href','data-src','data-poster']){
+    const ref=element.getAttribute(attr);if(ref?.startsWith('/')&&!ref.startsWith('//'))assert.ok(fs.existsSync(path.join('dist',new URL(ref,'http://localhost').pathname)),`${route}: missing asset ${ref}`);
+  }
 }
 console.log('PASS: four routed pages; hero colour toggle; project navigation/URLs; dialogs/root scroll lock and restoration; sound/reel/brief; versioned assets; CSS; consistent damping and pointer trajectories at multiple refresh rates; pointer pause/re-entry/expiry.');
 dom.window.close();process.exit(0);
