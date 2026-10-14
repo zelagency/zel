@@ -3,7 +3,7 @@ import gsap from 'gsap';
 // A dandelion drawn live in the about frame, in the same ink-on-cobalt treatment the footage had.
 // It turns slowly and lets seeds go on the breeze; a pointer moving through the head blows more
 // loose. Released seeds regrow, so the head never goes bald. Reduced motion gets one still frame.
-const GOLDEN=Math.PI*(3-Math.sqrt(5)),HAIRS=9,MAX_FLYERS=90;
+const GOLDEN=Math.PI*(3-Math.sqrt(5)),HAIRS=9,MAX_FLYERS=90,NONE=[0,0,0];
 const rand=(a,b)=>a+Math.random()*(b-a);
 const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
 const unit=a=>{const l=Math.hypot(...a);return a.map(n=>n/l);};
@@ -16,7 +16,7 @@ function seedHead(count){
     const r=Math.sqrt(1-y*y),a=i*GOLDEN,d=[Math.cos(a)*r,y,Math.sin(a)*r];
     const u=unit(cross(d,Math.abs(y)<.9?[0,1,0]:[1,0,0])),v=cross(d,u);
     const hairs=Array.from({length:HAIRS},(_,k)=>{const p=k/HAIRS*Math.PI*2+rand(-.25,.25);
-      return [0,1,2].map(j=>d[j]*c+(u[j]*Math.cos(p)+v[j]*Math.sin(p))*s);});
+      const cp=Math.cos(p)*s,sp=Math.sin(p)*s;return [0,1,2].map(j=>d[j]*c+u[j]*cp+v[j]*sp);});
     seeds.push({d,hairs,reach:rand(.9,1.06),grow:1,gone:false,regrowAt:0,sx:0,sy:0,z:1});
   }
   return seeds;
@@ -25,7 +25,17 @@ function seedHead(count){
 export function initBloom(canvas){
   const frame=canvas?.parentElement;
   if(!frame)return;
+  // The frame is below the fold on every screen, so the scene is only built once it is a screen away.
+  let stop=null;
+  const near=new IntersectionObserver(([entry])=>{if(entry.isIntersecting){near.disconnect();stop=buildBloom(canvas,frame);}},{rootMargin:'100% 0px'});
+  near.observe(canvas);
+  return ()=>{near.disconnect();stop?.();};
+}
+
+function buildBloom(canvas,frame){
+  // Safari returns no context once its canvas memory budget is spent; the frame then keeps its tinted background.
   const ctx=canvas.getContext('2d');
+  if(!ctx)return;
   const heads=[
     {at:[.62,.44],size:.47,ink:.9,width:1,phase:0,tilt:-.32,seeds:seedHead(300),stem:[.53,1.06],main:true},
     {at:[.19,.68],size:.2,ink:.3,width:2.4,phase:2.1,tilt:-.2,seeds:seedHead(130),stem:[.24,1.06]},
@@ -34,9 +44,9 @@ export function initBloom(canvas){
   const main=heads[0],flyers=[];
   let width=0,height=0,dpr=1,sky,grain,clock=0,nextRelease=1,nextDrift=3;
 
+  // Layout size, not the on-screen box: the frame tilts in as it scrolls, and a rotated box would stretch the scene.
   function resize(){
-    const rect=canvas.getBoundingClientRect();
-    dpr=Math.min(devicePixelRatio||1,2);width=rect.width;height=rect.height;
+    dpr=Math.min(devicePixelRatio||1,2);width=canvas.offsetWidth;height=canvas.offsetHeight;
     canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);
     for(const head of heads){head.x=head.at[0]*width;head.y=head.at[1]*height;head.R=head.size*height;}
     sky=ctx.createRadialGradient(width*.62,height*.3,0,width*.62,height*.3,width*.85);
@@ -47,7 +57,7 @@ export function initBloom(canvas){
   {
     const tile=document.createElement('canvas');tile.width=tile.height=96;
     const t=tile.getContext('2d'),noise=t.createImageData(96,96);
-    for(let i=0;i<noise.data.length;i+=4){const n=Math.random()*255;noise.data.set([n,n,n,28],i);}
+    const px=noise.data;for(let i=0;i<px.length;i+=4){px[i]=px[i+1]=px[i+2]=Math.random()*255;px[i+3]=28;}
     t.putImageData(noise,0,0);grain=ctx.createPattern(tile,'repeat');
   }
 
@@ -57,13 +67,27 @@ export function initBloom(canvas){
     flyers.push({x:seed.sx,y:seed.sy,vx,vy,ang:0,len:head.R*rand(.85,1),ink:.85,width:1,drift:rand(.8,1.2),phase:rand(0,9)});
   }
 
-  function drawHead(head){
+  // The head's turn and perspective at this instant: `turn` spins a direction, `flat` projects p*k+q to the screen.
+  function pose(head){
     const spin=clock*.07+head.phase,cy=Math.cos(spin),sy=Math.sin(spin),cx=Math.cos(head.tilt),sx=Math.sin(head.tilt);
     const R=head.R,ox=head.x+Math.sin(clock*.5+head.phase)*R*.03,oy=head.y,focal=R*5;
     const turn=([x,y,z])=>{const x1=x*cy+z*sy,z1=z*cy-x*sy;return [x1,y*cx-z1*sx,y*sx+z1*cx];};
     const flat=(p,q,k)=>{const x=p[0]*k+q[0],y=p[1]*k+q[1],z=p[2]*k+q[2],s=focal/(focal+z);return [ox+x*s,oy+y*s];};
+    return {R,ox,oy,turn,flat};
+  }
+  // Where each seed's tip is on screen (what the breeze and the pointer act on), without drawing anything.
+  function project(head){
+    const {R,turn,flat}=pose(head);
+    for(const seed of head.seeds){
+      if(seed.gone)continue;
+      const d=turn(seed.d);[seed.sx,seed.sy]=flat(d,NONE,R*(.12+.5*seed.reach*seed.grow));seed.z=d[2];
+    }
+  }
+
+  function drawHead(head){
+    const {R,ox,oy,turn,flat}=pose(head),none=NONE;
     // Near, middle and far seeds are stroked as three batches, fading and thinning with depth.
-    const layers=[new Path2D(),new Path2D(),new Path2D()],none=[0,0,0];
+    const layers=[new Path2D(),new Path2D(),new Path2D()];
     for(const seed of head.seeds){
       if(seed.gone)continue;
       const d=turn(seed.d),g=seed.grow,stalk=R*(.12+.5*seed.reach*g),hair=R*.3*g;
@@ -130,11 +154,17 @@ export function initBloom(canvas){
     ctx.globalAlpha=1;ctx.fillStyle=grain;ctx.save();ctx.translate(rand(-48,0),rand(-48,0));ctx.fillRect(0,0,width+48,height+48);ctx.restore();
   }
 
-  // Seeds the scene with a few seconds of breeze, so it never opens on a still head.
-  function settle(seconds){for(let t=0;t<seconds;t+=1/30){step(1/30);if(Math.round(t*30)%6===0)draw();}}
+  // Seeds the scene with a few seconds of breeze, so it never opens on a still head. Seed positions are only
+  // read when one is let go (the main head, every second or so), so they are worked out just before those
+  // steps; the scene is drawn once afterwards.
+  function settle(seconds){for(let t=0;t<seconds;t+=1/30){if(clock+1/30>nextRelease)project(main);step(1/30);}}
 
   resize();settle(4);draw();
-  const sizes=new ResizeObserver(()=>{resize();settle(2);draw();});sizes.observe(canvas);
+  // The observer also fires once on observe(); only a real size change needs a fresh scene.
+  const sizes=new ResizeObserver(()=>{
+    if(Math.abs(canvas.offsetWidth-width)<1&&Math.abs(canvas.offsetHeight-height)<1)return;
+    resize();settle(2);draw();
+  });sizes.observe(canvas);
   const mm=gsap.matchMedia();
   mm.add('(prefers-reduced-motion: no-preference)',()=>{
     const controller=new AbortController(),{signal}=controller;

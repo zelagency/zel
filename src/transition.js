@@ -56,7 +56,8 @@ export function createPageTransition({isReduced}){
 
   const isOpen=()=>supportsPopover?host.matches(':popover-open'):host.classList.contains('is-open');
   function show(){if(supportsPopover){if(isOpen())host.hidePopover();host.showPopover();}else host.classList.add('is-open');}
-  function hide(){if(supportsPopover){if(isOpen())host.hidePopover();}else host.classList.remove('is-open');}
+  // The full-screen backing store is released between transitions (measure() reallocates it).
+  function hide(){if(supportsPopover){if(isOpen())host.hidePopover();}else host.classList.remove('is-open');canvas.width=canvas.height=0;}
   function measure(){
     const w=innerWidth,h=innerHeight,dpr=Math.min(devicePixelRatio||1,1.5);
     canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);

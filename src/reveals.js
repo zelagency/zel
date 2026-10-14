@@ -42,15 +42,25 @@ export function playIntro(root,{header=false}={}){
   return tl;
 }
 
-export function initReveals(root){
+// `context` is the page's gsap.matchMedia context: reveals built later are added to it, so leaving the page reverts them too.
+export function initReveals(root,context){
   const restore=[];
-  $$('[data-reveal-heading]',root).forEach(heading=>riseHeading(heading));
-  $$('[data-reveal-lines]',root).forEach(p=>riseLines(p,{duration:1.1,stagger:.05,start:'top 92%'}));
+  // Splitting text into lines measures layout, so each text reveal is built only once its element is within a
+  // screen of view (still hidden below the fold); a page pays for what is read, not all of it at load.
+  const builds=new Map();
+  const near=new IntersectionObserver(entries=>entries.forEach(({target,isIntersecting})=>{
+    const build=builds.get(target);if(!isIntersecting||!build)return;
+    near.unobserve(target);builds.delete(target);context.add(build);
+  }),{rootMargin:'0px 0px 100% 0px'});
+  const whenNear=(element,build)=>{if(element){builds.set(element,build);near.observe(element);}};
+  restore.push(()=>{near.disconnect();builds.clear();});
+  $$('[data-reveal-heading]',root).forEach(heading=>whenNear(heading,()=>riseHeading(heading)));
+  $$('[data-reveal-lines]',root).forEach(p=>whenNear(p,()=>riseLines(p,{duration:1.1,stagger:.05,start:'top 92%'})));
   // Lists and cards settle up into place.
   // Statements ink in word by word (inline image chips included) as they scroll through.
-  $$('[data-reveal-words]',root).forEach(p=>SplitText.create(p,{type:'words',wordsClass:'word',autoSplit:true,
+  $$('[data-reveal-words]',root).forEach(p=>whenNear(p,()=>SplitText.create(p,{type:'words',wordsClass:'word',autoSplit:true,
     onSplit:()=>gsap.fromTo(p.querySelectorAll('.word,.chip'),{opacity:.14},{opacity:1,stagger:.1,ease:'none',
-      scrollTrigger:{trigger:p,start:'top 80%',end:'bottom 50%',scrub:true}})}));
+      scrollTrigger:{trigger:p,start:'top 80%',end:'bottom 50%',scrub:true}})})));
   // Ledger figures count up once; the markup keeps the final value for no-JS and reduced motion.
   $$('[data-count]',root).forEach(element=>{
     const value=Number(element.dataset.count),state={n:0};if(!value)return;
@@ -68,19 +78,20 @@ export function initReveals(root){
     gsap.fromTo(sign.querySelector('.stamp'),{opacity:0,scale:1.9,rotation:-38},{opacity:1,scale:1,rotation:-12,duration:.55,ease:'back.out(2.2)',
       scrollTrigger:{trigger:sign,start:'top 40%',toggleActions:'play none none reverse'}});
   });
-  $$('.project',root).forEach(project=>{
+  $$('.project',root).forEach(project=>whenNear(project,()=>{
     const image=project.querySelector('.project-image'),meta=project.querySelector('.project-meta');
     // Cards tilt back in perspective as they enter and settle flat in place.
     gsap.fromTo(image,{rotationX:20,y:110,scale:.93,transformPerspective:1400,transformOrigin:'50% 0%'},
       {rotationX:0,y:0,scale:1,ease:'power2.out',scrollTrigger:{trigger:project,start:'top bottom',end:'top 45%',scrub:.6}});
     riseLines(project.querySelector('.project-title-text'),{trigger:project.querySelector('.project-title'),start:'top 95%',duration:1.1});
-    // Tags decode from scrambled characters, left to right; assistive tech reads a static copy.
+    // Tags decode from scrambled characters, left to right; assistive tech reads a static copy. An invisible copy
+    // holds the line's final height and the scramble is laid over it, so its changing wrap never moves the page.
     const text=meta.textContent;
-    meta.innerHTML=`<span class="sr-only"></span><span class="meta-scramble" aria-hidden="true"></span>`;
-    meta.firstChild.textContent=text;meta.style.minHeight='1.5em';
-    restore.push(()=>{meta.textContent=text;meta.style.minHeight='';});
+    meta.innerHTML=`<span class="sr-only"></span><span class="meta-ghost" aria-hidden="true"></span><span class="meta-scramble" aria-hidden="true"></span>`;
+    meta.firstChild.textContent=text;meta.children[1].textContent=text;
+    restore.push(()=>{meta.textContent=text;});
     ScrollTrigger.create({trigger:meta,start:'top 95%',once:true,onEnter:()=>gsap.to(meta.lastChild,{duration:1.3,ease:'none',
       scrambleText:{text,chars:'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789;:=+»',revealDelay:.2,speed:.7}})});
-  });
+  }));
   return ()=>restore.forEach(fn=>fn());
 }

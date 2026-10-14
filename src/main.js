@@ -6,7 +6,7 @@ import { PointerTrail } from './pointer-trail.js';
 import { initPills, initSoundWave, fillPill, drainPill } from './pills.js';
 import { playPreloader } from './intro.js';
 import { createPageTransition } from './transition.js';
-import { mountPage, videoSource } from './page.js';
+import { mountPage, videoSource, liteData } from './page.js';
 
 gsap.registerPlugin(ScrollTrigger);
 // Mobile browser bars resize the viewport while scrolling; refreshing then makes pins jump.
@@ -304,10 +304,13 @@ window.addEventListener('scroll',updateProgress,{passive:true});
 // the trail is drawn in the same frame the input arrives (pointer events are rAF-aligned).
 const paint=$('#fluid-canvas'), ctx=paint.getContext('2d'), trail=new PointerTrail();let paintRaf=null;
 function resetPaint(){if(paintRaf!==null)cancelAnimationFrame(paintRaf);paintRaf=null;trail.clear();ctx?.clearRect(0,0,innerWidth,innerHeight);}
-function sizePaint(){resetPaint();const dpr=Math.min(devicePixelRatio,1.25);paint.width=innerWidth*dpr;paint.height=innerHeight*dpr;ctx?.setTransform(dpr,0,0,dpr,0,0);}
-sizePaint();window.addEventListener('resize',sizePaint);
+// The backing store is only allocated once a mouse moves, so touch screens never pay for it.
+let paintSized=false;
+function sizePaint(){resetPaint();if(!paintSized)return;const dpr=Math.min(devicePixelRatio,1.25);paint.width=innerWidth*dpr;paint.height=innerHeight*dpr;ctx?.setTransform(dpr,0,0,dpr,0,0);}
+paint.width=paint.height=0;window.addEventListener('resize',sizePaint);
 window.addEventListener('pointermove',event=>{
   if(!ctx||reduced||document.hidden||event.pointerType!=='mouse'||innerWidth<813)return;
+  if(!paintSized){paintSized=true;sizePaint();}
   // Over media the trail stops taking input and retracts instead of vanishing.
   if(event.target.closest('.hero-visual,.media-frame,dialog,.project-image')){trail.break();return;}
   const now=performance.now(),samples=event.getCoalescedEvents?.();
@@ -375,6 +378,7 @@ mount();page.prepareIntro({header:true});syncNav();
 playPreloader({reduced,onReveal:skipped=>{if(skipped)return;lenis?.start();page.playIntro({header:true});}});
 motionQuery.addEventListener('change',event=>{
   reduced=event.matches;
-  if(reduced){lenis?.destroy();lenis=null;$$('.ambient-video').forEach(video=>video.pause());resetPaint();}else{startSmoothScroll();if($$('dialog[open]').length)lenis?.stop();$$('.ambient-video').forEach(video=>{if(video.getBoundingClientRect().bottom>0&&video.getBoundingClientRect().top<innerHeight){if(!video.src)video.src=videoSource(video);video.play().catch(()=>{});}});}
+  if(reduced){lenis?.destroy();lenis=null;$$('.ambient-video').forEach(video=>video.pause());resetPaint();}else{startSmoothScroll();if($$('dialog[open]').length)lenis?.stop();$$('.ambient-video').forEach(video=>{if(video.getBoundingClientRect().bottom>0&&video.getBoundingClientRect().top<innerHeight){if(liteData())return;if(!video.src)video.src=videoSource(video);video.play().catch(()=>{});}});}
 });
-window.addEventListener('load',()=>{ScrollTrigger.refresh();updateProgress();});
+// ScrollTrigger refreshes itself on load (its default autoRefreshEvents); only the progress bar needs a nudge.
+window.addEventListener('load',updateProgress);

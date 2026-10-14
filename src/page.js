@@ -13,6 +13,8 @@ const projectCard=(project,i,featured)=>`<article class="project ${featured?'pro
 
 // Videos with a portrait cut (data-src-portrait) use it when their frame is closer to 4:5 than to 16:9.
 export function videoSource(video,key='src',portrait=video.clientWidth<video.clientHeight*1.2){return portrait&&video.dataset[key+'Portrait']||video.dataset[key];}
+// With Data Saver on or on a 2G connection, decorative loops stay on their posters (the reel still plays when opened).
+export function liteData(){const connection=navigator.connection;return !!connection&&(connection.saveData||/2g/.test(connection.effectiveType||''));}
 
 // Everything owned by one page: built when it mounts, fully torn down before the next one.
 export function mountPage({root,footer,motionQuery,isReduced,ui}){
@@ -30,7 +32,7 @@ export function mountPage({root,footer,motionQuery,isReduced,ui}){
   // Load only the video loops that are approaching the screen.
   const videos=$$('.ambient-video');
   const videoObserver=new IntersectionObserver(entries=>entries.forEach(({target,isIntersecting})=>{
-    if(isIntersecting&&!isReduced()){if(!target.src){target.addEventListener('loadedmetadata',()=>{if(target.dataset.start)target.currentTime=Number(target.dataset.start);},{once:true});target.src=videoSource(target);}target.play().catch(()=>{});}else target.pause();
+    if(isIntersecting&&!isReduced()&&!liteData()){if(!target.src){target.addEventListener('loadedmetadata',()=>{if(target.dataset.start)target.currentTime=Number(target.dataset.start);},{once:true});target.src=videoSource(target);}target.play().catch(()=>{});}else target.pause();
   }));
   videos.forEach(video=>videoObserver.observe(video));
   // The reel carries its own headlines, so the PLAY REEL title steps aside while it plays.
@@ -44,8 +46,8 @@ export function mountPage({root,footer,motionQuery,isReduced,ui}){
     if(isIntersecting&&target.dataset.poster){target.poster=videoSource(target,'poster');delete target.dataset.poster;}
   }),{rootMargin:'100% 0px'});
   videos.forEach(video=>posterObserver.observe(video));
-  // Decorative loops share the same visibility lifecycle as the video loops.
-  const loops=$$('.marquee>div'),visibleLoops=new Set();
+  // Decorative loops share the same visibility lifecycle as the video loops (chart chips pass it on to their bars).
+  const loops=$$('.marquee>div,.chip-bars'),visibleLoops=new Set();
   const syncLoops=()=>loops.forEach(element=>{element.style.animationPlayState=!isReduced()&&!document.hidden&&visibleLoops.has(element)?'running':'paused';});
   const loopObserver=new IntersectionObserver(entries=>{entries.forEach(({target,isIntersecting})=>{isIntersecting?visibleLoops.add(target):visibleLoops.delete(target);});syncLoops();});
   loops.forEach(element=>loopObserver.observe(element));syncLoops();
@@ -60,9 +62,9 @@ export function mountPage({root,footer,motionQuery,isReduced,ui}){
   cleanups.push(initNextPage(footer?.querySelector('[data-next-page]'),{navigate:ui.navigate}));
 
   const mm=gsap.matchMedia();
-  mm.add('(prefers-reduced-motion: no-preference)',()=>{
+  mm.add('(prefers-reduced-motion: no-preference)',context=>{
     if($('.hero h1'))gsap.to($('.hero h1'),{y:-70,ease:'none',scrollTrigger:{trigger:$('.hero'),start:'top top',end:'bottom top',scrub:1}});
-    const restoreReveals=initReveals(root);
+    const restoreReveals=initReveals(root,context);
     $$('.ribbon path').forEach(path=>{const length=path.getTotalLength();gsap.fromTo(path,{strokeDasharray:length,strokeDashoffset:length},{strokeDashoffset:0,ease:'none',scrollTrigger:{trigger:path.closest('section'),start:'top 90%',end:'bottom 70%',scrub:1.2}});});
     $$('.flower-frame').forEach(frame=>gsap.from(frame,{y:90,rotation:-3,ease:'none',scrollTrigger:{trigger:frame.parentElement,start:'top bottom',end:'bottom 30%',scrub:1}}));
     if($('.reel-frame'))gsap.from($('.reel-frame'),{scale:.86,ease:'power1.inOut',scrollTrigger:{trigger:$('.reel'),start:'top bottom',end:'top 5%',scrub:1}});

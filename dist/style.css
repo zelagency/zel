@@ -230,7 +230,7 @@ main[data-page-root]{overflow-x:hidden;overflow-x:clip}
 .chip-art svg{width:100%;height:100%;display:block;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .chip-art circle,.chip-art .fill{fill:currentColor;stroke:none}
 /* The two charts bob out of step: dashboards that never agree. */
-.chip-bars rect{transform-box:fill-box;transform-origin:50% 100%;animation:chip-bar 1.8s var(--ease) infinite alternate}
+.chip-bars rect{transform-box:fill-box;transform-origin:50% 100%;animation:chip-bar 1.8s var(--ease) infinite alternate;animation-play-state:inherit}
 .chip-bars rect:nth-child(even){animation-delay:-.9s}
 .chip-bars rect:nth-child(n+4){animation-direction:alternate-reverse}
 @keyframes chip-bar{from{transform:scaleY(.55)}to{transform:scaleY(1)}}
