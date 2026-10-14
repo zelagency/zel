@@ -6,7 +6,7 @@ import { PointerTrail } from './pointer-trail.js';
 import { initPills, initSoundWave, fillPill, drainPill } from './pills.js';
 import { playPreloader } from './intro.js';
 import { createPageTransition } from './transition.js';
-import { mountPage } from './page.js';
+import { mountPage, videoSource } from './page.js';
 
 gsap.registerPlugin(ScrollTrigger);
 // Mobile browser bars resize the viewport while scrolling; refreshing then makes pins jump.
@@ -172,7 +172,7 @@ document.addEventListener('submit',event=>{
   status.innerHTML='Your project brief is ready to download. <br><a class="brief-download" download="ZEL-project-brief.txt">Download your brief ↗</a>';
   $('.brief-download',status).href=url;
 });
-media.addEventListener('close',()=>{const video=$('video',media);video?.pause();$('.media-dialog-content').replaceChildren();if(audio.enabled)audio.get('music').play().catch(()=>{});});
+media.addEventListener('close',()=>{delete media.dataset.reel;const video=$('video',media);video?.pause();$('.media-dialog-content').replaceChildren();if(audio.enabled)audio.get('music').play().catch(()=>{});});
 // The case study leads with every screenshot, customer side first, on a 12-column grid whose rows
 // always fill (each shot's span comes from projects.js).
 let shots=[];
@@ -258,8 +258,12 @@ function renderGallery(){
   media.scrollTop=0;
 }
 function openReel(){
-  $('.media-dialog-content').innerHTML='<video src="/assets/reel.mp4" controls playsinline loop aria-label="Lusion creative reference reel"></video><p class="media-credit">Creative reference reel by <a href="https://lusion.co/" target="_blank" rel="noopener">Lusion</a> · ZEL visual study</p>';
-  showDialog(media);audio.pauseMusic();const video=$('video',media);video.muted=!audio.enabled;video.play().catch(()=>{});
+  const portrait=innerWidth<innerHeight*1.2,cut=portrait?'-4x5':'';
+  // The reel just plays: no player chrome, only the close button.
+  $('.media-dialog-content').innerHTML=`<video src="/assets/zel-reel${cut}.mp4" poster="/assets/zel-reel${cut}-poster.jpg" playsinline loop aria-label="ZEL reel: we take your business digital"></video>`;
+  media.dataset.reel='';showDialog(media);audio.pauseMusic();const video=$('video',media);video.muted=!audio.enabled;
+  // Without controls there is no way to start a blocked play, so fall back to muted.
+  video.play().catch(()=>{video.muted=true;video.play().catch(()=>{});});
 }
 
 const progress=$('.scroll-indicator i');
@@ -342,6 +346,6 @@ mount();page.prepareIntro({header:true});syncNav();
 playPreloader({reduced,onReveal:skipped=>{if(skipped)return;lenis?.start();page.playIntro({header:true});}});
 motionQuery.addEventListener('change',event=>{
   reduced=event.matches;
-  if(reduced){lenis?.destroy();lenis=null;$$('.ambient-video').forEach(video=>video.pause());resetPaint();}else{startSmoothScroll();if($$('dialog[open]').length)lenis?.stop();$$('.ambient-video').forEach(video=>{if(video.getBoundingClientRect().bottom>0&&video.getBoundingClientRect().top<innerHeight){if(!video.src)video.src=video.dataset.src;video.play().catch(()=>{});}});}
+  if(reduced){lenis?.destroy();lenis=null;$$('.ambient-video').forEach(video=>video.pause());resetPaint();}else{startSmoothScroll();if($$('dialog[open]').length)lenis?.stop();$$('.ambient-video').forEach(video=>{if(video.getBoundingClientRect().bottom>0&&video.getBoundingClientRect().top<innerHeight){if(!video.src)video.src=videoSource(video);video.play().catch(()=>{});}});}
 });
 window.addEventListener('load',()=>{ScrollTrigger.refresh();updateProgress();});

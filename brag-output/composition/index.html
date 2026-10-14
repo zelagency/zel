@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>ZEL Reel</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Aeonik";
+        src: url("assets/fonts/Aeonik-Regular.woff2") format("woff2");
+        font-weight: 400;
+        font-display: block;
+      }
+      :root {
+        --paper: #f0f1fa;
+        --ink: #000;
+        --cobalt: #1a2ffb;
+        --dark: #2d2f3b;
+        --ivory: #f6f3ea;
+        --aqua: #47dfe9;
+        --muted: #e2e4f1;
+      }
+      html, body { margin: 0; background: var(--paper); }
+      body { font-family: "Aeonik", Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--cobalt); }
+      .scene { position: absolute; inset: 0; }
+      .layer { position: absolute; inset: 0; overflow: hidden; }
+
+      /* masks for line reveals */
+      .mask { display: block; overflow: hidden; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+      .mask > span { display: block; white-space: nowrap; }
+
+      .eyebrow { display: flex; align-items: center; gap: 14px; font-size: 24px; letter-spacing: 0.06em; text-transform: uppercase; }
+      .eyebrow i { display: block; width: 12px; height: 12px; border-radius: 50%; background: var(--cobalt); }
+
+      /* ---------- Scene 1: ZEL ---------- */
+      #s1 .layer { background: var(--cobalt); }
+      .glow { position: absolute; inset: 0; background: radial-gradient(60% 70% at 50% 50%, #5b6cff 0%, rgba(91, 108, 255, 0) 70%); opacity: 0.25; }
+      .wordmark { position: absolute; left: 50%; top: 270px; width: 1264px; height: 520px; margin-left: -632px; display: flex; gap: 40px; }
+      .letter { position: relative; flex: none; width: 395px; height: 520px; overflow: hidden; }
+      .letter .ink { position: absolute; inset: 0; }
+      .letter svg { display: block; width: 100%; height: 100%; fill: var(--ivory); }
+      .s1-caption { position: absolute; left: 328px; top: 822px; color: var(--ivory); font-size: 34px; letter-spacing: -0.01em; }
+      .s1-hint { position: absolute; right: 328px; top: 826px; color: var(--ivory); font-size: 22px; letter-spacing: 0.08em; opacity: 0.8; }
+
+      /* ---------- Scene 2: front of house ---------- */
+      #s2 .layer { background: var(--paper); color: var(--ink); }
+      .copy { position: absolute; left: 140px; top: 300px; width: 860px; }
+      .copy .eyebrow { margin-bottom: 40px; }
+      .headline { font-size: 100px; line-height: 1.02; letter-spacing: -0.04em; }
+      .media { position: absolute; border-radius: 20px; overflow: hidden; background: white; box-shadow: 0 30px 80px rgba(20, 24, 80, 0.18); }
+      .browser { left: 1000px; top: 200px; width: 720px; height: 420px; }
+      .browser .bar { height: 44px; display: flex; align-items: center; gap: 9px; padding: 0 18px; background: #f4f4f8; font-size: 17px; color: #6a6d7c; }
+      .browser .bar i { width: 11px; height: 11px; border-radius: 50%; background: #d4d6e2; display: block; }
+      .browser .bar span { margin-left: 18px; padding: 5px 16px; border-radius: 99px; background: white; }
+      .browser .shot { position: relative; height: 376px; overflow: hidden; }
+      .browser img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; display: block; }
+      .browser .shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0) 55%); }
+      .browser .brand { position: absolute; left: 28px; bottom: 22px; color: white; }
+      .browser .brand strong { display: block; font-weight: 400; font-size: 44px; letter-spacing: -0.03em; }
+      .browser .brand span { font-size: 18px; opacity: 0.9; }
+      .card-inf { left: 990px; top: 648px; width: 330px; height: 262px; background: #eef4f1; }
+      .card-inf img { width: 100%; display: block; margin-top: -150px; }
+      .phone { position: absolute; left: 1470px; top: 400px; width: 270px; height: 500px; border-radius: 44px; background: #111; padding: 10px; box-sizing: border-box; box-shadow: 0 30px 80px rgba(20, 24, 80, 0.25); }
+      .phone .screen { position: relative; width: 100%; height: 100%; border-radius: 34px; overflow: hidden; background: #f8f9fb; }
+      .phone img { position: absolute; left: 0; top: -82px; width: 100%; display: block; }
+      .tag { position: absolute; padding: 10px 18px; border-radius: 99px; background: white; font-size: 18px; letter-spacing: 0.04em; box-shadow: 0 10px 30px rgba(20, 24, 80, 0.12); white-space: nowrap; }
+
+      /* ---------- Scene 3: back of house ---------- */
+      #s3 .layer { background: var(--dark); color: var(--ivory); }
+      #s3 .eyebrow i { background: var(--aqua); }
+      .orders { position: absolute; left: 1160px; top: 250px; width: 520px; height: 600px; }
+      .chip { position: absolute; left: 40px; width: 440px; height: 84px; border-radius: 99px; background: #3b3e4d; display: flex; align-items: center; gap: 18px; padding: 0 30px; box-sizing: border-box; font-size: 26px; letter-spacing: 0.04em; }
+      .chip b { font-weight: 400; width: 14px; height: 14px; border-radius: 50%; display: block; }
+      .chip em { font-style: normal; margin-left: auto; opacity: 0.6; font-size: 22px; }
+      .ticket { position: absolute; left: 0; top: 40px; width: 520px; height: 520px; border-radius: 24px; background: var(--ivory); color: var(--ink); padding: 40px 44px; box-sizing: border-box; }
+      .ticket .t-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 22px; letter-spacing: 0.06em; color: #555867; }
+      .ticket .t-title { margin-top: 18px; font-size: 60px; letter-spacing: -0.035em; line-height: 1; }
+      .ticket .t-src { display: flex; gap: 10px; margin-top: 22px; }
+      .ticket .t-src span { padding: 8px 14px; border-radius: 99px; background: var(--muted); font-size: 17px; letter-spacing: 0.05em; }
+      .ticket ul { list-style: none; margin: 30px 0 0; padding: 26px 0 0; border-top: 2px dashed #c9cbd8; }
+      .ticket li { display: flex; justify-content: space-between; font-size: 30px; line-height: 1.6; }
+      .ticket li span:last-child { color: #6a6d7c; }
+      .status { position: absolute; right: 44px; bottom: 40px; height: 54px; width: 200px; border-radius: 99px; overflow: hidden; }
+      .status span { position: absolute; inset: 0; display: grid; place-items: center; font-size: 20px; letter-spacing: 0.08em; border-radius: 99px; }
+      .status .new { background: var(--muted); color: var(--ink); }
+      .status .cooking { background: var(--cobalt); color: white; }
+
+      /* ---------- Scene 4: both sides ---------- */
+      #s4 .layer { background: var(--cobalt); color: var(--ivory); }
+      .counter-line { position: absolute; left: 140px; top: 560px; width: 1640px; height: 3px; background: var(--ivory); transform-origin: 0 50%; }
+      .s4-eyebrow { position: absolute; left: 140px; top: 330px; color: var(--ivory); opacity: 0.85; }
+      .s4-eyebrow i { background: var(--aqua); }
+      .final-line { position: absolute; left: 140px; top: 410px; font-size: 104px; line-height: 1.02; letter-spacing: -0.04em; }
+      .mini-mark { position: absolute; left: 140px; top: 612px; height: 210px; width: 520px; display: flex; gap: 18px; }
+      .mini-mark .letter { width: 158px; height: 210px; }
+      .cta { position: absolute; right: 140px; top: 640px; height: 72px; padding: 0 36px; border-radius: 99px; background: white; color: var(--ink); display: flex; align-items: center; gap: 20px; font-size: 24px; letter-spacing: 0.04em; }
+      .cta i { width: 10px; height: 10px; border-radius: 50%; background: var(--cobalt); display: block; }
+      .site { position: absolute; right: 140px; top: 760px; font-size: 24px; letter-spacing: 0.06em; opacity: 0.85; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-width="1920" data-height="1080" data-duration="8.5">
+
+      <!-- Scene 1 — ZEL wordmark (site hero paths) -->
+      <section id="s1" class="scene clip" data-start="0" data-duration="1.95" data-track-index="0">
+        <div class="layer">
+          <div class="glow" id="glow1"></div>
+          <div class="wordmark" id="wm1">
+            <div class="letter" data-layout-allow-overflow id="z1"><div class="ink"><svg viewBox="0 0 300 400" preserveAspectRatio="none"><path d="M0 0H300V64L87 336H300V400H0V336L213 64H0Z"/></svg></div></div>
+            <div class="letter" data-layout-allow-overflow id="e1"><div class="ink"><svg viewBox="0 0 300 400" preserveAspectRatio="none"><path d="M0 0H300V64H72V166H272V230H72V336H300V400H0Z"/></svg></div></div>
+            <div class="letter" data-layout-allow-overflow id="l1"><div class="ink"><svg viewBox="0 0 300 400" preserveAspectRatio="none"><path d="M0 0H72V336H300V400H0Z"/></svg></div></div>
+          </div>
+          <div class="s1-caption" id="cap1">Ideas into reality.</div>
+          <div class="s1-hint" id="hint1">DIGITAL AGENCY · BANGALORE</div>
+        </div>
+      </section>
+
+      <!-- Scene 2 — Front of house -->
+      <section id="s2" class="scene clip" data-start="1.3" data-duration="2.9" data-track-index="1">
+        <div class="layer" id="s2-layer"><div class="layer" id="s2-stage">
+          <div class="copy" id="s2-copy">
+            <div class="eyebrow" id="s2-eye"><i></i>For your customers</div>
+            <div class="headline">
+              <span class="mask" data-layout-allow-overflow><span id="s2-l1">Websites &amp; apps</span></span>
+              <span class="mask" data-layout-allow-overflow><span id="s2-l2">customers love.</span></span>
+            </div>
+          </div>
+          <div class="media browser" id="m-fog">
+            <div class="bar"><i></i><i></i><i></i><span>fogstores.vercel.app</span></div>
+            <div class="shot">
+              <img src="assets/img/fogstores-hero-laptop.webp" alt="" />
+              <div class="shade"></div>
+              <div class="brand"><strong>FOGSTORES</strong><span>Fashion, with a point of view.</span></div>
+            </div>
+          </div>
+          <div class="media card-inf" id="m-inf" data-layout-allow-overflow><img src="assets/img/infinity-home.webp" alt="" /></div>
+          <div class="phone" id="m-bnm"><div class="screen" data-layout-allow-overflow><img src="assets/img/bnm-menu.webp" alt="" /></div></div>
+          <div class="tag" id="tag-fog" style="left: 1000px; top: 150px">ONLINE STORE</div>
+          <div class="tag" id="tag-bnm" style="left: 1540px; top: 352px">ORDERING APP</div>
+        </div></div>
+      </section>
+
+      <!-- Scene 3 — Back of house -->
+      <section id="s3" class="scene clip" data-start="3.45" data-duration="2.6" data-track-index="2">
+        <div class="layer" id="s3-layer">
+          <div class="copy" id="s3-copy">
+            <div class="eyebrow" id="s3-eye"><i></i>For your team</div>
+            <div class="headline">
+              <span class="mask" data-layout-allow-overflow><span id="s3-l1">Systems your</span></span>
+              <span class="mask" data-layout-allow-overflow><span id="s3-l2">team runs on.</span></span>
+            </div>
+          </div>
+          <div class="orders">
+            <div class="ticket" id="ticket" data-layout-allow-occlusion>
+              <div class="t-head"><span>YOUR DASHBOARD</span><span>TODAY</span></div>
+              <div class="t-title">One dashboard.</div>
+              <div class="t-src"><span>WEBSITE</span><span>APP</span><span>IN-STORE</span></div>
+              <ul data-layout-allow-overflow>
+                <li><span>Orders</span><span>128</span></li>
+                <li><span>Inventory</span><span>In sync</span></li>
+                <li><span>Payments</span><span>Verified</span></li>
+              </ul>
+              <div class="status"><span class="new" id="st-new">SYNCING</span><span class="cooking" id="st-cook">LIVE</span></div>
+            </div>
+            <div class="chip" id="c1" style="top: 108px"><b style="background: #8ea0ff"></b>WEBSITE<em>New order</em></div>
+            <div class="chip" id="c2" style="top: 258px"><b style="background: #ff8a3d"></b>MOBILE APP<em>New order</em></div>
+            <div class="chip" id="c3" style="top: 408px"><b style="background: #ff4d6a"></b>IN-STORE<em>Sale</em></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scene 4 — Both sides of the counter -->
+      <section id="s4" class="scene clip" data-start="5.5" data-duration="3.0" data-track-index="3">
+        <div class="layer" id="s4-layer">
+          <div class="glow" id="glow4"></div>
+          <div class="eyebrow s4-eyebrow" id="s4-eye"><i></i>One agency · Front to back</div>
+          <div class="final-line"><span class="mask" data-layout-allow-overflow><span id="s4-l1">We take your business digital.</span></span></div>
+          <div class="counter-line" id="counter"></div>
+          <div class="mini-mark">
+            <div class="letter" data-layout-allow-overflow id="z4"><div class="ink"><svg viewBox="0 0 300 400" preserveAspectRatio="none"><path d="M0 0H300V64L87 336H300V400H0V336L213 64H0Z"/></svg></div></div>
+            <div class="letter" data-layout-allow-overflow id="e4"><div class="ink"><svg viewBox="0 0 300 400" preserveAspectRatio="none"><path d="M0 0H300V64H72V166H272V230H72V336H300V400H0Z"/></svg></div></div>
+            <div class="letter" data-layout-allow-overflow id="l4"><div class="ink"><svg viewBox="0 0 300 400" preserveAspectRatio="none"><path d="M0 0H72V336H300V400H0Z"/></svg></div></div>
+          </div>
+          <div class="cta" id="cta"><i></i>LET’S TALK<span>↗</span></div>
+        </div>
+      </section>
+
+      <!-- Audio -->
+      <audio id="sfx-zel" src="assets/sfx/impact/impactSoft_medium_001.ogg" data-start="0.02" data-duration="0.18" data-track-index="11" data-volume="0.6"></audio>
+      <audio id="sfx-wipe1" src="assets/sfx/interface/drop_002.ogg" data-start="1.42" data-duration="0.19" data-track-index="12" data-volume="0.45"></audio>
+      <audio id="sfx-cards" src="assets/sfx/casino/card-slide-2.ogg" data-start="1.68" data-duration="0.58" data-track-index="13" data-volume="0.5"></audio>
+      <audio id="sfx-wipe2" src="assets/sfx/interface/drop_002.ogg" data-start="3.62" data-duration="0.19" data-track-index="14" data-volume="0.4"></audio>
+      <audio id="sfx-merge" src="assets/sfx/casino/card-place-3.ogg" data-start="4.9" data-duration="0.8" data-track-index="15" data-volume="0.7"></audio>
+      <audio id="sfx-final" src="assets/sfx/impact/impactBell_heavy_000.ogg" data-start="5.98" data-duration="1.48" data-track-index="16" data-volume="0.45"></audio>
+    </div>
+
+    <script>
+      document.fonts.load('400 100px "Aeonik"').then(function () {
+        var tl = gsap.timeline({ paused: true });
+        var X = "expo.out", IO = "expo.inOut";
+
+        /* ---------- Scene 1: kinetic ZEL (0 – 1.64) ---------- */
+        // letters rise out of their masks, one per beat accent
+        tl.fromTo(["#z1 .ink", "#e1 .ink", "#l1 .ink"], { yPercent: 105 }, { yPercent: 0, duration: 0.55, ease: X, stagger: 0.12 }, 0);
+        // width redistribution, the hero's pointer-stretch played as a sweep
+        tl.fromTo("#z1", { width: 700 }, { keyframes: [{ width: 300, duration: 0.42 }, { width: 395, duration: 0.4, delay: 0.4 }], ease: "power3.inOut" }, 0.05);
+        tl.fromTo("#e1", { width: 242 }, { keyframes: [{ width: 640, duration: 0.42 }, { width: 300, duration: 0.4 }, { width: 395, duration: 0.4 }], ease: "power3.inOut" }, 0.05);
+        tl.fromTo("#l1", { width: 242 }, { keyframes: [{ width: 244, duration: 0.42 }, { width: 584, duration: 0.4 }, { width: 395, duration: 0.4 }], ease: "power3.inOut" }, 0.05);
+        tl.fromTo("#cap1", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: X }, 0.45);
+        tl.fromTo("#hint1", { opacity: 0, y: 24 }, { opacity: 0.8, y: 0, duration: 0.5, ease: X }, 0.55);
+        // exit: lift + shrink while paper wipes up
+        tl.to("#wm1, #cap1, #hint1", { y: -160, scale: 0.94, opacity: 0.3, duration: 0.5, ease: "power3.in" }, 1.38);
+
+        /* ---------- Scene 2: front of house (wipe centred on beat 1.64) ---------- */
+        tl.fromTo("#s2-layer", { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.5, ease: IO }, 1.38); // beat-locked: 1.64
+        tl.fromTo("#s2-eye", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: X }, 1.54);
+        tl.fromTo(["#s2-l1", "#s2-l2"], { yPercent: 110 }, { yPercent: 0, duration: 0.7, ease: X, stagger: 0.09 }, 1.56);
+        // storefronts tilt in like the site's project cards
+        var cards = ["#m-fog", "#m-inf", "#m-bnm"];
+        tl.fromTo(cards,
+          { y: 260, rotationX: 38, rotationY: -14, rotationZ: 3, opacity: 0, transformPerspective: 1400, transformOrigin: "50% 100%" },
+          { y: 0, rotationX: 0, rotationY: 0, rotationZ: 0, opacity: 1, duration: 0.9, ease: X, stagger: 0.16 }, 1.68);
+        tl.fromTo(["#tag-fog", "#tag-bnm"], { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(2)", stagger: 0.2 }, 2.4);
+        // slow drift during the hold
+        tl.to("#m-fog", { y: -18, duration: 1.4, ease: "none" }, 2.68);
+        tl.to("#m-bnm", { y: -34, duration: 1.2, ease: "none" }, 2.9);
+        tl.to("#m-inf", { y: -10, duration: 1.0, ease: "none" }, 3.1);
+        // exit parallax as the dark panel rises
+        tl.to("#s2-stage", { y: -150, duration: 0.5, ease: "power3.in" }, 3.58);
+
+        /* ---------- Scene 3: back of house (wipe centred on beat 3.83) ---------- */
+        tl.fromTo("#s3-layer", { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.5, ease: IO }, 3.58); // beat-locked: 3.83
+        tl.fromTo("#s3-eye", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: X }, 3.86);
+        tl.fromTo(["#s3-l1", "#s3-l2"], { yPercent: 110 }, { yPercent: 0, duration: 0.7, ease: X, stagger: 0.09 }, 3.88);
+        // chips on a half-beat grid (4.02 / 4.24 / 4.46) so all three land before the merge
+        tl.fromTo(["#c1", "#c2", "#c3"], { x: 520, opacity: 0 }, { x: 0, opacity: 1, duration: 0.28, ease: X, stagger: 0.22 }, 4.02);
+        // beat-locked: 4.92 strong cue — three orders collapse into one ticket
+        tl.to(["#c1", "#c2", "#c3"], { y: function (i) { return [150, 0, -150][i]; }, scale: 0.7, opacity: 0, duration: 0.22, ease: "power3.in" }, 4.74);
+        tl.fromTo("#ticket", { scale: 0.6, opacity: 0, rotationZ: -4 }, { scale: 1, opacity: 1, rotationZ: 0, duration: 0.6, ease: "back.out(1.6)" }, 4.92);
+        tl.fromTo("#ticket li", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.35, ease: X, stagger: 0.07 }, 5.05);
+        tl.fromTo("#st-cook", { yPercent: 100 }, { yPercent: 0, duration: 0.4, ease: X }, 5.45);
+        tl.to("#s3-copy, .orders", { scale: 0.96, duration: 0.4, ease: "power3.in" }, 5.55);
+
+        /* ---------- Scene 4: both sides of the counter (iris lands on beat 6.01) ---------- */
+        tl.fromTo("#s4-layer", { clipPath: "circle(0% at 1536px 743px)" }, { clipPath: "circle(135% at 1536px 743px)", duration: 0.5, ease: "expo.in" }, 5.5);
+        tl.fromTo("#counter", { scaleX: 0 }, { scaleX: 1, duration: 0.8, ease: IO }, 5.82);
+        tl.fromTo("#s4-l1", { yPercent: 110 }, { yPercent: 0, duration: 0.7, ease: X }, 5.98); // beat-locked: 6.01
+        tl.fromTo("#s4-eye", { opacity: 0, y: 20 }, { opacity: 0.85, y: 0, duration: 0.5, ease: X }, 6.1);
+        tl.fromTo(["#z4 .ink", "#e4 .ink", "#l4 .ink"], { yPercent: -105 }, { yPercent: 0, duration: 0.6, ease: X, stagger: 0.08 }, 6.2);
+        tl.fromTo("#cta", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.55, ease: "back.out(1.8)" }, 6.55);
+        // gentle settle over the hold
+        tl.fromTo(".final-line", { x: 0 }, { x: -14, duration: 2.0, ease: "none" }, 6.5);
+
+        /* ---------- Cobalt glow breathes slowly behind the wordmark scenes ---------- */
+        tl.fromTo("#glow1", { opacity: 0.18 }, { opacity: 0.42, duration: 1.6, ease: "sine.inOut" }, 0);
+        tl.fromTo("#glow4", { opacity: 0.18 }, { opacity: 0.45, duration: 2.6, ease: "sine.inOut" }, 5.8);
+
+        window.__timelines["main"] = tl;
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,4 @@
+**/.hyperframes/
+# Renders: the site serves identical copies from dist/assets (zel-reel*.mp4).
+/brag*.mp4
+/brag*.jpg

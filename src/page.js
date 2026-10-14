@@ -9,6 +9,9 @@ import { initNextPage } from './next-page.js';
 
 const projectCard=(project,i,featured)=>`<article class="project ${featured?'project-featured':''}" data-project-id="${project.id}"><button class="project-image" data-project="${i}" aria-label="Explore ${project.title}">${projectCover(project)}<span class="project-arrow" aria-hidden="true">↗</span></button><p class="project-meta">${project.tags}</p><div class="project-title"><h3><span class="project-title-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span><span class="project-title-text">${project.title}</span></h3><a href="${project.url}" target="_blank" rel="noopener" aria-label="Visit ${project.title} live website">VISIT SITE ↗</a></div><p class="project-summary">${project.description}</p></article>`;
 
+// Videos with a portrait cut (data-src-portrait) use it when their frame is closer to 4:5 than to 16:9.
+export function videoSource(video,key='src',portrait=video.clientWidth<video.clientHeight*1.2){return portrait&&video.dataset[key+'Portrait']||video.dataset[key];}
+
 // Everything owned by one page: built when it mounts, fully torn down before the next one.
 export function mountPage({root,footer,motionQuery,isReduced,ui}){
   const $=s=>root.querySelector(s),$$=s=>[...root.querySelectorAll(s)];
@@ -25,12 +28,18 @@ export function mountPage({root,footer,motionQuery,isReduced,ui}){
   // Load only the video loops that are approaching the screen.
   const videos=$$('.ambient-video');
   const videoObserver=new IntersectionObserver(entries=>entries.forEach(({target,isIntersecting})=>{
-    if(isIntersecting&&!isReduced()){if(!target.src){target.addEventListener('loadedmetadata',()=>{if(target.dataset.start)target.currentTime=Number(target.dataset.start);},{once:true});target.src=target.dataset.src;}target.play().catch(()=>{});}else target.pause();
+    if(isIntersecting&&!isReduced()){if(!target.src){target.addEventListener('loadedmetadata',()=>{if(target.dataset.start)target.currentTime=Number(target.dataset.start);},{once:true});target.src=videoSource(target);}target.play().catch(()=>{});}else target.pause();
   }));
   videos.forEach(video=>videoObserver.observe(video));
+  // The reel carries its own headlines, so the PLAY REEL title steps aside while it plays.
+  const reelVideo=$('.reel-video'),reelFrame=reelVideo?.closest('.reel-frame');
+  if(reelFrame){
+    reelVideo.addEventListener('playing',()=>{reelFrame.dataset.playing='';},{signal});
+    for(const type of ['pause','emptied'])reelVideo.addEventListener(type,()=>{delete reelFrame.dataset.playing;},{signal});
+  }
   // Posters are fetched a screen ahead of the videos, so they never compete with the first paint.
   const posterObserver=new IntersectionObserver(entries=>entries.forEach(({target,isIntersecting})=>{
-    if(isIntersecting&&target.dataset.poster){target.poster=target.dataset.poster;delete target.dataset.poster;}
+    if(isIntersecting&&target.dataset.poster){target.poster=videoSource(target,'poster');delete target.dataset.poster;}
   }),{rootMargin:'100% 0px'});
   videos.forEach(video=>posterObserver.observe(video));
   // Decorative loops share the same visibility lifecycle as the video loops.

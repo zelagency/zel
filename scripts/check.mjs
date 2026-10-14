@@ -104,7 +104,7 @@ globalThis.URL.createObjectURL=()=> 'blob:test-brief';globalThis.URL.revokeObjec
 $('#contact-form').dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true}));assert.equal($('.brief-download').getAttribute('download'),'ZEL-project-brief.txt');
 $('#contact-dialog [data-close]').click();assert.equal(document.body.style.overflow,'');
 for(const element of [...document.querySelectorAll('[src],[href],[data-src],[data-poster]')]){
-  for(const attr of ['src','href','data-src','data-poster']){const ref=element.getAttribute(attr);if(ref?.startsWith('/')&&!ref.startsWith('//'))assert.ok(fs.existsSync(path.join('dist',new URL(ref,'http://localhost').pathname)),`Missing asset ${ref}`);if(ref?.startsWith('#'))assert.ok(document.querySelector(ref),`Invalid anchor ${ref}`);}
+  for(const attr of ['src','href','data-src','data-poster','data-src-portrait','data-poster-portrait']){const ref=element.getAttribute(attr);if(ref?.startsWith('/')&&!ref.startsWith('//'))assert.ok(fs.existsSync(path.join('dist',new URL(ref,'http://localhost').pathname)),`Missing asset ${ref}`);if(ref?.startsWith('#'))assert.ok(document.querySelector(ref),`Invalid anchor ${ref}`);}
 }
 await transform(fs.readFileSync('dist/style.css','utf8'),{loader:'css',minify:true});
 await transform(fs.readFileSync('dist/projects.css','utf8'),{loader:'css',minify:true});
@@ -117,7 +117,7 @@ for(const [file,route,next,heading] of [['dist/index.html','/','/about/','We bui
   assert.equal(page.querySelector('#menu-dialog [aria-current="page"]')?.getAttribute('href'),route,`${route} marks itself current in the menu`);
   assert.equal(page.querySelector('[data-next-page]')?.getAttribute('href'),next,`${route} leads to ${next}`);
   assert.ok(page.querySelector('script[src^="/app.js?v="]'),`${route} loads the versioned app`);
-  for(const element of page.querySelectorAll('[src],[href],[data-src],[data-poster]'))for(const attr of ['src','href','data-src','data-poster']){
+  for(const element of page.querySelectorAll('[src],[href],[data-src],[data-poster]'))for(const attr of ['src','href','data-src','data-poster','data-src-portrait','data-poster-portrait']){
     const ref=element.getAttribute(attr);if(ref?.startsWith('/')&&!ref.startsWith('//'))assert.ok(fs.existsSync(path.join('dist',new URL(ref,'http://localhost').pathname)),`${route}: missing asset ${ref}`);
   }
 }

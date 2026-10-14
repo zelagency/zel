@@ -45,7 +45,11 @@ The contact form prepares a local downloadable brief. No messages are submitted 
 ## Reference media
 
 Design reference: https://lusion.co/ and the user’s a.png–f.png screenshots.
-The flower loop, creative reference reel, ambient audio and UI sounds remain Lusion reference media, credited in the page and reel viewer. Featured Work now uses the user's own projects and real assets. The page and interactive wordmark are newly authored.
+The flower loop, ambient audio and UI sounds remain Lusion reference media, credited in the page. Featured Work now uses the user's own projects and real assets. The page and interactive wordmark are newly authored.
+
+## Reel
+
+The homepage reel (`dist/assets/zel-reel.mp4`, 8.5s, 1920×1080) is ZEL's own: the ZEL wordmark (digital agency, Bangalore), websites and apps customers love (shown with Fogstores, BNM Cafe and Infinity Kitchens), the systems a team runs on (website, app and in-store orders landing on one dashboard), and "We take your business digital." A 4:5 cut (`zel-reel-4x5.mp4`) tells the same story for portrait frames: the slot and the reel dialog pick it whenever their frame is closer to 4:5 than 16:9 (`videoSource` in `src/page.js`). The PLAY REEL title and a dark scrim show over the poster, step aside while the reel plays so its headlines read, and return on hover or focus. Both cuts are HyperFrames compositions (`brag-output/composition/` and `brag-output/composition-4x5/`); `npx hyperframes render --quality high` in either re-renders it. Frame 0 is the closing lockup, which is also the poster, so the idle poster and the loop point match. There is no music; the few sound effects are CC0 (Kenney).
 
 The reference’s Aeonik Regular web font is included for accurate typography in this private visual study, with Arial/Helvetica fallbacks. The reference media and font retain their original ownership; use appropriate licenses or replacements for a public agency launch.
 
