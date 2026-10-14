@@ -3,6 +3,7 @@ import { readFileSync,writeFileSync,mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { createHash } from 'node:crypto';
 import { projects } from '../src/projects.js';
+import { contact, instagramUrl } from '../src/contact.js';
 
 await build({ entryPoints: ['src/main.js'], bundle: true, minify: true, format: 'esm', outfile: 'dist/app.js', target: ['es2022'], legalComments: 'eof' });
 
@@ -16,9 +17,6 @@ export const pages=[
 // Link previews (og:image, og:url) need absolute URLs.
 const site='https://zel-tau.vercel.app';
 const labels={home:'Home',about:'About us',projects:'Projects',contact:'Contact'};
-// One source for how to reach ZEL: the footer, menu, contact page and search listing all read it.
-const contact={email:'support@zel.agency',instagram:'agency.zel'};
-const instagramUrl=`https://www.instagram.com/${contact.instagram}/`;
 const contactLinks=[`<a href="mailto:${contact.email}">${contact.email}</a>`,
   `<a href="${instagramUrl}" target="_blank" rel="noopener">Instagram @${contact.instagram}&nbsp;↗</a>`].join('');
 const orgSchema=JSON.stringify({'@context':'https://schema.org','@type':'Organization',name:'ZEL',url:site,email:contact.email,sameAs:[instagramUrl],

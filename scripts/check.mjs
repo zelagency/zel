@@ -6,6 +6,7 @@ import { transform } from 'esbuild';
 import { projects } from '../src/projects.js';
 import { damp } from '../src/motion.js';
 import { PointerTrail } from '../src/pointer-trail.js';
+import { briefPdf, briefFileName } from '../src/brief-pdf.js';
 
 function pointerReplay(fps){
   const trail=new PointerTrail();let inputTime=0;
@@ -106,8 +107,22 @@ $('#contact-form [data-brief-next]').click();assert.equal($('#contact-form').dat
 $('#contact-form [name=needs][value=Website]').checked=true;$('#contact-form [data-brief-next]').click();assert.equal($('#contact-form').dataset.step,'2');
 $('#contact-form [name=timeline][value="Within 3 months"]').checked=true;$('#contact-form [data-brief-next]').click();assert.equal($('#contact-form').dataset.step,'3');
 $('#contact-form [name=name]').value='Test client';$('#contact-form [name=email]').value='test@example.com';$('#contact-form [name=project]').value='Interactive website';
-globalThis.URL.createObjectURL=()=> 'blob:test-brief';globalThis.URL.revokeObjectURL=()=>{};
-$('#contact-form').dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true}));assert.equal($('.brief-download').getAttribute('download'),'ZEL-project-brief.txt');
+let briefBlob;globalThis.URL.createObjectURL=blob=>{briefBlob=blob;return 'blob:test-brief';};globalThis.URL.revokeObjectURL=()=>{};
+$('#contact-form').dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true}));assert.equal($('.brief-download').getAttribute('download'),'ZEL-project-brief-test-client.pdf');assert.equal(briefBlob.type,'application/pdf');
+// The PDF itself: every object and stream sits where the file says, answers are real text, and long notes continue on further pages.
+function readPdf(bytes){
+  const pdf=Buffer.from(bytes).toString('latin1'),xref=Number(pdf.match(/startxref\n(\d+)/)[1]);assert.ok(pdf.startsWith('%PDF-1.4')&&pdf.startsWith('xref',xref));
+  [...pdf.slice(xref).matchAll(/^(\d{10}) 00000 n $/gm)].forEach((entry,i)=>assert.ok(pdf.startsWith(`${i+1} 0 obj`,Number(entry[1])),`PDF object ${i+1} is where the xref says`));
+  for(const stream of pdf.matchAll(/\/Length (\d+) >>\nstream\n/g))assert.ok(pdf.startsWith('\nendstream',stream.index+stream[0].length+Number(stream[1])),'PDF stream length matches');
+  return pdf;
+}
+const answers={name:'Test client',email:'test@example.com',needs:['Website','Ordering & payments'],timeline:'In 3–6 months',notes:'Interactive website'};
+const shortBrief=readPdf(briefPdf(answers));
+assert.ok(shortBrief.includes('(Test client) Tj')&&shortBrief.includes('(In 3\x966 months) Tj'),'Answers are set as text in Windows-1252');
+assert.ok(shortBrief.includes('/URI (mailto:test@example.com)')&&shortBrief.includes('/Count 1'),'One page with a working email link');
+const longBrief=readPdf(briefPdf({...answers,notes:'A long idea. '.repeat(600)}));
+assert.ok(/\/Count [2-9]/.test(longBrief)&&longBrief.includes('(PROJECT BRIEF, CONTINUED) Tj'),'Long notes continue on further pages');
+assert.equal(briefFileName('Anaïs Fernández'),'ZEL-project-brief-anais-fernandez.pdf');assert.equal(briefFileName('अम्मार'),'ZEL-project-brief.pdf');
 assert.ok(decodeURIComponent($('.brief-send').href).includes('Building: Website'),'Brief email carries the answers');assert.ok($('.brief-send').href.startsWith('mailto:support@zel.agency'));
 $('#contact-dialog [data-close]').click();assert.equal(document.body.style.overflow,'');
 // Long dialogs scroll inside, so their close buttons never scroll out of reach.

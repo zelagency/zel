@@ -7,6 +7,8 @@ import { initPills, initSoundWave, fillPill, drainPill } from './pills.js';
 import { playPreloader } from './intro.js';
 import { createPageTransition } from './transition.js';
 import { mountPage, videoSource, liteData } from './page.js';
+import { contact as zelContact } from './contact.js';
+import { briefPdf, briefFileName } from './brief-pdf.js';
 
 gsap.registerPlugin(ScrollTrigger);
 // Mobile browser bars resize the viewport while scrolling; refreshing then makes pins jump.
@@ -170,7 +172,6 @@ $$('dialog').forEach(dialog=>{
 });
 // Project brief forms (contact dialog and contact page) ask three short steps: what, when, then who.
 // Taps come first and contact details last, so starting costs nothing.
-const ZEL_EMAIL='support@zel.agency';
 function showBriefStep(form,step){
   form.dataset.step=String(step);
   $('[data-brief-count]',form).textContent=String(step);
@@ -192,14 +193,16 @@ document.addEventListener('submit',event=>{
   const form=event.target.closest('form[data-brief-form]');if(!form)return;
   event.preventDefault();const values=new FormData(form);
   if(briefUrls.has(form))URL.revokeObjectURL(briefUrls.get(form));
-  const brief=`ZEL — Project brief\n\nName: ${values.get('name')}\nEmail: ${values.get('email')}\n\n`+
-    `Building: ${values.getAll('needs').join(', ')||'Not given'}\nIdeal launch: ${values.get('timeline')||'Not given'}\n\n`+
-    `Notes\n${values.get('project')||'None'}\n`;
-  const url=URL.createObjectURL(new Blob([brief],{type:'text/plain;charset=utf-8'}));briefUrls.set(form,url);
+  const answers={name:values.get('name').trim(),email:values.get('email').trim(),needs:values.getAll('needs'),timeline:values.get('timeline'),notes:values.get('project').trim()};
+  const brief=`ZEL — Project brief\n\nName: ${answers.name}\nEmail: ${answers.email}\n\n`+
+    `Building: ${answers.needs.join(', ')||'Not given'}\nIdeal launch: ${answers.timeline||'Not given'}\n\n`+
+    `Notes\n${answers.notes||'None'}\n`;
+  // The email carries the brief as text; the download is the designed PDF.
+  const url=URL.createObjectURL(new Blob([briefPdf(answers)],{type:'application/pdf'}));briefUrls.set(form,url);
   const status=$('.form-status',form);
-  status.innerHTML='Your brief is ready: <a class="brief-send">email it to us ↗</a> &nbsp;·&nbsp; <a class="brief-download" download="ZEL-project-brief.txt">download it ↗</a>';
-  $('.brief-send',status).href=`mailto:${ZEL_EMAIL}?subject=${encodeURIComponent(`Project brief from ${values.get('name')}`)}&body=${encodeURIComponent(brief)}`;
-  $('.brief-download',status).href=url;
+  status.innerHTML='Your brief is ready: <a class="brief-send">email it to us ↗</a> &nbsp;·&nbsp; <a class="brief-download">download the PDF ↗</a>';
+  $('.brief-send',status).href=`mailto:${zelContact.email}?subject=${encodeURIComponent(`Project brief from ${answers.name}`)}&body=${encodeURIComponent(brief)}`;
+  $('.brief-download',status).href=url;$('.brief-download',status).download=briefFileName(answers.name);
 });
 media.addEventListener('close',()=>{delete media.dataset.reel;const video=$('video',media);video?.pause();$('.media-dialog-content').replaceChildren();if(audio.enabled)audio.get('music').play().catch(()=>{});});
 // The case study leads with every screenshot, customer side first, on a 12-column grid whose rows

@@ -40,7 +40,7 @@ Fogstores leads the work section, followed by Infinity Kitchens and BNM Cafe. Cl
 
 Customer names, courier tracking numbers and the owner's email are blurred in the exported screenshots; captures showing customer contact details or addresses are left out. Source project folders are unchanged. The Infinity Kitchens live site sits behind sign-in, so its admin and kitchen screens are not captured.
 
-The contact form asks three short steps (what to build, when, then name and email) and prepares a brief the visitor can email to support@zel.agency (it opens their mail app) or download. Nothing is submitted to a server, so a visitor without a mail app can only download it. Long dialogs (the brief on short screens, case studies) scroll inside, so their close button stays in view.
+The contact form asks three short steps (what to build, when, then name and email) and prepares a brief the visitor can email to support@zel.agency (it opens their mail app) or download. Nothing is submitted to a server, so a visitor without a mail app can only download it. The download is an A4 PDF (`src/brief-pdf.js`) written in the browser without a library: a cobalt card with the ZEL wordmark, the answers in a two-column sheet, and a closing note on where to send it. It is set in Helvetica, which PDF readers have built in, so the Aeonik web font is never embedded; lines with characters Helvetica lacks (Indian scripts, emoji, ₹) are drawn by the browser as images, and everything else stays selectable text. Long notes continue on further pages. Long dialogs (the brief on short screens, case studies) scroll inside, so their close button stays in view.
 
 ## Reference media
 
