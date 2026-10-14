@@ -71,7 +71,7 @@ assert.equal(document.querySelectorAll('.project').length,3,'Three real ZEL proj
 assert.equal($('.project-featured').dataset.projectId,'fogstores','Fogstores is the lead project');
 for(const project of projects){
   assert.equal($(`[data-project-id="${project.id}"] .project-title a`).href,project.url,'Correct live project link');
-  for(const image of project.images)assert.ok(fs.existsSync(path.join('dist',image.src)),`Missing real project image ${image.src}`);
+  for(const image of project.gallery.flatMap(group=>group.shots).flatMap(shot=>[{src:shot.src},{src:shot.thumb}]))assert.ok(fs.existsSync(path.join('dist',image.src)),`Missing real project image ${image.src}`);
 }
 $('.menu-button').click();assert.ok($('#menu-dialog').open);assert.equal($('.menu-button').getAttribute('aria-expanded'),'true');
 assert.equal(document.documentElement.style.overflow,'hidden','Root scrolling locks while menu is open');
@@ -88,7 +88,11 @@ assert.equal(document.activeElement,$('[data-project="0"]'),'Return focus to pro
 assert.equal(new URL($('#all-projects').href).pathname,'/projects/','See all projects routes to the projects page');
 $('[data-project="0"]').click();await until(()=>$('#media-dialog').open);await idle();$('[data-back-projects]').click();assert.equal(document.querySelectorAll('[data-gallery-project]').length,3,'Case study links back to the gallery');
 $('[data-gallery-project="1"]').click();assert.equal($('.media-dialog-content h2').textContent,'Infinity Kitchens');
-assert.equal(document.querySelectorAll('.case-screens img').length,2);
+assert.equal(document.querySelectorAll('.shot').length,projects[1].gallery.flatMap(group=>group.shots).length,'Every Infinity screenshot is in the grid');
+$('[data-shot="1"]').click();assert.ok($('#lightbox').open,'A screenshot opens the gallery');assert.equal($('.lightbox-count').textContent,'02 / 07');
+$('#lightbox [data-step="1"]').click();assert.equal($('.lightbox-count').textContent,'03 / 07','Next steps forward');
+$('#lightbox').dispatchEvent(new window.KeyboardEvent('keydown',{key:'ArrowLeft',bubbles:true}));assert.equal($('.lightbox-count').textContent,'02 / 07','Arrow keys step back');
+$('#lightbox').dispatchEvent(new window.Event('cancel',{cancelable:true}));assert.ok(!$('#lightbox').open&&$('#media-dialog').open,'Escape closes only the gallery');
 $('[data-back-projects]').click();assert.equal(document.querySelectorAll('[data-gallery-project]').length,3);
 $('[data-gallery-project="2"]').click();assert.equal($('.media-dialog-content h2').textContent,'BNM Cafe');
 assert.equal($('.case-heading a').href,'https://bnm-cafe-rho.vercel.app/menu');
@@ -105,7 +109,7 @@ for(const element of [...document.querySelectorAll('[src],[href],[data-src],[dat
 await transform(fs.readFileSync('dist/style.css','utf8'),{loader:'css',minify:true});
 await transform(fs.readFileSync('dist/projects.css','utf8'),{loader:'css',minify:true});
 // Case-study images only appear when a project opens, so check the project data directly.
-for(const project of projects)for(const image of [project.cover,...project.images].filter(Boolean))assert.ok(fs.existsSync(path.join('dist',image.src)),`Missing project image ${image.src}`);
+for(const project of projects)for(const image of [project.cover,...project.gallery.flatMap(group=>group.shots)].filter(Boolean))assert.ok(fs.existsSync(path.join('dist',image.src)),`Missing project image ${image.src}`);
 // Every route is a complete page: own content, current menu item and the next page in the footer.
 for(const [file,route,next,heading] of [['dist/index.html','/','/about/','We build'],['dist/about/index.html','/about/','/projects/','both sides'],['dist/projects/index.html','/projects/','/contact/','Projects'],['dist/contact/index.html','/contact/','/','Let’s work']]){
   const page=new JSDOM(fs.readFileSync(file,'utf8')).window.document;

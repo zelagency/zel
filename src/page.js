@@ -18,7 +18,7 @@ export function mountPage({root,footer,motionQuery,isReduced,ui}){
   if(grid){const all=grid.dataset.layout==='all';grid.innerHTML=projects.map((project,i)=>projectCard(project,i,!all&&i===0)).join('');}
   $$('[data-project-count]').forEach(element=>{element.textContent=String(projects.length).padStart(2,'0');});
   root.addEventListener('click',event=>{
-    const project=event.target.closest('[data-project]');if(project){ui.openProject(Number(project.dataset.project));return;}
+    const project=event.target.closest('[data-project]');if(project){ui.openProject(Number(project.dataset.project),project);return;}
     if(event.target.closest('[data-reel]'))ui.openReel();
   },{signal});
 

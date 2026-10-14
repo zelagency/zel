@@ -32,13 +32,13 @@ The first screen waits only for the HTML, the two stylesheets, the script and th
 
 ## Selected work
 
-Fogstores leads the work section, followed by Infinity Kitchens and BNM Cafe. Each project opens a detail view and links to its actual live site. Source records and project descriptions are defined in `src/projects.js`.
+Fogstores leads the work section, followed by Infinity Kitchens and BNM Cafe. Clicking a project grows its detail view out of the card. The detail view leads with a screenshot grid, customer side first, then "behind the counter" (admin, analytics, operations). Any tile opens a full-screen gallery with arrows, ←/→/Home/End, swipe and a thumbnail strip. Records, captions and grid spans live in `src/projects.js`; images are in `dist/assets/projects/screens/<project>/` as `<name>.webp` (gallery) and `<name>-thumb.webp` (grid tile).
 
-- Fogstores: https://fogstores.vercel.app/ — streetwear feature cover from `Hazestudios/public/fogstores/men/hero-desktop.webp`, with original campaign and look photography from `Hazestudios/public/fogstores` in the detail gallery.
-- Infinity Kitchens: https://infinitykitchensblr.com/ — original food photography and brand mark from Cloud-Kitchen, with actual customer homepage and menu screenshots recorded in its September 19, 2026 capture assets.
-- BNM Cafe: https://bnm-cafe-rho.vercel.app/menu — actual mobile menu screenshot and cafe logo from `bnm/BNM-Cafe`.
+- Fogstores: https://fogstores.vercel.app/ — storefront home, collections, product pages and search captured at desktop and phone size from the Hazestudios app run locally with `STOREFRONT_PREVIEW_LOCK=off` (October 14, 2026); admin, analytics, orders, delivery tracking, products and discounts from the admin audit captures in `Hazestudios/.codex`.
+- Infinity Kitchens: https://infinitykitchensblr.com/ — customer home, menu and meal-plan screens from the September 19, 2026 capture assets, and an explainer of what the kitchen system does for the team and the owner (one board for website, Swiggy and Zomato orders; paid before it is cooked; cooks see food, owners see figures), drawn from Cloud-Kitchen's order flow.
+- BNM Cafe: https://bnm-cafe-rho.vercel.app/menu — customer phone screens, the live KOT board, cashier POS, analytics and station hub from `bnm/BNM-Cafe/screenshots`.
 
-The covers compose these real assets for ZEL's portfolio; the detail views identify actual screenshots and photography. Source project folders are unchanged. At inspection, the Fogstores and Infinity URLs served sign-in pages, so their authenticated interfaces were not captured from the live sites.
+Customer names, courier tracking numbers and the owner's email are blurred in the exported screenshots; captures showing customer contact details or addresses are left out. Source project folders are unchanged. The Infinity Kitchens live site sits behind sign-in, so its admin and kitchen screens are not captured.
 
 The contact form prepares a local downloadable brief. No messages are submitted to a server; a real contact destination should be configured before a public agency launch.
 

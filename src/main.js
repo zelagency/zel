@@ -66,7 +66,7 @@ document.addEventListener('pointerover',event=>{
 document.addEventListener('click',event=>{if(event.target.closest('a,button'))audio.play('click');});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)audio.pauseMusic();else if(audio.enabled&&!$('#media-dialog').open)audio.get('music').play().catch(()=>{});});
 
-const menu=$('#menu-dialog'), contact=$('#contact-dialog'), media=$('#media-dialog');
+const menu=$('#menu-dialog'), contact=$('#contact-dialog'), media=$('#media-dialog'), lightbox=$('#lightbox');
 $$('dialog').forEach(dialog=>dialog.setAttribute('data-lenis-prevent',''));
 menu.insertAdjacentHTML('afterbegin','<a class="menu-logo logo" href="/">ZEL</a><button class="dialog-close pill menu-close" aria-label="Close menu">CLOSE ••</button>');
 let previousFocus;
@@ -158,7 +158,7 @@ $$('[data-close]').forEach(button=>button.addEventListener('click',()=>dismissDi
 $$('dialog').forEach(dialog=>{
   dialog.addEventListener('cancel',event=>{event.preventDefault();dismissDialog(dialog);});
   dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dismissDialog(dialog);}});
-  dialog.addEventListener('close',unlockScroll);
+  dialog.addEventListener('close',()=>{delete dialog.dataset.opening;unlockScroll();});
 });
 // Project brief forms (contact dialog and contact page) prepare a local download.
 const briefUrls=new WeakMap();
@@ -173,13 +173,85 @@ document.addEventListener('submit',event=>{
   $('.brief-download',status).href=url;
 });
 media.addEventListener('close',()=>{const video=$('video',media);video?.pause();$('.media-dialog-content').replaceChildren();if(audio.enabled)audio.get('music').play().catch(()=>{});});
+// The case study leads with every screenshot, customer side first, on a 12-column grid whose rows
+// always fill (each shot's span comes from projects.js).
+let shots=[];
 function renderProject(index){
-  const project=projects[index];
-  $('.media-dialog-content').innerHTML=`<article class="case-study"><div class="case-heading"><div><h2>${project.title}</h2><p>${project.type}</p></div><a class="pill white" href="${project.url}" target="_blank" rel="noopener">VISIT LIVE SITE ↗</a></div><div class="case-cover">${projectCover(project)}</div><div class="case-description"><p>${project.description}</p><ul>${project.features.map(feature=>`<li>${feature}</li>`).join('')}</ul></div><div class="case-screens">${project.images.map(image=>`<figure><img src="${image.src}" alt="${image.alt}" loading="lazy"><figcaption>${image.alt}</figcaption></figure>`).join('')}</div><button class="case-back" data-back-projects>← Back to all projects</button></article>`;
+  const project=projects[index];let n=0;
+  shots=project.gallery.flatMap(group=>group.shots.map(shot=>({...shot,group:group.label})));
+  const groups=project.gallery.map(group=>`<section class="shots-group"><header class="shots-head"><h3>${group.label}</h3><p>${group.note}</p></header><div class="shots">${group.shots.map(shot=>`<button class="shot shot-${shot.size}" style="--span:${shot.span}" data-shot="${n++}" aria-label="View ${shot.alt}"><img src="${shot.thumb}" alt="" loading="lazy" decoding="async"><span class="shot-caption">${shot.alt}</span><span class="shot-open" aria-hidden="true">↗</span></button>`).join('')}</div></section>`).join('');
+  $('.media-dialog-content').innerHTML=`<article class="case-study"><div class="case-heading"><div><h2>${project.title}</h2><p>${project.type}</p></div><a class="pill white" href="${project.url}" target="_blank" rel="noopener">VISIT LIVE SITE ↗</a></div><div class="case-shots">${groups}</div><div class="case-description"><p>${project.description}</p><ul>${project.features.map(feature=>`<li>${feature}</li>`).join('')}</ul></div><button class="case-back" data-back-projects>← Back to all projects</button></article>`;
   $('[data-back-projects]',media).addEventListener('click',renderGallery);
   media.scrollTop=0;
 }
-function openProject(index){pageTransition.run(()=>{renderProject(index);showDialog(media);});}
+// Dialogs open out of whatever was clicked: clipped to its rectangle in the site blue, the dialog
+// grows to its full size while settling to its own surface, and its contents rise in behind.
+function openFrom(dialog,origin,open){
+  const grow=!reduced&&!!dialog.animate&&!!origin;
+  // Kept until close: removing it while open would re-enable the CSS entrance and replay it.
+  if(grow)dialog.dataset.opening='';
+  open();
+  if(!grow)return;
+  const from=origin.getBoundingClientRect(),to=dialog.getBoundingClientRect(),radius=getComputedStyle(origin).borderTopLeftRadius;
+  const inset=[from.top-to.top,to.right-from.right,to.bottom-from.bottom,from.left-to.left].map(v=>`${Math.max(0,v)}px`).join(' ');
+  const surface=getComputedStyle(dialog).backgroundColor,blue=getComputedStyle(document.documentElement).getPropertyValue('--blue');
+  dialog.animate([
+    {clipPath:`inset(${inset} round ${radius})`,backgroundColor:blue},
+    {backgroundColor:blue,offset:.3},
+    {clipPath:`inset(0px round ${getComputedStyle(dialog).borderTopLeftRadius})`,backgroundColor:surface}
+  ],{duration:620,easing:'cubic-bezier(.4,0,.1,1)'});
+  [...dialog.children].forEach((child,i)=>child.animate([{opacity:0,transform:'translateY(48px)'},{opacity:1,transform:'none'}],{duration:520,delay:260+i*50,easing:'cubic-bezier(.22,1,.36,1)',fill:'backwards'}));
+  try{dialog.animate({opacity:[0,1]},{duration:400,pseudoElement:'::backdrop'});}catch{}
+}
+function openProject(index,card){
+  if(media.open||pageTransition.running)return;
+  renderProject(index);openFrom(media,card,()=>showDialog(media));
+}
+
+// Screenshot gallery: arrows, ←/→/Home/End, swipe, or the thumbnail strip. Captures taller than
+// they are wide (full analytics pages, reports) scroll at full width instead of shrinking to fit.
+const stage=$('.lightbox-stage'),stageImage=$('img',stage),strip=$('.lightbox-thumbs');
+let current=0;
+stageImage.addEventListener('load',()=>{
+  const shot=shots[current],tall=stageImage.naturalHeight>stageImage.naturalWidth;
+  stage.toggleAttribute('data-scroll',tall&&shot?.size!=='phone'&&shot?.size!=='photo');
+});
+function showShot(index,direction=0){
+  current=Math.max(0,Math.min(shots.length-1,index));const shot=shots[current];
+  $('.lightbox-count').textContent=`${String(current+1).padStart(2,'0')} / ${String(shots.length).padStart(2,'0')}`;
+  $('.lightbox-group').textContent=shot.group;$('.lightbox-caption').textContent=shot.alt;
+  stageImage.src=shot.src;stageImage.alt=shot.alt;stage.scrollTop=0;
+  $$('[data-step]',lightbox).forEach(button=>{const to=current+Number(button.dataset.step);button.disabled=to<0||to>=shots.length;});
+  const thumbs=[...strip.children];
+  thumbs.forEach((button,i)=>button.toggleAttribute('aria-current',i===current));
+  thumbs[current]?.scrollIntoView?.({block:'nearest',inline:'center',behavior:reduced?'instant':'smooth'});
+  if(direction&&!reduced&&stageImage.animate)stageImage.animate([{opacity:0,transform:`translateX(${direction*40}px)`},{opacity:1,transform:'none'}],{duration:280,easing:'cubic-bezier(.22,1,.36,1)'});
+  // Warm the neighbours so stepping through feels instant.
+  [current-1,current+1].forEach(i=>{if(shots[i])document.createElement('img').src=shots[i].src;});
+}
+function step(by){if(shots[current+by])showShot(current+by,by);}
+media.addEventListener('click',event=>{
+  const tile=event.target.closest('[data-shot]');if(!tile||lightbox.open)return;
+  strip.innerHTML=shots.map(shot=>`<button aria-label="${shot.alt}"><img src="${shot.thumb}" alt="" loading="lazy" decoding="async"></button>`).join('');
+  showShot(Number(tile.dataset.shot));
+  openFrom(lightbox,tile,()=>lightbox.showModal());
+});
+strip.addEventListener('click',event=>{const button=event.target.closest('button');if(!button)return;const i=[...strip.children].indexOf(button);showShot(i,Math.sign(i-current));});
+$$('[data-step]',lightbox).forEach(button=>button.addEventListener('click',()=>step(Number(button.dataset.step))));
+lightbox.addEventListener('keydown',event=>{
+  const keys={ArrowLeft:()=>step(-1),ArrowRight:()=>step(1),Home:()=>showShot(0,-1),End:()=>showShot(shots.length-1,1)};
+  if(keys[event.key]){event.preventDefault();keys[event.key]();}
+});
+// A horizontal swipe steps; vertical drags stay scrolls. A tap beside the image closes.
+let swipe=null,swiped=false;
+stage.addEventListener('pointerdown',event=>{swipe={x:event.clientX,y:event.clientY};swiped=false;});
+stage.addEventListener('pointerup',event=>{
+  if(!swipe)return;const dx=event.clientX-swipe.x,dy=event.clientY-swipe.y;swipe=null;
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.2){swiped=true;step(dx<0?1:-1);}
+});
+stage.addEventListener('pointercancel',()=>{swipe=null;});
+stage.addEventListener('click',event=>{if(event.target===stage&&!swiped)dismissDialog(lightbox);});
+lightbox.addEventListener('close',()=>media.querySelector(`[data-shot="${current}"]`)?.focus());
 function renderGallery(){
   $('.media-dialog-content').innerHTML='<h2>Selected projects</h2><div class="gallery-grid">'+projects.map((project,i)=>`<button data-gallery-project="${i}" aria-label="Explore ${project.title}">${projectCover(project)}<span>${project.title} ↗</span></button>`).join('')+'</div>';
   $$('[data-gallery-project]',media).forEach(button=>button.addEventListener('click',()=>renderProject(Number(button.dataset.galleryProject))));

@@ -71,6 +71,8 @@ html[data-input-mode="pointer"] :is(button,a):focus{outline:none}
 .pill-fill{position:absolute;left:0;top:0;width:0;height:0;border-radius:50%;background:var(--blue);z-index:-1;pointer-events:none;will-change:transform}
 .pill[data-filled],.pill.sound[aria-pressed=true]{color:white}
 .media-dialog>.dialog-close[data-filled]{color:white}
+/* Projects and screenshots grow out of what was clicked (openFrom in main.js), so the generic dialog entrance is skipped. */
+dialog[data-opening]{animation:none}
 /* Let's talk: arrow slides in, label shifts, dot scales away. */
 .talk{gap:0}
 .talk-arrow{position:absolute;left:22px;top:50%;width:16px;height:16px;margin-top:-8px;transform:translateX(-46px);transition:transform .3s var(--snap)}
