@@ -1,0 +1,9 @@
+# Same exclusions as .gitignore (a .graphifyignore replaces them rather than adding to them).
+node_modules/
+research/
+*.zip
+*.tar.gz
+.vercel
+.env*
+# The launch-video project (renders, sound effects, vendored gsap) is separate from the site.
+brag-output/

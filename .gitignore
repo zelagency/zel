@@ -5,3 +5,9 @@ research/
 
 .vercel
 .env*
+
+# graphify: the graph, report and viewer are shared; the cache, manifest and interpreter path are per machine.
+graphify-out/cache/
+graphify-out/manifest.json
+graphify-out/cost.json
+graphify-out/.graphify_*
