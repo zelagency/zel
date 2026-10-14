@@ -11,6 +11,12 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,dialog::-webkit-scrollbar,dialog
 dialog,.menu-inner{overscroll-behavior:contain}
 .menu-dialog{margin:0;overflow:hidden;height:100dvh;max-height:100dvh}
 .menu-inner{height:100%;min-height:0;overflow-x:hidden;overflow-y:auto}
+/* The menu always fits one screen: links and spacing follow the viewport's height as well as its width. */
+.menu-inner{padding-top:clamp(96px,15dvh,160px);padding-bottom:clamp(24px,5dvh,50px)}
+.menu-inner nav{margin-top:clamp(14px,3.5dvh,35px)}
+.menu-inner nav>a{font-size:clamp(40px,min(7.5vw,12.5dvh),150px)}
+.menu-contact{margin-top:clamp(14px,4dvh,40px)}
+@media(max-width:812px){.menu-inner{padding-top:clamp(96px,15dvh,130px)}.menu-inner nav>a{font-size:min(16vw,11dvh)}}
 html:has(dialog[open]) .scroll-indicator{visibility:hidden}
 html[data-input-mode="pointer"] :is(button,a):focus{outline:none}
 .reel-frame .reel-cursor{opacity:0;visibility:hidden;will-change:transform}
@@ -351,3 +357,40 @@ main[data-page-root]{outline:none}
 input:focus,input:focus-visible,textarea:focus,textarea:focus-visible{outline:none;border-bottom-color:var(--blue);box-shadow:0 1px 0 var(--blue)}
 input,textarea{transition:border-color .25s var(--ease),box-shadow .25s var(--ease)}
 @media(max-width:812px){.next-page{grid-template-columns:1fr;grid-template-rows:1fr auto auto;row-gap:18px}.next-label{justify-self:start;padding-bottom:0}}
+/* Brief form: three short steps of tap-to-pick choices, contact details last. */
+.brief-progress{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0;font-size:11px;letter-spacing:.08em;color:#55566a}
+.brief-progress b{font-weight:400}
+.brief-progress i{display:flex;gap:6px}
+.brief-progress i b{display:block;width:28px;height:3px;border-radius:3px;background:#0000001a;transition:background-color .4s}
+form[data-step="1"] .brief-progress i b:first-child,form[data-step="2"] .brief-progress i b:nth-child(-n+2),form[data-step="3"] .brief-progress i b{background:var(--blue)}
+.brief-step{display:none;border:0;margin:0;padding:0;min-width:0}
+form[data-step="1"] .brief-step[data-index="1"],form[data-step="2"] .brief-step[data-index="2"],form[data-step="3"] .brief-step[data-index="3"]{display:block}
+.brief-step>legend{padding:0;margin-bottom:18px;font-size:clamp(22px,1.9vw,32px);line-height:1.15;letter-spacing:-.03em}
+.brief-step>legend:focus{outline:none}
+.brief-hint{margin:-8px 0 16px;font-size:13px;color:#55566a}
+.choices{display:flex;flex-wrap:wrap;gap:8px}
+form label.choice{display:block;position:relative;font-size:15px;cursor:pointer}
+.choice input{position:absolute;inset:0;margin:0;opacity:0;cursor:pointer}
+.choice span{display:block;padding:.62em 1.15em;border:1px solid #00000033;border-radius:99px;transition:background-color .25s,color .25s,border-color .25s}
+.choice:hover span{border-color:var(--ink)}
+.choice input:checked+span{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.choice input:focus-visible+span{outline:2px solid var(--blue);outline-offset:2px}
+.brief-row{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:22px}
+.brief-step textarea{resize:none}
+.brief-error{margin:0;font-size:13px;color:#b42318}
+.brief-error:empty,.form-status:empty{display:none}
+.brief-nav{display:flex;flex-wrap:wrap;gap:10px}
+form[data-step="1"] [data-brief-back],form[data-step="3"] [data-brief-next],form:not([data-step="3"]) [data-brief-submit]{display:none}
+.form-status .brief-send,.form-status .brief-download{display:inline;margin:0;color:var(--blue);text-decoration:underline}
+/* The contact dialog sizes itself to the screen's height, so it never needs to scroll. */
+.contact-dialog{padding:clamp(34px,6svh,65px) clamp(25px,5vw,55px)}
+.contact-dialog h2{font-size:clamp(44px,min(5vw,8svh),88px);margin:clamp(16px,3svh,35px) 0 clamp(10px,2svh,25px)}
+.contact-dialog form{margin-top:clamp(18px,3svh,35px);gap:clamp(16px,2.6svh,25px)}
+@media(max-width:812px){.brief-row{grid-template-columns:1fr;gap:20px}}
+/* Direct contact: email, phones and Instagram wherever someone might look for them. */
+@media(min-width:1101px){.footer-grid{grid-template-columns:1.3fr repeat(4,minmax(0,1fr))}}
+.menu-direct{display:flex;flex-wrap:wrap;gap:6px 22px;margin-top:clamp(12px,2.4dvh,22px);font-size:13px}
+.menu-direct a:hover,.contact-direct a:hover,.contact-dialog>p a:hover{text-decoration:underline}
+.contact-dialog>p a{color:var(--blue)}
+.contact-direct{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-top:3vw;font-size:clamp(17px,1.4vw,24px);letter-spacing:-.02em}
+@media(max-width:812px){.contact-direct{margin-top:34px}}

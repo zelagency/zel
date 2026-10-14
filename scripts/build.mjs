@@ -16,10 +16,20 @@ export const pages=[
 // Link previews (og:image, og:url) need absolute URLs.
 const site='https://zel-tau.vercel.app';
 const labels={home:'Home',about:'About us',projects:'Projects',contact:'Contact'};
+// One source for how to reach ZEL: the footer, menu, contact page, dialog and search listing all read it.
+const contact={email:'support@zel.agency',phones:['+91 72599 41403','+91 94825 29879'],instagram:'agency.zel'};
+const tel=phone=>`tel:${phone.replaceAll(' ','')}`,instagramUrl=`https://www.instagram.com/${contact.instagram}/`;
+const contactLinks=[`<a href="mailto:${contact.email}">${contact.email}</a>`,...contact.phones.map(phone=>`<a href="${tel(phone)}">${phone}</a>`),
+  `<a href="${instagramUrl}" target="_blank" rel="noopener">Instagram @${contact.instagram} ↗</a>`].join('');
+const orgSchema=JSON.stringify({'@context':'https://schema.org','@type':'Organization',name:'ZEL',url:site,email:contact.email,telephone:contact.phones[0],sameAs:[instagramUrl],
+  address:{'@type':'PostalAddress',addressLocality:'Bangalore',addressCountry:'IN'},
+  contactPoint:contact.phones.map(phone=>({'@type':'ContactPoint',telephone:phone,email:contact.email,contactType:'customer service',areaServed:'IN'}))});
 // Hash the text with line endings normalised, so a Windows checkout (CRLF) and CI (LF) agree.
 const hashOf=file=>createHash('sha256').update(readFileSync(file,'utf8').replaceAll('\r\n','\n')).digest('hex').slice(0,12);
 const versions=Object.fromEntries(['app.js','style.css','projects.css'].map(asset=>[asset,hashOf(`dist/${asset}`)]));
 const layout=readFileSync('src/site/layout.html','utf8');
+// The brief form appears twice (contact dialog and contact page), so it is written once.
+const briefForm=readFileSync('src/site/brief-form.html','utf8').trimEnd();
 
 function footer(next){
   const live=projects.map(project=>`<a href="${project.url}" target="_blank" rel="noopener">${project.title} ↗</a>`).join('');
@@ -28,6 +38,7 @@ function footer(next){
       <div class="footer-brand"><a class="footer-logo" href="/">ZEL</a><p>Bold ideas, brought to life.</p></div>
       <nav class="footer-col" aria-label="Footer"><span class="footer-label">EXPLORE</span>${pages.map(p=>`<a href="${p.route}">${labels[p.page]}</a>`).join('')}</nav>
       <div class="footer-col"><span class="footer-label">LIVE WORK</span>${live}</div>
+      <div class="footer-col footer-contact"><span class="footer-label">CONTACT</span>${contactLinks}</div>
       <div class="footer-col"><span class="footer-label">START A PROJECT</span><p>Have an idea worth building?</p><button class="pill dark" data-contact>LET’S TALK <span class="small-dot">•</span></button></div>
     </div>
     <div class="footer-bottom section"><span>© 2026 ZEL</span><a href="#main">BACK TO TOP ↑</a></div>
@@ -42,6 +53,8 @@ pages.forEach((page,i)=>{
     .replace('{{url}}',site+page.route).replaceAll('{{site}}',site)
     .replace('{{main}}',readFileSync(`src/site/pages/${page.page}.html`,'utf8').trimEnd())
     .replace('{{footer}}',footer(next))
+    .replaceAll('{{brief-form}}',briefForm)
+    .replaceAll('{{contact-links}}',contactLinks).replaceAll('{{phone}}',contact.phones[0]).replaceAll('{{phone-href}}',tel(contact.phones[0])).replace('{{org-schema}}',orgSchema)
     .replaceAll(`<a href="${page.route}">`,`<a href="${page.route}" aria-current="page">`);
   for(const [asset,hash] of Object.entries(versions))html=html.replaceAll(`/${asset}"`,`/${asset}?v=${hash}"`);
   mkdirSync(dirname(page.out),{recursive:true});writeFileSync(page.out,html);

@@ -1,6 +1,5 @@
     <section class="contact-hero" id="top" aria-labelledby="page-title">
       <canvas class="confetti" aria-hidden="true"></canvas>
-      <p class="eyebrow">IS YOUR BIG IDEA READY TO GO WILD?</p>
       <h1 class="page-title contact-title" id="page-title" data-intro-lines><span class="line">Let’s work</span><span class="line">together!</span></h1>
       <a class="pill white contact-jump" href="#brief"><span class="dot"></span>START YOUR BRIEF <span class="arrow">↓</span></a>
     </section>
@@ -8,13 +7,8 @@
       <div class="contact-intro">
         <h2 id="brief-title" data-reveal-heading>Tell us about it</h2>
         <p data-reveal-lines>Share the idea, the ambition and the possibilities. We will turn your answers into a project brief you can download and send.</p>
-        <ol class="contact-steps"><li><span>01</span>Describe your project</li><li><span>02</span>Download your brief</li><li><span>03</span>Shape the next steps together</li></ol>
+        <ol class="contact-steps"><li><span>01</span>Describe your project</li><li><span>02</span>Send or download your brief</li><li><span>03</span>Shape the next steps together</li></ol>
+        <div class="contact-direct"><p class="footer-label">OR REACH US DIRECTLY</p>{{contact-links}}</div>
       </div>
-      <form class="contact-page-form" data-brief-form>
-        <label>Your name<input name="name" autocomplete="name" required placeholder="How should we call you?"></label>
-        <label>Email address<input name="email" type="email" autocomplete="email" required placeholder="you@company.com"></label>
-        <label>Your project<textarea name="project" required placeholder="The idea, the ambition, the possibilities…" rows="4"></textarea></label>
-        <button class="pill dark" type="submit">PREPARE PROJECT BRIEF ↗</button>
-        <p class="form-status" aria-live="polite"></p>
-      </form>
+      <form class="contact-page-form" data-brief-form data-step="1">{{brief-form}}</form>
     </section>

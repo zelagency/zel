@@ -1,0 +1,38 @@
+<p class="brief-progress"><span>STEP <b data-brief-count>1</b> OF 3</span><i aria-hidden="true"><b></b><b></b><b></b></i></p>
+<fieldset class="brief-step" data-index="1">
+  <legend tabindex="-1">What can we build for you?</legend>
+  <p class="brief-hint">Pick everything that applies.</p>
+  <div class="choices">
+    <label class="choice"><input type="checkbox" name="needs" value="Website"><span>Website</span></label>
+    <label class="choice"><input type="checkbox" name="needs" value="Online store"><span>Online store</span></label>
+    <label class="choice"><input type="checkbox" name="needs" value="Ordering &amp; payments"><span>Ordering &amp; payments</span></label>
+    <label class="choice"><input type="checkbox" name="needs" value="Dashboard or admin"><span>Dashboard or admin</span></label>
+    <label class="choice"><input type="checkbox" name="needs" value="Redesign"><span>Redesign</span></label>
+    <label class="choice"><input type="checkbox" name="needs" value="Not sure yet"><span>Not sure yet</span></label>
+  </div>
+</fieldset>
+<fieldset class="brief-step" data-index="2">
+  <legend tabindex="-1">When would you like to launch?</legend>
+  <p class="brief-hint">A rough idea is fine.</p>
+  <div class="choices">
+    <label class="choice"><input type="radio" name="timeline" value="As soon as possible"><span>As soon as possible</span></label>
+    <label class="choice"><input type="radio" name="timeline" value="Within 3 months"><span>Within 3 months</span></label>
+    <label class="choice"><input type="radio" name="timeline" value="In 3–6 months"><span>In 3–6 months</span></label>
+    <label class="choice"><input type="radio" name="timeline" value="Just exploring"><span>Just exploring</span></label>
+  </div>
+</fieldset>
+<fieldset class="brief-step" data-index="3">
+  <legend tabindex="-1">Last step: who’s asking?</legend>
+  <div class="brief-row">
+    <label>Your name<input name="name" autocomplete="name" required placeholder="How should we call you?"></label>
+    <label>Email address<input name="email" type="email" autocomplete="email" required placeholder="you@company.com"></label>
+  </div>
+  <label>Anything else? (optional)<textarea name="project" rows="2" placeholder="The idea in a sentence or two…"></textarea></label>
+</fieldset>
+<p class="brief-error" aria-live="polite"></p>
+<div class="brief-nav">
+  <button class="pill" type="button" data-brief-back>← BACK</button>
+  <button class="pill dark" type="button" data-brief-next>NEXT →</button>
+  <button class="pill dark" type="submit" data-brief-submit>PREPARE PROJECT BRIEF ↗</button>
+</div>
+<p class="form-status" aria-live="polite"></p>

@@ -160,16 +160,37 @@ $$('dialog').forEach(dialog=>{
   dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dismissDialog(dialog);}});
   dialog.addEventListener('close',()=>{delete dialog.dataset.opening;unlockScroll();});
 });
-// Project brief forms (contact dialog and contact page) prepare a local download.
+// Project brief forms (contact dialog and contact page) ask three short steps: what, when, then who.
+// Taps come first and contact details last, so starting costs nothing.
+const ZEL_EMAIL='support@zel.agency';
+function showBriefStep(form,step){
+  form.dataset.step=String(step);
+  $('[data-brief-count]',form).textContent=String(step);
+  $('.brief-error',form).textContent='';
+  const current=$(`.brief-step[data-index="${step}"]`,form);
+  if(!reduced)current.animate([{opacity:0,transform:'translateY(14px)'},{opacity:1,transform:'none'}],{duration:380,easing:'cubic-bezier(.22,1,.36,1)'});
+  current.querySelector('legend').focus({preventScroll:true});
+}
+document.addEventListener('click',event=>{
+  const button=event.target.closest('[data-brief-next],[data-brief-back]');if(!button)return;
+  const form=button.closest('form[data-brief-form]'),step=Number(form.dataset.step);
+  if(button.hasAttribute('data-brief-back')){showBriefStep(form,step-1);return;}
+  const missing=step===1&&!form.querySelector('[name="needs"]:checked')?'Pick at least one, so we know where to start.'
+    :step===2&&!form.querySelector('[name="timeline"]:checked')?'Pick a launch window, even a rough one.':'';
+  if(missing)$('.brief-error',form).textContent=missing;else showBriefStep(form,step+1);
+});
 const briefUrls=new WeakMap();
 document.addEventListener('submit',event=>{
   const form=event.target.closest('form[data-brief-form]');if(!form)return;
   event.preventDefault();const values=new FormData(form);
   if(briefUrls.has(form))URL.revokeObjectURL(briefUrls.get(form));
-  const brief=`ZEL — Project brief\n\nName: ${values.get('name')}\nEmail: ${values.get('email')}\n\nProject\n${values.get('project')}\n`;
+  const brief=`ZEL — Project brief\n\nName: ${values.get('name')}\nEmail: ${values.get('email')}\n\n`+
+    `Building: ${values.getAll('needs').join(', ')||'Not given'}\nIdeal launch: ${values.get('timeline')||'Not given'}\n\n`+
+    `Notes\n${values.get('project')||'None'}\n`;
   const url=URL.createObjectURL(new Blob([brief],{type:'text/plain;charset=utf-8'}));briefUrls.set(form,url);
   const status=$('.form-status',form);
-  status.innerHTML='Your project brief is ready to download. <br><a class="brief-download" download="ZEL-project-brief.txt">Download your brief ↗</a>';
+  status.innerHTML='Your brief is ready: <a class="brief-send">email it to us ↗</a> &nbsp;·&nbsp; <a class="brief-download" download="ZEL-project-brief.txt">download it ↗</a>';
+  $('.brief-send',status).href=`mailto:${ZEL_EMAIL}?subject=${encodeURIComponent(`Project brief from ${values.get('name')}`)}&body=${encodeURIComponent(brief)}`;
   $('.brief-download',status).href=url;
 });
 media.addEventListener('close',()=>{delete media.dataset.reel;const video=$('video',media);video?.pause();$('.media-dialog-content').replaceChildren();if(audio.enabled)audio.get('music').play().catch(()=>{});});

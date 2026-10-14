@@ -99,9 +99,14 @@ assert.equal($('.case-heading a').href,'https://bnm-cafe-rho.vercel.app/menu');
 $('#media-dialog').dispatchEvent(new window.Event('cancel',{cancelable:true}));assert.ok(!$('#media-dialog').open,'Escape dismisses case study');
 $('[data-reel]').click();assert.ok($('.media-dialog-content video'));$('#media-dialog [data-close]').click();
 $('.talk[data-contact]').click();assert.ok($('#contact-dialog').open);
+// The brief asks in three steps; each step needs an answer before moving on.
+$('#contact-form [data-brief-next]').click();assert.equal($('#contact-form').dataset.step,'1','Step one needs a choice');assert.ok($('#contact-form .brief-error').textContent);
+$('#contact-form [name=needs][value=Website]').checked=true;$('#contact-form [data-brief-next]').click();assert.equal($('#contact-form').dataset.step,'2');
+$('#contact-form [name=timeline][value="Within 3 months"]').checked=true;$('#contact-form [data-brief-next]').click();assert.equal($('#contact-form').dataset.step,'3');
 $('#contact-form [name=name]').value='Test client';$('#contact-form [name=email]').value='test@example.com';$('#contact-form [name=project]').value='Interactive website';
 globalThis.URL.createObjectURL=()=> 'blob:test-brief';globalThis.URL.revokeObjectURL=()=>{};
 $('#contact-form').dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true}));assert.equal($('.brief-download').getAttribute('download'),'ZEL-project-brief.txt');
+assert.ok(decodeURIComponent($('.brief-send').href).includes('Building: Website'),'Brief email carries the answers');assert.ok($('.brief-send').href.startsWith('mailto:support@zel.agency'));
 $('#contact-dialog [data-close]').click();assert.equal(document.body.style.overflow,'');
 for(const element of [...document.querySelectorAll('[src],[href],[data-src],[data-poster]')]){
   for(const attr of ['src','href','data-src','data-poster','data-src-portrait','data-poster-portrait']){const ref=element.getAttribute(attr);if(ref?.startsWith('/')&&!ref.startsWith('//'))assert.ok(fs.existsSync(path.join('dist',new URL(ref,'http://localhost').pathname)),`Missing asset ${ref}`);if(ref?.startsWith('#'))assert.ok(document.querySelector(ref),`Invalid anchor ${ref}`);}
