@@ -45,7 +45,7 @@ The contact form asks three short steps (what to build, when, then name and emai
 ## Reference media
 
 Design reference: https://lusion.co/ and the user’s a.png–f.png screenshots.
-The ambient audio and UI sounds remain Lusion reference media, credited in the page. The flower loop is gone: the about frame on the home page now holds a dandelion drawn live on a canvas (`src/bloom.js`). Featured Work uses the user's own projects and real assets. The page and interactive wordmark are newly authored.
+The ambient audio and UI sounds remain Lusion reference media; the page no longer carries a credits section. The flower loop is gone: the about frame on the home page now holds a dandelion drawn live on a canvas (`src/bloom.js`). Featured Work uses the user's own projects and real assets. The page and interactive wordmark are newly authored.
 
 ## Reel
 

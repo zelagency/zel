@@ -68,7 +68,7 @@ export function initReveals(root,context){
     ScrollTrigger.create({trigger:element,start:'top 92%',once:true,onEnter:()=>gsap.to(state,{n:value,duration:1.8,ease:'expo.out',
       onUpdate:()=>{element.textContent=String(Math.round(state.n));}})});
   });
-  $$('.service-list>li,.rule,.contact-steps>li,.house-side,.stat',root).forEach((item,i)=>gsap.from(item,{y:50,opacity:0,duration:1.1,ease:'expo.out',delay:(i%4)*.06,scrollTrigger:{trigger:item,start:'top 92%',once:true}}));
+  $$('.service-list>li,.rule,.contact-steps>li,.stat',root).forEach((item,i)=>gsap.from(item,{y:50,opacity:0,duration:1.1,ease:'expo.out',delay:(i%4)*.06,scrollTrigger:{trigger:item,start:'top 92%',once:true}}));
   // The pledge strikes out each excuse as it passes, then signs its name and stamps it.
   $$('.rule-excuse s',root).forEach(strike=>gsap.fromTo(strike,{backgroundSize:'0% .09em',color:'#000000b3'},{backgroundSize:'100% .09em',color:'#0000006b',ease:'none',
     scrollTrigger:{trigger:strike,start:'top 82%',end:'top 52%',scrub:.6}}));

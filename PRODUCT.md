@@ -8,6 +8,6 @@ Present ZEL as an agency building unique digital solutions around a client's bus
 ## Brand Personality
 Oversized, expressive, interactive.
 ## Design Principles
-Preserve the reference viewport scale, generous margins, black typography, pale background, 3D visuals, sound, and scrolling rhythm. Build real interactive effects. Reference media is credited and is not represented as ZEL client work.
+Preserve the reference viewport scale, generous margins, black typography, pale background, 3D visuals, sound, and scrolling rhythm. Build real interactive effects. Reference media is not represented as ZEL client work.
 ## Accessibility & Inclusion
 Keyboard operable navigation and dialogs, visible focus, sound off until enabled, reduced motion support, mobile adaptation.
