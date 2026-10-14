@@ -453,17 +453,15 @@ form[data-step="1"] [data-brief-back],form[data-step="3"] [data-brief-next],form
 /* Direct contact: email, phones and Instagram wherever someone might look for them. */
 @media(min-width:1101px){.footer-grid{grid-template-columns:1.3fr repeat(4,minmax(0,1fr))}}
 .menu-direct{display:flex;flex-wrap:wrap;gap:6px 22px;margin-top:clamp(12px,2.4dvh,22px);font-size:13px}
-.menu-direct a:hover,.contact-direct a:hover,.dialog-scroll>p a:hover{text-decoration:underline}
-.dialog-scroll>p a{color:var(--blue)}
+.menu-direct a:hover,.contact-direct a:hover{text-decoration:underline}
 .contact-direct{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-top:3vw;font-size:clamp(17px,1.4vw,24px);letter-spacing:-.02em}
 @media(max-width:812px){.contact-direct{margin-top:34px}}
 /* Phones: the stamp lands on the signature's end instead of beside it, so the pair never outgrows a 320px screen. */
 @media(max-width:812px){.pledge-art{width:100%}.signature{width:min(62vw,300px)}.stamp{left:auto;right:0;margin-left:0}}
-/* Touch: phone numbers, email and credits are full-height targets without moving the text. */
+/* Touch: the email, Instagram and credits links are full-height targets without moving the text. */
 @media(hover:none){
   .contact-direct{gap:0}.contact-direct a{padding:10px 0}
   .menu-direct{row-gap:0}.menu-direct a{padding:10px 0}
-  .dialog-scroll>p a{display:inline-block;padding:12px 0;margin:-12px 0}
   .colophon-list a{display:inline-block;padding:6px 0;margin:-6px 0}
 }
 /* Short landscape screens (phones on their side): the links take the left column and the contact block the right, so it still fits. */
