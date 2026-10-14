@@ -32,7 +32,9 @@ startSmoothScroll();
 gsap.ticker.add(time=>lenis?.raf(time*1000));
 const jump = target => lenis ? lenis.scrollTo(target,{offset:target==='#home'?0:-80}) : $(target)?.scrollIntoView({behavior:reduced?'instant':'smooth'});
 // Sound starts off, so nothing is downloaded until it is first switched on.
-const SOUNDS={music:'/assets/ambient.ogg',hover:'/assets/hover.ogg',click:'/assets/click.ogg'};
+// Safari before iOS 18.4 cannot play Ogg Vorbis, so it gets the AAC copies.
+const SOUND_EXT=new Audio().canPlayType('audio/ogg; codecs="vorbis"')?'ogg':'m4a';
+const SOUNDS=Object.fromEntries(['music','hover','click'].map(type=>[type,`/assets/${type==='music'?'ambient':type}.${SOUND_EXT}`]));
 const audio = {
   enabled: false,
   players: {},
@@ -46,14 +48,20 @@ const audio = {
     const player=this.get(type).cloneNode(); player.volume=type==='hover'?.24:.4;
     player.play().catch(()=>{});
   },
+  // The button answers at once; music can take a few seconds to start on a slow connection, and is only rolled
+  // back if it fails. `attempt` stops a rejection from an earlier tap (pausing rejects a pending play) undoing a later one.
+  attempt:0,
   async toggle(){
-    this.enabled=!this.enabled;
-    if(this.enabled){this.get('hover');this.get('click');try{await this.get('music').play();}catch{this.enabled=false;}}else this.pauseMusic();
-    const sound=$('.sound');sound.setAttribute('aria-pressed',String(this.enabled));
-    soundWave.set(this.enabled);
-    if(this.enabled)fillPill(sound,undefined,undefined,reduced);else if(!sound.matches(':hover'))drainPill(sound,undefined,undefined,reduced);
-    $('.sound').setAttribute('aria-label',this.enabled?'Disable sound':'Enable sound');
-    $('.sound').title=this.enabled?'Sound on':'Sound off';
+    this.enabled=!this.enabled;const attempt=++this.attempt;this.render();
+    if(!this.enabled){this.pauseMusic();return;}
+    this.get('hover');this.get('click');
+    try{await this.get('music').play();}catch{if(attempt===this.attempt&&this.enabled){this.enabled=false;this.render();}}
+  },
+  render(){
+    const sound=$('.sound'),on=this.enabled;
+    sound.setAttribute('aria-pressed',String(on));sound.setAttribute('aria-label',on?'Disable sound':'Enable sound');sound.title=on?'Sound on':'Sound off';
+    soundWave.set(on);
+    if(on)fillPill(sound,undefined,undefined,reduced);else if(!sound.matches(':hover'))drainPill(sound,undefined,undefined,reduced);
   }
 };
 initPills(()=>reduced);
@@ -168,7 +176,7 @@ function showBriefStep(form,step){
   $('[data-brief-count]',form).textContent=String(step);
   $('.brief-error',form).textContent='';
   const current=$(`.brief-step[data-index="${step}"]`,form);
-  if(!reduced)current.animate([{opacity:0,transform:'translateY(14px)'},{opacity:1,transform:'none'}],{duration:380,easing:'cubic-bezier(.22,1,.36,1)'});
+  if(!reduced)current.animate?.([{opacity:0,transform:'translateY(14px)'},{opacity:1,transform:'none'}],{duration:380,easing:'cubic-bezier(.22,1,.36,1)'});
   current.querySelector('legend').focus({preventScroll:true});
 }
 document.addEventListener('click',event=>{
@@ -283,8 +291,8 @@ function openReel(){
   // The reel just plays: no player chrome, only the close button.
   $('.media-dialog-content').innerHTML=`<video src="/assets/zel-reel${cut}.mp4" poster="/assets/zel-reel${cut}-poster.jpg" playsinline loop aria-label="ZEL reel: we take your business digital"></video>`;
   media.dataset.reel='';showDialog(media);audio.pauseMusic();const video=$('video',media);video.muted=!audio.enabled;
-  // Without controls there is no way to start a blocked play, so fall back to muted.
-  video.play().catch(()=>{video.muted=true;video.play().catch(()=>{});});
+  // Without controls there is no way to start a blocked play, so fall back to muted, and as a last resort show controls.
+  video.play().catch(()=>{video.muted=true;video.play().catch(()=>{video.controls=true;});});
 }
 
 const progress=$('.scroll-indicator i');

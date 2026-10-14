@@ -113,6 +113,9 @@ $('#contact-dialog [data-close]').click();assert.equal(document.body.style.overf
 // Long dialogs scroll inside, so their close buttons never scroll out of reach.
 assert.ok($('#contact-dialog>.dialog-close')&&$('#contact-dialog>.dialog-scroll #contact-form'),'Contact close button sits outside its scroller');
 assert.ok($('#media-dialog>.dialog-close')&&$('#media-dialog>.media-dialog-content'),'Media close button sits outside its scroller');
+// Sounds ship as Ogg plus AAC (Safari before iOS 18.4), and forced dark modes are opted out of.
+for(const name of ['ambient','hover','click'])for(const ext of ['ogg','m4a'])assert.ok(fs.existsSync(`dist/assets/${name}.${ext}`),`Missing sound ${name}.${ext}`);
+assert.equal($('meta[name="color-scheme"]')?.content,'only light','Opts out of forced dark modes');
 for(const element of [...document.querySelectorAll('[src],[href],[data-src],[data-poster]')]){
   for(const attr of ['src','href','data-src','data-poster','data-src-portrait','data-poster-portrait']){const ref=element.getAttribute(attr);if(ref?.startsWith('/')&&!ref.startsWith('//'))assert.ok(fs.existsSync(path.join('dist',new URL(ref,'http://localhost').pathname)),`Missing asset ${ref}`);if(ref?.startsWith('#'))assert.ok(document.querySelector(ref),`Invalid anchor ${ref}`);}
 }
@@ -131,5 +134,5 @@ for(const [file,route,next,heading] of [['dist/index.html','/','/about/','We bui
     const ref=element.getAttribute(attr);if(ref?.startsWith('/')&&!ref.startsWith('//'))assert.ok(fs.existsSync(path.join('dist',new URL(ref,'http://localhost').pathname)),`${route}: missing asset ${ref}`);
   }
 }
-console.log('PASS: four routed pages; hero colour toggle; project navigation/URLs; dialogs/root scroll lock and restoration; close buttons outside dialog scrollers; sound/reel/brief; versioned assets; CSS; consistent damping and pointer trajectories at multiple refresh rates; pointer pause/re-entry/expiry.');
+console.log('PASS: four routed pages; hero colour toggle; project navigation/URLs; dialogs/root scroll lock and restoration; close buttons outside dialog scrollers; sound (Ogg + AAC)/reel/brief; light-only colour scheme; versioned assets; CSS; consistent damping and pointer trajectories at multiple refresh rates; pointer pause/re-entry/expiry.');
 dom.window.close();process.exit(0);
