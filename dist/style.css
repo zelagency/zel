@@ -38,6 +38,10 @@ html[data-input-mode="pointer"] :is(button,a):focus{outline:none}
   .logo{padding:10px 0;margin:-10px 0}
   .end-note a{padding:14px 0;margin:-14px 0}
   .project-title a{min-height:44px}
+  /* Footer links tile their 10px gaps (28px targets, none overlapping); the rest have room to grow. */
+  .footer-col a{padding:5px 0;margin:-5px 0}
+  .footer-bottom a{padding:14px 0;margin:-14px 0}
+  .menu-contact{padding:12px 0;margin-top:28px}
 }
 /* Tablet portrait and small landscape: the desktop headline would collide with the header. */
 @media(min-width:813px) and (max-width:1100px){
@@ -104,6 +108,9 @@ dialog[data-opening]{animation:none}
 .menu-button[aria-expanded=true] .menu-dots{transform:rotate(90deg)}
 .menu-button[aria-expanded=true] .menu-button-label>span:first-child{transform:translateY(-105%)}
 .menu-button[aria-expanded=true] .menu-button-label>span+span{transform:none}
+/* Narrowest phones (320px): the logo and three pills only fit with tighter pills, which keeps
+   a gap after the logo and the 25px edge margin. */
+@media(max-width:359px){.header-actions{gap:5px}.talk{padding:0 10px}.talk-dot{margin-left:8px}.menu-button{padding:0 11px;gap:8px}}
 /* Reel play pill: white at rest; hovering the pill itself makes a blue fill rises from below with a curved,
    liquid leading edge (a large disc), and drains back down on leave. */
 .play-pill{position:relative;overflow:hidden;isolation:isolate;transition:background-color .1s}
