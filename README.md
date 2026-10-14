@@ -28,7 +28,7 @@ Hero direction research: [Codrops kinetic typography](https://tympanus.net/codro
 
 ## Loading
 
-The first screen waits only for the HTML, the two stylesheets, the script and the preloaded Aeonik font. Everything else loads on demand: sounds download the first time sound is switched on, video posters a screen before their video, videos and project images as they near the viewport. Images are served as WebP at the size they are displayed (the About page chips have their own small thumbnails), and the reel is muxed with `+faststart` so it plays while it streams. On Vercel, `app.js` and the stylesheets are cached immutably (their URLs carry a content hash) and `/assets/` for a day with background revalidation.
+The first screen waits only for the HTML, the two stylesheets, the script and the preloaded Aeonik font. Everything else loads on demand: sounds download the first time sound is switched on (Ogg, or AAC where Ogg cannot play, as in Safari before iOS 18.4), video posters a screen before their video, videos and project images as they near the viewport. With Data Saver on or on a 2G connection, the reel loop stays on its poster; opening the reel still plays it. Images are served as WebP at the size they are displayed, and the reel is muxed with `+faststart` so it plays while it streams. Work that is not on the first screen is deferred too: text reveals are split into lines, and the home page's dandelion is built, only when they come within a screen of view. The page declares itself light-only (`color-scheme`), so forced dark modes (Samsung Internet, Chrome's auto dark) leave the colours alone. On Vercel, `app.js` and the stylesheets are cached immutably (their URLs carry a content hash) and `/assets/` for a day with background revalidation.
 
 ## Selected work
 
@@ -40,12 +40,12 @@ Fogstores leads the work section, followed by Infinity Kitchens and BNM Cafe. Cl
 
 Customer names, courier tracking numbers and the owner's email are blurred in the exported screenshots; captures showing customer contact details or addresses are left out. Source project folders are unchanged. The Infinity Kitchens live site sits behind sign-in, so its admin and kitchen screens are not captured.
 
-The contact form prepares a local downloadable brief. No messages are submitted to a server; a real contact destination should be configured before a public agency launch.
+The contact form asks three short steps (what to build, when, then name and email) and prepares a brief the visitor can email to support@zel.agency (it opens their mail app) or download. Nothing is submitted to a server, so a visitor without a mail app can only download it. Long dialogs (the brief on short screens, case studies) scroll inside, so their close button stays in view.
 
 ## Reference media
 
 Design reference: https://lusion.co/ and the user’s a.png–f.png screenshots.
-The flower loop, ambient audio and UI sounds remain Lusion reference media, credited in the page. Featured Work now uses the user's own projects and real assets. The page and interactive wordmark are newly authored.
+The ambient audio and UI sounds remain Lusion reference media, credited in the page. The flower loop is gone: the about frame on the home page now holds a dandelion drawn live on a canvas (`src/bloom.js`). Featured Work uses the user's own projects and real assets. The page and interactive wordmark are newly authored.
 
 ## Reel
 
@@ -53,4 +53,8 @@ The homepage reel (`dist/assets/zel-reel.mp4`, 8.5s, 1920×1080) is ZEL's own: t
 
 The reference’s Aeonik Regular web font is included for accurate typography in this private visual study, with Arial/Helvetica fallbacks. The reference media and font retain their original ownership; use appropriate licenses or replacements for a public agency launch.
 
-Browser surfaces were unavailable in the execution session. Functional checks and build validation were performed; viewport screenshot comparison and perceptual audio verification remain unverified.
+## Device testing
+
+Every page was checked in headless WebKit (iPhone and iPad sizes) and Chrome (Android phones, tablets, laptops, desktop and ultrawide), 26 viewports from 320×568 to 2560×1080 in both orientations, with motion on and off: no sideways scroll, header and headline clear of each other, dialogs fit with their close buttons in view, every reveal completes, no measurable layout shift, and touch targets of at least 24px. Under 6× CPU and slow 4G throttling (a low-end Android profile), the home page's first script task takes about 450ms and total blocking time is about 500ms. Not covered: Firefox, real-device GPUs (the WebKit build used cannot render 3D transforms, so the laptop's 3D was checked in Chrome only) and perceptual audio.
+
+To do: re-measure scroll smoothness under the same throttling (phone, tablet and desktop profiles). The last pass was disturbed by other load on the test machine, so its frame times are not reported here.
