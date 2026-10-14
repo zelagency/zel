@@ -20,7 +20,7 @@ const labels={home:'Home',about:'About us',projects:'Projects',contact:'Contact'
 const contact={email:'support@zel.agency',phones:['+91 72599 41403','+91 94825 29879'],instagram:'agency.zel'};
 const tel=phone=>`tel:${phone.replaceAll(' ','')}`,instagramUrl=`https://www.instagram.com/${contact.instagram}/`;
 const contactLinks=[`<a href="mailto:${contact.email}">${contact.email}</a>`,...contact.phones.map(phone=>`<a href="${tel(phone)}">${phone}</a>`),
-  `<a href="${instagramUrl}" target="_blank" rel="noopener">Instagram @${contact.instagram} ↗</a>`].join('');
+  `<a href="${instagramUrl}" target="_blank" rel="noopener">Instagram @${contact.instagram}&nbsp;↗</a>`].join('');
 const orgSchema=JSON.stringify({'@context':'https://schema.org','@type':'Organization',name:'ZEL',url:site,email:contact.email,telephone:contact.phones[0],sameAs:[instagramUrl],
   address:{'@type':'PostalAddress',addressLocality:'Bangalore',addressCountry:'IN'},
   contactPoint:contact.phones.map(phone=>({'@type':'ContactPoint',telephone:phone,email:contact.email,contactType:'customer service',areaServed:'IN'}))});
@@ -32,7 +32,7 @@ const layout=readFileSync('src/site/layout.html','utf8');
 const briefForm=readFileSync('src/site/brief-form.html','utf8').trimEnd();
 
 function footer(next){
-  const live=projects.map(project=>`<a href="${project.url}" target="_blank" rel="noopener">${project.title} ↗</a>`).join('');
+  const live=projects.map(project=>`<a href="${project.url}" target="_blank" rel="noopener">${project.title}&nbsp;↗</a>`).join('');
   return `  <footer class="site-footer">
     <div class="footer-grid section">
       <div class="footer-brand"><a class="footer-logo" href="/">ZEL</a><p>Bold ideas, brought to life.</p></div>

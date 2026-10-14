@@ -60,6 +60,8 @@ html[data-input-mode="pointer"] :is(button,a):focus{outline:none}
   .project-summary{font-size:17px}
   .menu-inner{padding-top:140px}
 }
+/* Small laptops and iPad landscape: the header pills keep their size, so the headline narrows and moves left to clear them. */
+@media(min-width:1101px) and (max-width:1400px){.hero h1{left:25vw;width:38vw;font-size:2.2vw}}
 @media(min-width:813px) and (max-width:1100px) and (orientation:portrait){
   .kinetic-word{width:88%;height:auto;aspect-ratio:1100/520;left:6%;top:50%;translate:0 -50%}
   .about-content{grid-template-columns:1fr;gap:50px}
@@ -164,6 +166,15 @@ dialog[data-opening]{animation:none}
   .scroll-cue{bottom:calc(3svh + 4px)}
 }
 @media(max-width:812px) and (max-height:700px){.hero{padding-top:96px}.hero h1{font-size:6.6vw}}
+/* Phones on their side (and narrow landscape windows): a shorter headline and a frame no taller than the screen.
+   The letters are capped by the frame's height as well as its width (frame height less ~110px for the hint and
+   caption, times the 1100:520 artwork ratio), so they never run into either. */
+@media(max-width:812px){.kinetic-word{left:50%;translate:-50% -50%;width:min(88%,calc((clamp(300px,calc(97svh - 180px - 33vw),125vw) - 110px)*2.115))}}
+@media(max-width:812px) and (orientation:landscape){
+  .hero h1{font-size:4.4vw}
+  .hero-visual{height:clamp(200px,calc(100svh - 90px),300px)}
+  .kinetic-word{width:min(88%,calc((clamp(200px,calc(100svh - 90px),300px) - 110px)*2.115))}
+}
 /* Page transition curtain (top layer via popover where supported). */
 .page-transition{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:transparent;overflow:hidden;z-index:200;display:none;cursor:progress}
 .page-transition:popover-open,.page-transition.is-open{display:block}
@@ -200,6 +211,9 @@ dialog[data-opening]{animation:none}
 .device-screen img{width:100%;height:100%;object-fit:cover}
 /* Pages ------------------------------------------------------------------------- */
 main[data-page-root]{outline:none}
+/* Entrance transforms (cards tilting in, the pledge stamp) reach past the screen edge until they settle; clip them
+   so the page never scrolls sideways. clip keeps vertical overflow visible; hidden is the fallback for Safari 15. */
+main[data-page-root]{overflow-x:hidden;overflow-x:clip}
 .eyebrow{font-size:12px;letter-spacing:.04em;text-transform:uppercase}
 .page-hero{min-height:88svh;display:flex;flex-direction:column;justify-content:flex-end;padding-top:150px;padding-bottom:6vw}
 .page-title{font-size:10.5vw;line-height:.95;letter-spacing:-.045em;margin:.25em 0 0}
@@ -443,3 +457,22 @@ form[data-step="1"] [data-brief-back],form[data-step="3"] [data-brief-next],form
 .dialog-scroll>p a{color:var(--blue)}
 .contact-direct{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-top:3vw;font-size:clamp(17px,1.4vw,24px);letter-spacing:-.02em}
 @media(max-width:812px){.contact-direct{margin-top:34px}}
+/* Phones: the stamp lands on the signature's end instead of beside it, so the pair never outgrows a 320px screen. */
+@media(max-width:812px){.pledge-art{width:100%}.signature{width:min(62vw,300px)}.stamp{left:auto;right:0;margin-left:0}}
+/* Touch: phone numbers, email and credits are full-height targets without moving the text. */
+@media(hover:none){
+  .contact-direct{gap:0}.contact-direct a{padding:10px 0}
+  .menu-direct{row-gap:0}.menu-direct a{padding:10px 0}
+  .dialog-scroll>p a{display:inline-block;padding:12px 0;margin:-12px 0}
+  .colophon-list a{display:inline-block;padding:6px 0;margin:-6px 0}
+}
+/* Short landscape screens (phones on their side): the links take the left column and the contact block the right, so it still fits. */
+@media(orientation:landscape) and (max-height:500px){
+  .menu-inner{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,max-content);grid-template-rows:auto 1fr auto;column-gap:6vw;padding-top:84px}
+  .menu-label{grid-column:1/-1}
+  .menu-inner nav{grid-row:2/4;max-width:none}
+  .menu-inner nav>a{font-size:min(9vw,12dvh)}
+  .menu-contact{grid-column:2;align-self:end;max-width:34vw;margin-top:0;padding:6px 0;text-align:left;white-space:normal}
+  .menu-direct{grid-column:2;flex-direction:column;align-items:flex-start;gap:0;margin-top:8px}
+  .menu-direct a{padding:6px 0}
+}
