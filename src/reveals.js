@@ -58,7 +58,16 @@ export function initReveals(root){
     ScrollTrigger.create({trigger:element,start:'top 92%',once:true,onEnter:()=>gsap.to(state,{n:value,duration:1.8,ease:'expo.out',
       onUpdate:()=>{element.textContent=String(Math.round(state.n));}})});
   });
-  $$('.service-list>li,.principles>article,.contact-steps>li,.house-side,.stat,.lab-list>li',root).forEach((item,i)=>gsap.from(item,{y:50,opacity:0,duration:1.1,ease:'expo.out',delay:(i%4)*.06,scrollTrigger:{trigger:item,start:'top 92%',once:true}}));
+  $$('.service-list>li,.rule,.contact-steps>li,.house-side,.stat',root).forEach((item,i)=>gsap.from(item,{y:50,opacity:0,duration:1.1,ease:'expo.out',delay:(i%4)*.06,scrollTrigger:{trigger:item,start:'top 92%',once:true}}));
+  // The pledge strikes out each excuse as it passes, then signs its name and stamps it.
+  $$('.rule-excuse s',root).forEach(strike=>gsap.fromTo(strike,{backgroundSize:'0% .09em',color:'#000000b3'},{backgroundSize:'100% .09em',color:'#0000006b',ease:'none',
+    scrollTrigger:{trigger:strike,start:'top 82%',end:'top 52%',scrub:.6}}));
+  $$('.pledge-sign',root).forEach(sign=>{
+    const write=gsap.timeline({scrollTrigger:{trigger:sign,start:'top 85%',end:'top 40%',scrub:.6}});
+    $$('.signature path',sign).forEach(path=>{const length=path.getTotalLength();write.fromTo(path,{strokeDasharray:length,strokeDashoffset:length},{strokeDashoffset:0,ease:'none',duration:length});});
+    gsap.fromTo(sign.querySelector('.stamp'),{opacity:0,scale:1.9,rotation:-38},{opacity:1,scale:1,rotation:-12,duration:.55,ease:'back.out(2.2)',
+      scrollTrigger:{trigger:sign,start:'top 40%',toggleActions:'play none none reverse'}});
+  });
   $$('.project',root).forEach(project=>{
     const image=project.querySelector('.project-image'),meta=project.querySelector('.project-meta');
     // Cards tilt back in perspective as they enter and settle flat in place.

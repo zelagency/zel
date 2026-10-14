@@ -5,6 +5,7 @@ import { damp } from './motion.js';
 import { initHero } from './hero.js';
 import { initReveals, prepareIntro, playIntro } from './reveals.js';
 import { initConfetti } from './confetti.js';
+import { initRoute } from './route.js';
 import { initNextPage } from './next-page.js';
 
 const projectCard=(project,i,featured)=>`<article class="project ${featured?'project-featured':''}" data-project-id="${project.id}"><button class="project-image" data-project="${i}" aria-label="Explore ${project.title}">${projectCover(project)}<span class="project-arrow" aria-hidden="true">↗</span></button><p class="project-meta">${project.tags}</p><div class="project-title"><h3><span class="project-title-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span><span class="project-title-text">${project.title}</span></h3><a href="${project.url}" target="_blank" rel="noopener" aria-label="Visit ${project.title} live website">VISIT SITE ↗</a></div><p class="project-summary">${project.description}</p></article>`;
@@ -53,6 +54,7 @@ export function mountPage({root,footer,motionQuery,isReduced,ui}){
 
   cleanups.push(initHero(motionQuery,root));
   cleanups.push(initConfetti($('.confetti'),{isReduced}));
+  cleanups.push(initRoute($('[data-route]')));
   cleanups.push(initNextPage(footer?.querySelector('[data-next-page]'),{navigate:ui.navigate}));
 
   const mm=gsap.matchMedia();
