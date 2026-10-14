@@ -110,6 +110,9 @@ globalThis.URL.createObjectURL=()=> 'blob:test-brief';globalThis.URL.revokeObjec
 $('#contact-form').dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true}));assert.equal($('.brief-download').getAttribute('download'),'ZEL-project-brief.txt');
 assert.ok(decodeURIComponent($('.brief-send').href).includes('Building: Website'),'Brief email carries the answers');assert.ok($('.brief-send').href.startsWith('mailto:support@zel.agency'));
 $('#contact-dialog [data-close]').click();assert.equal(document.body.style.overflow,'');
+// Long dialogs scroll inside, so their close buttons never scroll out of reach.
+assert.ok($('#contact-dialog>.dialog-close')&&$('#contact-dialog>.dialog-scroll #contact-form'),'Contact close button sits outside its scroller');
+assert.ok($('#media-dialog>.dialog-close')&&$('#media-dialog>.media-dialog-content'),'Media close button sits outside its scroller');
 for(const element of [...document.querySelectorAll('[src],[href],[data-src],[data-poster]')]){
   for(const attr of ['src','href','data-src','data-poster','data-src-portrait','data-poster-portrait']){const ref=element.getAttribute(attr);if(ref?.startsWith('/')&&!ref.startsWith('//'))assert.ok(fs.existsSync(path.join('dist',new URL(ref,'http://localhost').pathname)),`Missing asset ${ref}`);if(ref?.startsWith('#'))assert.ok(document.querySelector(ref),`Invalid anchor ${ref}`);}
 }
@@ -128,5 +131,5 @@ for(const [file,route,next,heading] of [['dist/index.html','/','/about/','We bui
     const ref=element.getAttribute(attr);if(ref?.startsWith('/')&&!ref.startsWith('//'))assert.ok(fs.existsSync(path.join('dist',new URL(ref,'http://localhost').pathname)),`${route}: missing asset ${ref}`);
   }
 }
-console.log('PASS: four routed pages; hero colour toggle; project navigation/URLs; dialogs/root scroll lock and restoration; sound/reel/brief; versioned assets; CSS; consistent damping and pointer trajectories at multiple refresh rates; pointer pause/re-entry/expiry.');
+console.log('PASS: four routed pages; hero colour toggle; project navigation/URLs; dialogs/root scroll lock and restoration; close buttons outside dialog scrollers; sound/reel/brief; versioned assets; CSS; consistent damping and pointer trajectories at multiple refresh rates; pointer pause/re-entry/expiry.');
 dom.window.close();process.exit(0);

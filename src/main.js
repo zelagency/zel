@@ -203,7 +203,7 @@ function renderProject(index){
   const groups=project.gallery.map(group=>`<section class="shots-group"><header class="shots-head"><h3>${group.label}</h3><p>${group.note}</p></header><div class="shots">${group.shots.map(shot=>`<button class="shot shot-${shot.size}" style="--span:${shot.span}" data-shot="${n++}" aria-label="View ${shot.alt}"><img src="${shot.thumb}" alt="" loading="lazy" decoding="async"><span class="shot-caption">${shot.alt}</span><span class="shot-open" aria-hidden="true">↗</span></button>`).join('')}</div></section>`).join('');
   $('.media-dialog-content').innerHTML=`<article class="case-study"><div class="case-heading"><div><h2>${project.title}</h2><p>${project.type}</p></div><a class="pill white" href="${project.url}" target="_blank" rel="noopener">VISIT LIVE SITE ↗</a></div><div class="case-shots">${groups}</div><div class="case-description"><p>${project.description}</p><ul>${project.features.map(feature=>`<li>${feature}</li>`).join('')}</ul></div><button class="case-back" data-back-projects>← Back to all projects</button></article>`;
   $('[data-back-projects]',media).addEventListener('click',renderGallery);
-  media.scrollTop=0;
+  $('.media-dialog-content').scrollTop=0;
 }
 // Dialogs open out of whatever was clicked: clipped to its rectangle in the site blue, the dialog
 // grows to its full size while settling to its own surface, and its contents rise in behind.
@@ -276,7 +276,7 @@ lightbox.addEventListener('close',()=>media.querySelector(`[data-shot="${current
 function renderGallery(){
   $('.media-dialog-content').innerHTML='<h2>Selected projects</h2><div class="gallery-grid">'+projects.map((project,i)=>`<button data-gallery-project="${i}" aria-label="Explore ${project.title}">${projectCover(project)}<span>${project.title} ↗</span></button>`).join('')+'</div>';
   $$('[data-gallery-project]',media).forEach(button=>button.addEventListener('click',()=>renderProject(Number(button.dataset.galleryProject))));
-  media.scrollTop=0;
+  $('.media-dialog-content').scrollTop=0;
 }
 function openReel(){
   const portrait=innerWidth<innerHeight*1.2,cut=portrait?'-4x5':'';

@@ -31,7 +31,7 @@ html.lenis.lenis-smooth{scroll-behavior:auto}
 .bnm-brand span{font-size:clamp(20px,2.7vw,60px);line-height:1.02;letter-spacing:-.03em}
 .bnm-phone{position:absolute;width:39%;right:7%;top:9%;height:104%;overflow:hidden;border:5px solid #151515;border-radius:25px;transform:rotate(6deg);background:#fff;box-shadow:0 16px 35px #22351d33}
 .project-cover .bnm-phone img{width:100%;height:auto;aspect-ratio:auto;max-height:none;object-fit:contain;border-radius:0;transform:none}
-.media-dialog-content:has(.case-study){height:auto;display:block}
+.media-dialog-content:has(.case-study){display:block}
 .case-study{width:100%;max-width:1400px;margin:auto}
 .case-heading{display:flex;align-items:center;justify-content:space-between;gap:25px;margin:15px 0 35px}
 .case-heading h2{font-size:clamp(38px,5vw,90px);font-weight:400;line-height:1;letter-spacing:-.035em}
