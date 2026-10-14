@@ -43,7 +43,7 @@ export function mountPage({root,footer,motionQuery,isReduced,ui}){
   }),{rootMargin:'100% 0px'});
   videos.forEach(video=>posterObserver.observe(video));
   // Decorative loops share the same visibility lifecycle as the video loops.
-  const loops=$$('.marquee>div,.device-orb'),visibleLoops=new Set();
+  const loops=$$('.marquee>div'),visibleLoops=new Set();
   const syncLoops=()=>loops.forEach(element=>{element.style.animationPlayState=!isReduced()&&!document.hidden&&visibleLoops.has(element)?'running':'paused';});
   const loopObserver=new IntersectionObserver(entries=>{entries.forEach(({target,isIntersecting})=>{isIntersecting?visibleLoops.add(target):visibleLoops.delete(target);});syncLoops();});
   loops.forEach(element=>loopObserver.observe(element));syncLoops();
