@@ -49,12 +49,14 @@ const dom=new JSDOM(html,{url:'http://localhost:5173',pretendToBeVisual:true});
 const {window}=dom;
 const motionEnabled=process.argv.includes('--motion');
 for(const key of ['window','Window','document','navigator','location','history','DOMParser','AbortController','AbortSignal','Event','KeyboardEvent','HTMLElement','Element','Node','getComputedStyle','requestAnimationFrame','cancelAnimationFrame','HTMLCanvasElement','HTMLVideoElement','HTMLMediaElement','FormData','Blob'])Object.defineProperty(globalThis,key,{value:window[key],configurable:true});
-Object.assign(globalThis,{innerWidth:1907,innerHeight:908,scrollY:0,devicePixelRatio:1,matchMedia:query=>({matches:query.includes('prefers-reduced-motion')?(query.includes('no-preference')?motionEnabled:!motionEnabled):true,addListener(){},removeListener(){},addEventListener(){},removeEventListener(){}}),IntersectionObserver:class{observe(){} disconnect(){}},ResizeObserver:class{observe(){} disconnect(){}},Audio:window.Audio});
+Object.assign(globalThis,{innerWidth:1907,innerHeight:908,scrollY:0,devicePixelRatio:1,matchMedia:query=>({matches:query.includes('prefers-reduced-motion')?(query.includes('no-preference')?motionEnabled:!motionEnabled):true,addListener(){},removeListener(){},addEventListener(){},removeEventListener(){}}),IntersectionObserver:class{observe(){} disconnect(){}},ResizeObserver:class{observe(){} disconnect(){}},Path2D:class{moveTo(){} lineTo(){}},Audio:window.Audio});
 window.matchMedia=globalThis.matchMedia;
 window.scrollTo=()=>{};
 window.HTMLMediaElement.prototype.play=async()=>{};
 window.HTMLMediaElement.prototype.pause=()=>{};
-window.HTMLCanvasElement.prototype.getContext=function(type){if(type!=='2d')return null;return new Proxy({},{get:(target,key)=>key in target?target[key]:()=>{},set:(target,key,value)=>{target[key]=value;return true;}});};
+// Calls on the stub context return a stub too, so gradients, patterns and image data chain without a real canvas.
+const canvasStub=new Proxy(function(){},{get:(target,key)=>key==='length'?0:canvasStub,apply:()=>canvasStub});
+window.HTMLCanvasElement.prototype.getContext=function(type){if(type!=='2d')return null;return new Proxy({},{get:(target,key)=>key in target?target[key]:()=>canvasStub,set:(target,key,value)=>{target[key]=value;return true;}});};
 window.HTMLDialogElement.prototype.showModal=function(){this.open=true;};
 window.HTMLDialogElement.prototype.close=function(){this.open=false;this.dispatchEvent(new window.Event('close'));};
 window.Element.prototype.scrollIntoView=function(){};
