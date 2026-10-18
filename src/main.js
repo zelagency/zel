@@ -135,8 +135,12 @@ async function navigate(href,{push=true}={}){
     $('[data-page-root]').innerHTML=nextMain.innerHTML;
     if(nextFooter)$('.site-footer').replaceWith(document.importNode(nextFooter,true));
     document.title=doc.title;document.body.dataset.page=doc.body.dataset.page||'';
-    const description=doc.querySelector('meta[name="description"]')?.content;
-    if(description)$('meta[name="description"]').content=description;
+    // The head follows the page, so it always describes the URL in the address bar.
+    for(const selector of ['meta[name="description"]','meta[name="robots"]','meta[property="og:title"]','meta[property="og:description"]','meta[property="og:url"]','meta[name="twitter:title"]','meta[name="twitter:description"]']){
+      const next=doc.querySelector(selector)?.content;if(next&&$(selector))$(selector).content=next;
+    }
+    const canonical=doc.querySelector('link[rel="canonical"]')?.href;if(canonical&&$('link[rel="canonical"]'))$('link[rel="canonical"]').href=canonical;
+    const structured=doc.querySelector('script[type="application/ld+json"]')?.textContent;if(structured&&$('script[type="application/ld+json"]'))$('script[type="application/ld+json"]').textContent=structured;
     if(push)history.pushState(null,'',url);
     currentRoute=route;syncNav();
     jumpNow('#main');
@@ -292,7 +296,7 @@ function renderGallery(){
 function openReel(){
   const portrait=innerWidth<innerHeight*1.2,cut=portrait?'-4x5':'';
   // The reel just plays: no player chrome, only the close button.
-  $('.media-dialog-content').innerHTML=`<video src="/assets/zel-reel${cut}.mp4" poster="/assets/zel-reel${cut}-poster.jpg" playsinline loop aria-label="ZEL reel: we take your business digital"></video>`;
+  $('.media-dialog-content').innerHTML=`<video src="/assets/zel-reel${cut}.mp4" poster="/assets/zel-reel${cut}-poster.webp" playsinline loop aria-label="ZEL reel: we take your business digital"></video>`;
   media.dataset.reel='';showDialog(media);audio.pauseMusic();const video=$('video',media);video.muted=!audio.enabled;
   // Without controls there is no way to start a blocked play, so fall back to muted, and as a last resort show controls.
   video.play().catch(()=>{video.muted=true;video.play().catch(()=>{video.controls=true;});});

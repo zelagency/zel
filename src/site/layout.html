@@ -2,26 +2,35 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f0f1fa">
-  <meta name="color-scheme" content="only light">
-  <meta name="description" content="{{description}}">
   <title>{{title}}</title>
-  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="ZEL">
-  <meta property="og:url" content="{{url}}">
-  <meta property="og:title" content="{{title}}">
-  <meta property="og:description" content="{{description}}">
-  <meta property="og:image" content="{{site}}/assets/og-image.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="ZEL">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="{{site}}/assets/og-image.png">
+  <meta name="description" content="{{description}}">
+  <meta name="robots" content="{{robots}}">
+  <link rel="canonical" href="{{url}}">
+  {{verification}}<meta name="theme-color" content="#f0f1fa">
+  <meta name="color-scheme" content="only light">
   <link rel="preload" href="/assets/Aeonik-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/projects.css">
-  <script type="application/ld+json">{{org-schema}}</script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/assets/favicon-48.png" type="image/png" sizes="48x48">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="ZEL">
+  <meta property="og:locale" content="en_IN">
+  <meta property="og:url" content="{{url}}">
+  <meta property="og:title" content="{{title}}">
+  <meta property="og:description" content="{{description}}">
+  <meta property="og:image" content="{{og-image}}">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{{og-image-alt}}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{title}}">
+  <meta name="twitter:description" content="{{description}}">
+  <meta name="twitter:image" content="{{og-image}}">
+  <meta name="twitter:image:alt" content="{{og-image-alt}}">
+  <script type="application/ld+json">{{schema}}</script>
 </head>
 <body data-page="{{page}}">
   <div class="preloader" aria-hidden="true">

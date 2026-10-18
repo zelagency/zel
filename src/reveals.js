@@ -8,9 +8,11 @@ const $$=(s,root=document)=>[...root.querySelectorAll(s)];
 
 // Lines rise out of masks. autoSplit re-splits on resize/font load and replays the
 // returned tween in place, so wrapping always matches the current layout.
+// aria:'none' leaves the split text readable as it is: the default puts aria-label on spans and
+// paragraphs, which is invalid ARIA there, and hides the real words.
 function riseLines(element,{trigger=element,start='top 88%',duration=1.25,stagger=.09,delay=0,scroll=true}={}){
   if(!element)return;
-  return SplitText.create(element,{type:'lines',mask:'lines',linesClass:'splitline',autoSplit:true,
+  return SplitText.create(element,{type:'lines',mask:'lines',linesClass:'splitline',autoSplit:true,aria:'none',
     onSplit:self=>gsap.from(self.lines,{yPercent:115,duration,stagger,delay,ease:'expo.out',
       scrollTrigger:scroll?{trigger,start,once:true}:undefined})});
 }
@@ -58,7 +60,7 @@ export function initReveals(root,context){
   $$('[data-reveal-lines]',root).forEach(p=>whenNear(p,()=>riseLines(p,{duration:1.1,stagger:.05,start:'top 92%'})));
   // Lists and cards settle up into place.
   // Statements ink in word by word (inline image chips included) as they scroll through.
-  $$('[data-reveal-words]',root).forEach(p=>whenNear(p,()=>SplitText.create(p,{type:'words',wordsClass:'word',autoSplit:true,
+  $$('[data-reveal-words]',root).forEach(p=>whenNear(p,()=>SplitText.create(p,{type:'words',wordsClass:'word',autoSplit:true,aria:'none',
     onSplit:()=>gsap.fromTo(p.querySelectorAll('.word,.chip'),{opacity:.14},{opacity:1,stagger:.1,ease:'none',
       scrollTrigger:{trigger:p,start:'top 80%',end:'bottom 50%',scrub:true}})})));
   // Ledger figures count up once; the markup keeps the final value for no-JS and reduced motion.

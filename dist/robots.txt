@@ -1,0 +1,5 @@
+# Everything on ZEL is public. Crawlers may fetch scripts, styles and images too, so they can render pages as visitors see them.
+User-agent: *
+Allow: /
+
+Sitemap: https://www.zel.agency/sitemap.xml

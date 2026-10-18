@@ -291,6 +291,7 @@ main[data-page-root]{overflow-x:hidden;overflow-x:clip}
 .cta-band{padding-top:6vw;padding-bottom:9vw;display:flex;align-items:flex-end;justify-content:space-between;gap:4vw;flex-wrap:wrap}
 .cta-band h2{font-size:7.6vw;line-height:1;letter-spacing:-.045em}
 .cta-actions{display:flex;gap:14px;flex-wrap:wrap}
+.page-hero .cta-actions{margin-top:clamp(32px,3vw,56px);align-items:center}
 /* Projects */
 .projects-hero{position:relative;min-height:70svh}
 .projects-title{font-size:15.5vw;text-transform:uppercase;letter-spacing:-.05em}

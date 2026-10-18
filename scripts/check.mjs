@@ -148,6 +148,32 @@ for(const [file,route,next,heading] of [['dist/index.html','/','/about/','We bui
   for(const element of page.querySelectorAll('[src],[href],[data-src],[data-poster]'))for(const attr of ['src','href','data-src','data-poster','data-src-portrait','data-poster-portrait']){
     const ref=element.getAttribute(attr);if(ref?.startsWith('/')&&!ref.startsWith('//'))assert.ok(fs.existsSync(path.join('dist',new URL(ref,'http://localhost').pathname)),`${route}: missing asset ${ref}`);
   }
+  for(const element of page.querySelectorAll('[srcset]'))for(const candidate of element.getAttribute('srcset').split(','))assert.ok(fs.existsSync(path.join('dist',candidate.trim().split(' ')[0])),`${route}: missing srcset image ${candidate}`);
+  // Search: a unique title and description that fit in a result, an indexable canonical on the public
+  // domain, one h1 with no skipped heading levels, described images, and structured data that parses.
+  const meta=selector=>page.querySelector(selector)?.getAttribute('content');
+  assert.ok(page.title.length>=30&&page.title.length<=60,`${route}: title is ${page.title.length} characters`);
+  assert.ok(meta('meta[name="description"]').length>=70&&meta('meta[name="description"]').length<=160,`${route}: description is ${meta('meta[name="description"]').length} characters`);
+  assert.equal(page.querySelector('link[rel="canonical"]')?.getAttribute('href'),`https://www.zel.agency${route}`,`${route}: canonical on www.zel.agency`);
+  assert.equal(meta('meta[property="og:url"]'),`https://www.zel.agency${route}`,`${route}: og:url matches canonical`);
+  assert.ok(meta('meta[name="robots"]').startsWith('index'),`${route}: indexable`);
+  assert.ok(fs.existsSync(path.join('dist',new URL(meta('meta[property="og:image"]')).pathname)),`${route}: og:image exists`);
+  assert.equal(page.querySelectorAll('h1').length,1,`${route}: exactly one h1`);
+  let level=1;for(const heading of page.querySelectorAll('[data-page-root] :is(h1,h2,h3,h4,h5,h6)')){const next=Number(heading.tagName[1]);assert.ok(next<=level+1,`${route}: heading skips from h${level} to h${next} ("${heading.textContent.trim()}")`);level=next;}
+  for(const image of page.querySelectorAll('img'))assert.ok(image.hasAttribute('alt'),`${route}: image without alt ${image.getAttribute('src')}`);
+  for(const image of page.querySelectorAll('[data-page-root] img'))assert.ok(image.getAttribute('width')&&image.getAttribute('height'),`${route}: image without width/height ${image.getAttribute('src')}`);
+  const graph=JSON.parse(page.querySelector('script[type="application/ld+json"]').textContent)['@graph'];
+  assert.ok(graph.some(node=>node['@type']==='Organization')&&graph.some(node=>node.url===`https://www.zel.agency${route}`),`${route}: structured data names ZEL and this page`);
+  assert.ok(page.querySelectorAll('[data-page-root] a[href^="/"]').length+page.querySelectorAll('.site-footer nav a[href^="/"]').length>=4,`${route}: links to the other pages`);
 }
-console.log('PASS: four routed pages; hero colour toggle; project navigation/URLs; dialogs/root scroll lock and restoration; close buttons outside dialog scrollers; sound (Ogg + AAC)/reel/brief; light-only colour scheme; versioned assets; CSS; consistent damping and pointer trajectories at multiple refresh rates; pointer pause/re-entry/expiry.');
+assert.ok(new JSDOM(fs.readFileSync('dist/projects/index.html','utf8')).window.document.querySelectorAll('.project h3').length===projects.length,'Project cards are in the HTML, not only added by script');
+const notFound=new JSDOM(fs.readFileSync('dist/404.html','utf8')).window.document;
+assert.ok(notFound.querySelector('meta[name="robots"]').content.startsWith('noindex')&&!notFound.querySelector('link[rel="canonical"]'),'404 page stays out of search');
+const sitemap=fs.readFileSync('dist/sitemap.xml','utf8');
+for(const route of ['/','/about/','/projects/','/contact/'])assert.ok(sitemap.includes(`<loc>https://www.zel.agency${route}</loc>`),`Sitemap lists ${route}`);
+for(const [,src] of sitemap.matchAll(/<image:loc>https:\/\/www\.zel\.agency([^<]+)<\/image:loc>/g))assert.ok(fs.existsSync(path.join('dist',src)),`Sitemap image exists ${src}`);
+assert.ok(!sitemap.includes('404'),'Sitemap leaves out the 404 page');
+assert.match(fs.readFileSync('dist/robots.txt','utf8'),/^Sitemap: https:\/\/www\.zel\.agency\/sitemap\.xml$/m,'robots.txt points to the sitemap');
+assert.doesNotMatch(fs.readFileSync('dist/robots.txt','utf8'),/Disallow: \/\s*$/m,'robots.txt does not block the site');
+console.log('PASS: four routed pages; SEO (titles, descriptions, canonicals, one h1, heading order, image alt/sizes, structured data, sitemap, robots.txt, 404); hero colour toggle; project navigation/URLs; dialogs/root scroll lock and restoration; close buttons outside dialog scrollers; sound (Ogg + AAC)/reel/brief; light-only colour scheme; versioned assets; CSS; consistent damping and pointer trajectories at multiple refresh rates; pointer pause/re-entry/expiry.');
 dom.window.close();process.exit(0);

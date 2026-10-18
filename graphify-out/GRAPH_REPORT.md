@@ -1,16 +1,16 @@
-# Graph Report - Zel  (2026-10-15)
+# Graph Report - zel  (2026-10-18)
 
 ## Corpus Check
-- 29 files · ~12,054 words
+- 30 files · ~13,281 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 535 nodes · 848 edges · 38 communities (35 shown, 3 thin omitted)
-- Extraction: 81% EXTRACTED · 19% INFERRED · 0% AMBIGUOUS · INFERRED: 160 edges (avg confidence: 0.88)
+- 553 nodes · 874 edges · 41 communities (37 shown, 4 thin omitted)
+- Extraction: 81% EXTRACTED · 18% INFERRED · 0% AMBIGUOUS · INFERRED: 161 edges (avg confidence: 0.88)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `84ef9296`
+- Built from commit: `7bdcb227`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -53,10 +53,13 @@
 - [[_COMMUNITY_Community 35|Community 35]]
 - [[_COMMUNITY_Community 36|Community 36]]
 - [[_COMMUNITY_Community 37|Community 37]]
+- [[_COMMUNITY_Community 38|Community 38]]
+- [[_COMMUNITY_Community 39|Community 39]]
+- [[_COMMUNITY_Community 40|Community 40]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `$()` - 73 edges
-2. `$()` - 39 edges
+2. `$()` - 40 edges
 3. `mountPage()` - 23 edges
 4. `Shared page layout template (layout.html)` - 21 edges
 5. `Page render loop (placeholder fill, aria-current, versioned URLs)` - 19 edges
@@ -69,14 +72,14 @@
 ## Surprising Connections (you probably didn't know these)
 - `HTTP Range (206) support` --conceptually_related_to--> `Reel`  [INFERRED]
   scripts/serve.mjs → README.md
-- `On-demand loading strategy` --references--> `/assets/ one-day cache with stale-while-revalidate`  [INFERRED]
-  README.md → vercel.json
-- `JSDOM harness running dist/app.js on dist/index.html` --conceptually_related_to--> `Ribbon SVGs (blue and aqua)`  [AMBIGUOUS]
-  scripts/check.mjs → src/site/pages/home.html
 - `Deploy to Vercel workflow` --references--> `Vercel project config (vercel.json)`  [INFERRED]
   .github/workflows/deploy.yml → vercel.json
+- `JSDOM harness running dist/app.js on dist/index.html` --conceptually_related_to--> `Ribbon SVGs (blue and aqua)`  [AMBIGUOUS]
+  scripts/check.mjs → src/site/pages/home.html
 - `Pre-deploy build and check gate` --references--> `Page render loop (placeholder fill, aria-current, versioned URLs)`  [INFERRED]
   .github/workflows/deploy.yml → scripts/build.mjs
+- `footer(next) generator` --implements--> `Next-page footer band (scroll to continue)`  [INFERRED]
+  scripts/build.mjs → README.md
 
 ## Import Cycles
 - None detected.
@@ -89,15 +92,15 @@
 - **Per-page module lifecycle (init returns cleanup, torn down on unmount)** — page_mountpage, hero_inithero, confetti_initconfetti, route_initroute, bloom_initbloom, next_page_initnextpage, reveals_initreveals [EXTRACTED 1.00]
 - **Scroll-scrubbed SVG stroke drawing** — route_initroute, page_scroll_scenes, reveals_pledge [INFERRED 0.85]
 
-## Communities (38 total, 3 thin omitted)
+## Communities (41 total, 4 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.11
-Nodes (26): data-count hook (ledger stat counters), data-reveal-words hook (manifesto), About page content (about.html), Pledge signature and ink stamp SVG, data-route services route map (data-route-point), Aeonik Regular typeface, Animated ribbons behind large text, Dandelion canvas (canvas.bloom) (+18 more)
+Cohesion: 0.08
+Nodes (38): data-count hook (ledger stat counters), data-reveal-words hook (manifesto), About page content (about.html), Pledge signature and ink stamp SVG, data-route services route map (data-route-point), Project, case study and lightbox assertions, Aeonik Regular typeface, Cabinet Grotesk (Infinity Kitchens cover only) (+30 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.09
-Nodes (29): buildBloom(), cross(), initBloom(), NONE, rand(), seedHead(), unit(), COLORS (+21 more)
+Cohesion: 0.05
+Nodes (49): briefForm, contact, contactLinks, escapeAttr(), footer(), labels, layout, notFound (+41 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.07
@@ -109,31 +112,31 @@ Nodes (26): data-back-projects hook, data-brief-back hook, data-brief-count hook
 
 ### Community 4 - "Community 4"
 Cohesion: 0.06
-Nodes (19): $(), answers, canvasStub, dom, html, idle(), interruptedTrail, jitter (+11 more)
+Nodes (20): $(), answers, canvasStub, dom, html, idle(), interruptedTrail, jitter (+12 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.13
 Nodes (22): draw() (hero), frame() (hero), initHero() kinetic wordmark, reset() (hero), schedule() (hero), targets() letter weights, data-letter hook, data-opening hook (dialog state) (+14 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.08
-Nodes (30): buildBloom() dandelion scene, draw() (bloom), drawHead(), Film grain tile, Pointer blow interaction, pose() head projection, project() seed tips, release() seed (+22 more)
+Cohesion: 0.12
+Nodes (19): buildBloom() dandelion scene, draw() (bloom), drawHead(), Film grain tile, Pointer blow interaction, pose() head projection, project() seed tips, release() seed (+11 more)
 
 ### Community 7 - "Community 7"
-Cohesion: 0.16
-Nodes (20): footer(next) generator, orgSchema JSON-LD Organization, Page render loop (placeholder fill, aria-current, versioned URLs), pages route table, site URL constant (zel-tau.vercel.app), Stylesheet syntax check (esbuild transform), Per-route page assertions, ZEL palette (lavender #f0f1fa, cobalt #1a2ffb, aqua) (+12 more)
+Cohesion: 0.15
+Nodes (22): contactLinks HTML, esbuild bundle src/main.js to dist/app.js, footer(next) generator, hashOf() content hash, orgSchema JSON-LD Organization, Page render loop (placeholder fill, aria-current, versioned URLs), pages route table, site URL constant (zel-tau.vercel.app) (+14 more)
 
 ### Community 8 - "Community 8"
-Cohesion: 0.10
-Nodes (22): Frame-independent tilt damping test, Hero colour toggle assertions, Kinetic ZEL vector wordmark hero, Lusion reference (lusion.co, a.png-f.png), #hero-visual interactive wordmark button, data-letter hook (Z/E/L vector letters), Accessibility & Inclusion, Brand Personality (+14 more)
+Cohesion: 0.18
+Nodes (13): Frame-independent tilt damping test, Hero colour toggle assertions, Kinetic ZEL vector wordmark hero, #hero-visual interactive wordmark button, data-letter hook (Z/E/L vector letters), Accessibility & Inclusion, Brand Personality, Product Purpose (+5 more)
 
 ### Community 9 - "Community 9"
 Cohesion: 0.17
 Nodes (15): data-layout hook (project grid), data-next-page hook, data-project-count hook, data-reel hook, data-route hook, data-route-point hook, openReel(), initNextPage() (+7 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.08
-Nodes (24): briefForm, contact, contactLinks, labels, layout, orgSchema, pages, versions (+16 more)
+Cohesion: 0.12
+Nodes (16): BLUE, briefFileName(), briefPdf(), CODES, context(), encodable(), GREY, infoString() (+8 more)
 
 ### Community 11 - "Community 11"
 Cohesion: 0.22
@@ -148,8 +151,8 @@ Cohesion: 0.19
 Nodes (13): initBloom(), Defer work until needed (low-end budget), data-poster hook, data-src / data-src-portrait hook, data-start hook (video start time), Reduced-motion change handler, liteData(), Poster prefetch observer (+5 more)
 
 ### Community 14 - "Community 14"
-Cohesion: 0.16
-Nodes (22): Menu/contact/media dialog and root scroll-lock assertions, Sound button assertions, Asset path, sound file and colour-scheme checks, Fixed 54px pill navigation, data-reel hook (reel frame button), Reel video (data-src/data-poster + portrait variants), Contact dialog (#contact-dialog), Header pill navigation (+14 more)
+Cohesion: 0.28
+Nodes (13): Menu/contact/media dialog and root scroll-lock assertions, Fixed 54px pill navigation, Contact dialog (#contact-dialog), Header pill navigation, data-close hook (dialog close buttons), data-contact hook (opens contact dialog), Screenshot lightbox (#lightbox), Media dialog (#media-dialog) (+5 more)
 
 ### Community 15 - "Community 15"
 Cohesion: 0.20
@@ -160,16 +163,16 @@ Cohesion: 0.18
 Nodes (8): createPageTransition(), expoIn, expoInOut, expoOut, GLYPHS, T, windowIn, windowOut
 
 ### Community 19 - "Community 19"
-Cohesion: 0.14
-Nodes (17): esbuild bundle src/main.js to dist/app.js, hashOf() content hash, versions map (asset to content hash), JSDOM harness running dist/app.js on dist/index.html, Pre-deploy build and check gate, Deploy to Vercel workflow, OpenAI static hosting config (dist), scripts (+9 more)
+Cohesion: 0.18
+Nodes (12): JSDOM harness running dist/app.js on dist/index.html, Pre-deploy build and check gate, Deploy to Vercel workflow, scripts, build, check, dev, prepare (+4 more)
 
 ### Community 20 - "Community 20"
 Cohesion: 0.20
 Nodes (9): dependencies, gsap, lenis, devDependencies, esbuild, jsdom, name, private (+1 more)
 
 ### Community 21 - "Community 21"
-Cohesion: 0.28
-Nodes (13): Project, case study and lightbox assertions, Cabinet Grotesk (Infinity Kitchens cover only), Featured project layout (Fogstores lead, two-column row), #project-grid container (featured work), Screenshot lightbox (#lightbox), ZEL agency (brand register), data-project-count hook, BNM Cafe (ordering/POS project) (+5 more)
+Cohesion: 0.17
+Nodes (15): Animated ribbons behind large text, Dandelion canvas (canvas.bloom), 3D laptop device scene (Fogstores screen), data-reel hook (reel frame button), Home page content (home.html), Reel video (data-src/data-poster + portrait variants), Ribbon SVGs (blue and aqua), OpenAI static hosting config (dist) (+7 more)
 
 ### Community 22 - "Community 22"
 Cohesion: 0.29
@@ -188,12 +191,12 @@ Cohesion: 0.29
 Nodes (6): Reduced-motion fallbacks, data-count hook, data-lenis-prevent hook, Lenis smooth scroll (startSmoothScroll), lockScroll(), Ledger count-up
 
 ### Community 26 - "Community 26"
-Cohesion: 0.29
-Nodes (6): buildCommand, framework, headers, outputDirectory, $schema, trailingSlash
+Cohesion: 0.25
+Nodes (7): buildCommand, framework, headers, outputDirectory, redirects, $schema, trailingSlash
 
 ### Community 27 - "Community 27"
-Cohesion: 0.27
-Nodes (12): Brief step 3: name, email, project, Brief step 1: what to build (needs), Brief step controls (data-brief-next/back/submit/count), Brief form partial (brief-form.html), Brief step 2: launch timeline, contact config (support@zel.agency, @agency.zel), contactLinks HTML, Brief form flow assertions (+4 more)
+Cohesion: 0.29
+Nodes (11): Brief step 3: name, email, project, Brief step 1: what to build (needs), Brief step controls (data-brief-next/back/submit/count), Brief form partial (brief-form.html), Brief step 2: launch timeline, contact config (support@zel.agency, @agency.zel), Brief form flow assertions, Contact hero confetti canvas (canvas.confetti) (+3 more)
 
 ### Community 28 - "Community 28"
 Cohesion: 0.47
@@ -231,6 +234,14 @@ Nodes (6): fastHeadLag() tip-lag test, Pointer trail settle/jitter/prediction/pa
 Cohesion: 0.47
 Nodes (6): finish() preloader exit, playPreloader(), setCount() odometer, tick() (preloader progress), First-load boot sequence, syncNav()
 
+### Community 38 - "Community 38"
+Cohesion: 0.21
+Nodes (11): drawPaint() pointer trail renderer, Pointer paint input handler, resetPaint(), sizePaint(), trailBands colour stack, alpha() smoothing factor, PointerTrail.clear(), PointerTrail.frame() (+3 more)
+
+### Community 39 - "Community 39"
+Cohesion: 0.25
+Nodes (9): Sound button assertions, Asset path, sound file and colour-scheme checks, Skip to content link, Sound toggle pill (.sound), Accessibility and inclusion requirements, Device testing, Direction-aware fluid pill fill, Light-only colour scheme (+1 more)
+
 ## Ambiguous Edges - Review These
 - `Design Principles` → `Reference media`  [AMBIGUOUS]
   README.md · relation: conceptually_related_to
@@ -242,9 +253,9 @@ Nodes (6): finish() preloader exit, playPreloader(), setCount() odometer, tick()
   src/main.js · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **148 isolated node(s):** `commit`, `pr`, `includeCoAuthoredBy`, `allow`, `PreToolUse` (+143 more)
+- **158 isolated node(s):** `commit`, `pr`, `includeCoAuthoredBy`, `allow`, `PreToolUse` (+153 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **3 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **4 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -258,8 +269,8 @@ _Questions this graph is uniquely positioned to answer:_
 - **What is the exact relationship between `openProject()` and `run()`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
 - **Why does `$()` connect `Community 2` to `Community 33`, `Community 34`, `Community 35`, `Community 1`, `Community 4`, `Community 10`, `Community 18`, `Community 22`, `Community 23`?**
-  _High betweenness centrality (0.075) - this node is a cross-community bridge._
+  _High betweenness centrality (0.077) - this node is a cross-community bridge._
 - **Why does `mountPage()` connect `Community 9` to `Community 3`, `Community 5`, `Community 6`, `Community 11`, `Community 13`, `Community 15`, `Community 28`, `Community 29`?**
-  _High betweenness centrality (0.044) - this node is a cross-community bridge._
+  _High betweenness centrality (0.042) - this node is a cross-community bridge._
 - **Why does `$()` connect `Community 4` to `Community 1`, `Community 10`?**
-  _High betweenness centrality (0.034) - this node is a cross-community bridge._
+  _High betweenness centrality (0.036) - this node is a cross-community bridge._

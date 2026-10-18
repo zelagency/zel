@@ -24,8 +24,11 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      # Full history: the sitemap dates each page by its last commit.
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # Same Node.js major version as the Vercel project.
       - name: Set up Node.js

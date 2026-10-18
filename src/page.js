@@ -1,6 +1,6 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { projects, projectCover } from './projects.js';
+import { projects, projectGrid } from './projects.js';
 import { damp } from './motion.js';
 import { initHero } from './hero.js';
 import { initReveals, prepareIntro, playIntro } from './reveals.js';
@@ -8,8 +8,6 @@ import { initConfetti } from './confetti.js';
 import { initRoute } from './route.js';
 import { initBloom } from './bloom.js';
 import { initNextPage } from './next-page.js';
-
-const projectCard=(project,i,featured)=>`<article class="project ${featured?'project-featured':''}" data-project-id="${project.id}"><button class="project-image" data-project="${i}" aria-label="Explore ${project.title}">${projectCover(project)}<span class="project-arrow" aria-hidden="true">↗</span></button><p class="project-meta">${project.tags}</p><div class="project-title"><h3><span class="project-title-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span><span class="project-title-text">${project.title}</span></h3><a href="${project.url}" target="_blank" rel="noopener" aria-label="Visit ${project.title} live website">VISIT SITE ↗</a></div><p class="project-summary">${project.description}</p></article>`;
 
 // Videos with a portrait cut (data-src-portrait) use it when their frame is closer to 4:5 than to 16:9.
 export function videoSource(video,key='src',portrait=video.clientWidth<video.clientHeight*1.2){return portrait&&video.dataset[key+'Portrait']||video.dataset[key];}
@@ -22,7 +20,8 @@ export function mountPage({root,footer,motionQuery,isReduced,ui}){
   const controller=new AbortController(),{signal}=controller,cleanups=[];
 
   const grid=$('#project-grid');
-  if(grid){const all=grid.dataset.layout==='all';grid.innerHTML=projects.map((project,i)=>projectCard(project,i,!all&&i===0)).join('');}
+  // The build pre-renders the cards; this only fills a grid that arrived empty.
+  if(grid&&!grid.children.length)grid.innerHTML=projectGrid(grid.dataset.layout==='all');
   $$('[data-project-count]').forEach(element=>{element.textContent=String(projects.length).padStart(2,'0');});
   root.addEventListener('click',event=>{
     const project=event.target.closest('[data-project]');if(project){ui.openProject(Number(project.dataset.project),project);return;}

@@ -22,7 +22,7 @@
       <div class="reel-pin">
         <div class="marquee" aria-hidden="true"><div><span>▶▶▶ &nbsp; PLAY REEL</span><span>▶▶▶ &nbsp; PLAY REEL</span><span>▶▶▶ &nbsp; PLAY REEL</span><span>▶▶▶ &nbsp; PLAY REEL</span><span>▶▶▶ &nbsp; PLAY REEL</span><span>▶▶▶ &nbsp; PLAY REEL</span></div></div>
         <button class="reel-frame media-frame" aria-label="Play the ZEL reel" data-reel>
-          <video class="ambient-video reel-video" muted loop playsinline preload="none" data-poster="/assets/zel-reel-poster.jpg" data-src="/assets/zel-reel.mp4" data-poster-portrait="/assets/zel-reel-4x5-poster.jpg" data-src-portrait="/assets/zel-reel-4x5.mp4"></video>
+          <video class="ambient-video reel-video" muted loop playsinline preload="none" data-poster="/assets/zel-reel-poster.webp" data-src="/assets/zel-reel.mp4" data-poster-portrait="/assets/zel-reel-4x5-poster.webp" data-src-portrait="/assets/zel-reel-4x5.mp4"></video>
           <div class="reel-title"><span>PLAY</span><span class="play-pill"><svg viewBox="0 0 30 30" aria-hidden="true"><path d="m10 6 16 9-16 9z"/></svg></span><span>REEL</span></div>
           <span class="reel-cursor" aria-hidden="true">▶</span>
         </button>
@@ -31,7 +31,7 @@
     </section>
     <section class="work section" id="work" aria-labelledby="work-title">
       <div class="work-heading"><h2 id="work-title" data-reveal-heading>Featured Work</h2><p data-reveal-lines>SELECTED PROJECTS BY ZEL.<br>FASHION, FOOD, AND DIGITAL EXPERIENCES<br>BUILT FROM IDEA TO LAUNCH.</p></div>
-      <div class="project-grid" id="project-grid"></div>
+      <div class="project-grid" id="project-grid">{{project-grid}}</div>
       <a class="pill white all-projects" id="all-projects" href="/projects/"><span class="dot"></span>SEE ALL PROJECTS <span class="arrow">↗</span></a>
     </section>
     <section class="ideas section" id="ideas" aria-labelledby="ideas-title">
@@ -43,7 +43,7 @@
             <div class="laptop-lid">
               <div class="laptop-face"><span class="laptop-notch"></span><div class="laptop-display">
                 <div class="device-toolbar"><i></i><i></i><i></i><span>fogstores.vercel.app/collections/haze-studios</span></div>
-                <div class="device-screen"><img src="/assets/projects/fogstores-haze-laptop.webp" alt="" width="1280" height="733" loading="lazy" decoding="async"></div>
+                <div class="device-screen"><img src="/assets/projects/fogstores-haze-laptop.webp" srcset="/assets/projects/fogstores-haze-laptop-640.webp 640w, /assets/projects/fogstores-haze-laptop.webp 1280w" sizes="(max-width: 812px) 67vw, 35vw" alt="Fogstores Haze Studios collection page on a laptop, designed and built by ZEL" width="1280" height="733" loading="lazy" decoding="async"></div>
               </div></div>
               <div class="laptop-back"><span>ZEL</span></div>
             </div>

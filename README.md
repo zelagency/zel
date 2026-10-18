@@ -16,7 +16,11 @@ Preview: http://localhost:5173 (routes: `/`, `/about/`, `/projects/`, `/contact/
 
 Pages are built from one shared layout (`src/site/layout.html`) plus per-page content in `src/site/pages/`; `npm run build` writes `dist/index.html`, `dist/about/index.html`, `dist/projects/index.html` and `dist/contact/index.html`, so every URL also works on a plain static host. In the browser, internal links are routed in place: the header, sound and dialogs persist while the page content is fetched and swapped under the page transition (`src/main.js` router, `src/page.js` mounts and fully tears down each page). Back and forward use the same path, and any failure falls back to a normal navigation. Each footer ends in a dark next-page band whose bar fills as it scrolls into view; continuing to scroll at the bottom moves on to the next page.
 
-`npm run check` validates navigation, dialogs, sound controls, project collection, project brief downloads, asset paths and stylesheet syntax.
+## Search
+
+The public address is https://www.zel.agency (`site` in `scripts/build.mjs`); the Vercel address 308-redirects there (`vercel.json`), and every page's canonical tag, `og:url`, sitemap entry and structured data use it. Each page has its own title (under 60 characters) and description (under 160), one h1, and a schema.org graph: the Organization (logo, services, Instagram), the WebSite, the page itself, breadcrumbs on inner pages and the project list on `/projects/`. Project cards are written into the HTML at build time, so crawlers see them without running the script. The build also writes `sitemap.xml` (dated by each page's last commit, with its images), `robots.txt` and a `noindex` `404.html`. The share image is `dist/assets/og-zel.png`. To verify Google Search Console by HTML tag, paste its code into `googleSiteVerification` in `scripts/build.mjs`; DNS verification needs no code change.
+
+`npm run check` validates SEO basics (titles, descriptions, canonicals, one h1, heading order, image alt and sizes, structured data, sitemap, robots.txt), navigation, dialogs, sound controls, project collection, project brief downloads, asset paths and stylesheet syntax.
 
 ## Experience
 
