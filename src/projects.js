@@ -7,7 +7,7 @@ export const projects = [
   {
     id:'fogstores', title:'Fogstores', type:'Fashion commerce',
     tags:'Ecommerce • Storefront • Design • Development',
-    url:'https://fogstores.vercel.app/',
+    url:'https://fogstores.com/',
     cover:{src:'/assets/projects/fogstores-streetwear.webp',alt:'Fogstores streetwear campaign with a black hoodie beside a red car and a white graphic tee'},
     description:'A fashion storefront with campaign-led discovery, shoppable collections, product pages and checkout, connected to an ecommerce operations dashboard.',
     features:['Campaign-led storefront','Collections and product discovery','Cart and checkout','Products, inventory and order management'],

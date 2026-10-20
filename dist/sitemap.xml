@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://www.zel.agency/</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-18</lastmod>
     <image:image><image:loc>https://www.zel.agency/assets/projects/fogstores-haze-laptop.webp</image:loc></image:image>
     <image:image><image:loc>https://www.zel.agency/assets/projects/fogstores-streetwear.webp</image:loc></image:image>
     <image:image><image:loc>https://www.zel.agency/assets/projects/infinity-hero.webp</image:loc></image:image>
@@ -10,11 +10,11 @@
   </url>
   <url>
     <loc>https://www.zel.agency/about/</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-18</lastmod>
   </url>
   <url>
     <loc>https://www.zel.agency/projects/</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-18</lastmod>
     <image:image><image:loc>https://www.zel.agency/assets/projects/screens/fogstores/store-home.webp</image:loc></image:image>
     <image:image><image:loc>https://www.zel.agency/assets/projects/screens/fogstores/store-collection.webp</image:loc></image:image>
     <image:image><image:loc>https://www.zel.agency/assets/projects/screens/fogstores/store-tees.webp</image:loc></image:image>
@@ -55,6 +55,6 @@
   </url>
   <url>
     <loc>https://www.zel.agency/contact/</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-18</lastmod>
   </url>
 </urlset>
